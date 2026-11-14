@@ -23,7 +23,7 @@ export function Faq() {
         <Accordion className="border-y border-border">
           {faq.items.map((item) => (
             <AccordionItem key={item.question} value={item.question}>
-              <AccordionTrigger className="gap-4 py-5 text-base font-medium hover:no-underline">
+              <AccordionTrigger className="gap-4 py-5 text-base font-medium transition-colors hover:text-brand hover:no-underline sm:text-[1.0625rem]">
                 {item.question}
               </AccordionTrigger>
               <AccordionContent className="max-w-prose pb-5 text-base leading-relaxed text-muted-foreground">

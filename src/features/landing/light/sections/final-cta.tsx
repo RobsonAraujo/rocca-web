@@ -12,7 +12,7 @@ export function FinalCta() {
           <LogoMark className="size-10" />
           <h2
             id="final-cta-title"
-            className="mt-6 text-4xl leading-[1.06] font-medium tracking-[-0.04em] text-balance sm:text-5xl"
+            className="mt-6 text-4xl leading-[1.06] font-semibold tracking-[-0.04em] text-balance sm:text-5xl"
           >
             {finalCta.title}
           </h2>

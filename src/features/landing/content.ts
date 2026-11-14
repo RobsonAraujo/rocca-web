@@ -59,7 +59,11 @@ export const preview = {
   },
 } as const
 
+/** Stable key per feature, so a layout can attach visuals without relying on order. */
+export type FeatureId = "accounts" | "moves" | "approval" | "alerts"
+
 export type Feature = {
+  id: FeatureId
   icon: LucideIcon
   title: string
   description: string
@@ -70,30 +74,74 @@ export const features = {
   title: "One agent for every account you own.",
   items: [
     {
+      id: "accounts",
       icon: LayersIcon,
       title: "Every account, one view",
       description:
         "Link your brokerage, retirement and crypto accounts once. Rocca keeps a live picture of everything you own.",
     },
     {
+      id: "moves",
       icon: ChartLineIcon,
       title: "Know why it moved",
       description:
         "A plain-English brief every morning on what changed in your portfolio and what is driving it.",
     },
     {
+      id: "approval",
       icon: ShieldCheckIcon,
       title: "Ideas to trades, on your terms",
       description:
         "Ask for an idea and see the reasoning and the risk. Nothing is executed until you approve it.",
     },
     {
+      id: "alerts",
       icon: BellRingIcon,
       title: "Alerts that matter",
       description:
         "Rocca watches the market around your holdings and reaches out only when something deserves your attention.",
     },
   ] satisfies Feature[],
+} as const
+
+/**
+ * Simulated data for the small product vignettes on the light layout's
+ * feature cards. Decorative only and consistent with `preview` (the account
+ * values add up to `preview.portfolio.value`).
+ */
+export const illustrations = {
+  accounts: [
+    { name: "Brokerage", value: "$142,880", share: 57.5 },
+    { name: "Roth IRA", value: "$48,211", share: 19.4 },
+    { name: "401(k)", value: "$39,512", share: 15.9 },
+    { name: "Crypto", value: "$17,707", share: 7.2 },
+  ],
+  moves: {
+    title: "What moved this week",
+    /** `share` is relative to the largest mover, for the bar length. */
+    items: [
+      { symbol: "NVDA", amount: "+$3,120", share: 100 },
+      { symbol: "VTI", amount: "+$1,040", share: 33 },
+      { symbol: "Other", amount: "+$230", share: 7 },
+    ],
+  },
+  approval: {
+    title: "Trim NVDA to 12%",
+    status: "Needs your OK",
+    detail: "Sell 14 NVDA · Buy 8 VTI",
+  },
+  alerts: [
+    {
+      title: "NVDA is now 18% of your portfolio",
+      detail: "Above your 12% target. Want to rebalance?",
+      time: "9:41",
+    },
+    {
+      title: "NVDA reports earnings this week",
+      detail: "Here's what could move your position.",
+      time: "Mon",
+    },
+  ],
 } as const
 
 export const howItWorks = {

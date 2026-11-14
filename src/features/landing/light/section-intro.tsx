@@ -22,7 +22,7 @@ export function SectionIntro({
       </p>
       <h2
         id={id}
-        className="mt-4 text-4xl leading-[1.08] font-medium tracking-[-0.035em] text-balance sm:text-5xl"
+        className="mt-4 text-4xl leading-[1.06] font-semibold tracking-[-0.04em] text-balance sm:text-5xl"
       >
         {title}
       </h2>

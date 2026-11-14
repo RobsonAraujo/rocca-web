@@ -77,13 +77,12 @@ Existem duas versões da landing para escolher uma:
 
 | Rota    | Versão    | Estilo                                                                    |
 | ------- | --------- | ------------------------------------------------------------------------- |
-| `/`     | **Light** | Clean: fundo claro, hero dividido, features em lista                      |
+| `/`     | **Light** | Clara: hero dividido, features em bento, passos em linha do tempo         |
 | `/dark` | **Dark**  | Escura e centralizada: preview em formato de dashboard, features em cards |
 
 As duas usam a mesma copy (`content.ts`) e o mesmo formulário, então a comparação é só de layout. Um botão flutuante, o `LayoutSwitcher`, troca entre elas. A rota `/dark` tem `noindex`.
 
 **Como funcionam as cores:** os tokens da versão Light ficam em `:root` (`globals.css`). A versão Dark envolve a página em `<div class="dark" data-page-theme="dark">`, o que aplica os tokens escuros só nela.
-
 Depois que vocês escolherem uma versão:
 
 1. Apague a pasta da versão descartada (`features/landing/light` ou `features/landing/dark`) e a rota dela.
