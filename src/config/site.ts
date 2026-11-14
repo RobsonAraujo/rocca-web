@@ -6,6 +6,6 @@ export const siteConfig = {
   name: "Rocca",
   title: "Rocca: your AI investing agent",
   description:
-    "Rocca connects every account you own, explains what moved your money, and turns your ideas into trades, only when you approve.",
+    "Rocca connects every account you own, explains every move in plain English, and turns ideas into trades on your terms, so you learn as you go.",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
 } as const

@@ -1,4 +1,7 @@
-import { LogoMark } from "@/components/layout/logo"
+import { CheckIcon, ReceiptIcon, SparklesIcon } from "lucide-react"
+
+import { ProgressRing } from "@/components/product/progress-ring"
+import { toneClasses } from "@/components/product/tone"
 import { illustrations, preview } from "@/features/landing/content"
 import { cn } from "@/lib/utils"
 
@@ -91,63 +94,84 @@ export function MovesVisual() {
   )
 }
 
+/** Same idiom as the dashboard: amber "needs you", tax line, green Approve. */
 export function ApprovalVisual() {
   const { approval } = illustrations
+  const { order } = preview
   return (
     <div className={panel}>
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm font-medium">{approval.title}</p>
-        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-          <span className="size-1.5 rounded-full bg-brand" />
+        <span
+          className={cn(
+            "inline-flex shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold",
+            toneClasses.attention.tile,
+          )}
+        >
+          <span className="size-1.5 rounded-full bg-attention" />
           {approval.status}
         </span>
       </div>
       <p className="mt-1 text-xs text-muted-foreground">{approval.detail}</p>
+      <p className="mt-2 flex items-center gap-1.5 text-xs">
+        <ReceiptIcon className="size-3.5 shrink-0 text-brand" aria-hidden />
+        <span className="font-semibold text-brand">
+          {order.taxSmart.estimate}
+        </span>
+        <span className="text-muted-foreground">
+          · {order.taxSmart.account}
+        </span>
+      </p>
       <div className="mt-4 grid grid-cols-2 gap-2">
-        <span className="inline-flex h-8 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
-          {preview.order.approve}
+        <span
+          className={cn(
+            "inline-flex h-8 items-center justify-center gap-1 rounded-full text-xs font-medium",
+            toneClasses.brand.solid,
+          )}
+        >
+          <CheckIcon className="size-3.5" aria-hidden />
+          {order.approve}
         </span>
         <span className="inline-flex h-8 items-center justify-center rounded-full border border-border text-xs font-medium text-muted-foreground">
-          {preview.order.dismiss}
+          {order.dismiss}
         </span>
       </div>
     </div>
   )
 }
 
-type Alert = (typeof illustrations.alerts)[number]
-
-function AlertRow({ alert, className }: { alert: Alert; className?: string }) {
+/** Lesson progress and the next lesson, picked from what you own (blue = learning). */
+export function LearnVisual() {
+  const { progress, next } = illustrations.learn
   return (
-    <div
-      className={cn(
-        "flex items-start gap-3 rounded-xl border border-border bg-card p-3 shadow-soft",
-        className,
-      )}
-    >
-      <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-brand">
-        <LogoMark className="size-4 text-brand-foreground" />
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-xs font-medium">{alert.title}</p>
-        <p className="mt-0.5 truncate text-xs text-muted-foreground">
-          {alert.detail}
-        </p>
+    <div className={panel}>
+      <div className="flex items-center gap-3">
+        <ProgressRing
+          done={progress.done}
+          total={progress.total}
+          className="size-14"
+        />
+        <div className="min-w-0">
+          <p className={cn("text-xs font-semibold", toneClasses.learn.text)}>
+            {next.meta}
+          </p>
+          <p className="mt-0.5 text-sm font-medium text-balance">
+            {next.title}
+          </p>
+        </div>
       </div>
-      <span className="shrink-0 text-[11px] text-muted-foreground tabular-nums">
-        {alert.time}
-      </span>
-    </div>
-  )
-}
-
-export function AlertsVisual() {
-  const [latest, earlier] = illustrations.alerts
-  return (
-    <div className="w-full max-w-sm space-y-2">
-      <AlertRow alert={latest} />
-      {/* The older alert recedes, suggesting a notification stack. */}
-      <AlertRow alert={earlier} className="mx-3 opacity-60" />
+      <p
+        className={cn(
+          "mt-3 flex items-start gap-1.5 rounded-lg px-2.5 py-2 text-xs text-muted-foreground",
+          toneClasses.learn.soft,
+        )}
+      >
+        <SparklesIcon
+          className={cn("mt-px size-3.5 shrink-0", toneClasses.learn.text)}
+          aria-hidden
+        />
+        {next.reason}
+      </p>
     </div>
   )
 }

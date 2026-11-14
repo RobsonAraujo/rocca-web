@@ -1,6 +1,8 @@
-import { TrendingUpIcon } from "lucide-react"
+import { CheckIcon, ReceiptIcon, TrendingUpIcon, XIcon } from "lucide-react"
 
 import { LogoMark } from "@/components/layout/logo"
+import { OrderLines } from "@/components/product/order-lines"
+import { toneClasses } from "@/components/product/tone"
 import { Badge } from "@/components/ui/badge"
 import { preview } from "@/features/landing/content"
 import { cn } from "@/lib/utils"
@@ -10,6 +12,7 @@ const SPARKLINE = "0,26 13,24 26,27 40,19 53,21 66,14 80,16 93,9 106,10 120,4"
 
 /** Static, decorative mock of the agent conversation. Not interactive. */
 export function ProductShowcase() {
+  const { order } = preview
   return (
     <div
       aria-label="Simulated preview: Rocca suggests rebalancing an oversized NVDA position and waits for your approval."
@@ -43,37 +46,36 @@ export function ProductShowcase() {
 
         <div className="mt-4 rounded-2xl border border-border p-4">
           <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-            {preview.order.title}
+            {order.title}
           </p>
-          <ul className="mt-2 divide-y divide-border/70 text-sm">
-            {preview.order.lines.map((line) => (
-              <li
-                key={line.detail}
-                className="flex items-center justify-between gap-3 py-2.5"
-              >
-                <span className="flex items-center gap-2.5">
-                  <span
-                    className={cn(
-                      "inline-flex h-5 w-10 items-center justify-center rounded-md text-xs font-medium",
-                      line.side === "Buy"
-                        ? "bg-brand/10 text-brand"
-                        : "bg-muted text-muted-foreground",
-                    )}
-                  >
-                    {line.side}
-                  </span>
-                  <span className="font-medium">{line.detail}</span>
-                </span>
-                <span className="font-medium tabular-nums">{line.amount}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <span className="inline-flex h-9 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">
-              {preview.order.approve}
+          <OrderLines lines={order.lines} className="mt-2" />
+          {/* Tax-smart placement: same detail the dashboard preview shows. */}
+          {/* The amount never wraps; the explanation can. */}
+          <p className="mt-1 flex items-start gap-1.5 rounded-lg bg-brand/[0.08] px-3 py-2 text-xs">
+            <ReceiptIcon
+              className="mt-px size-3.5 shrink-0 text-brand"
+              aria-hidden
+            />
+            <span className="shrink-0 font-semibold whitespace-nowrap text-brand">
+              {order.taxSmart.estimate}
             </span>
-            <span className="inline-flex h-9 items-center justify-center rounded-full border border-border bg-card text-sm font-medium text-muted-foreground">
-              {preview.order.dismiss}
+            <span className="text-pretty text-muted-foreground">
+              in your {order.taxSmart.account} {order.taxSmart.comparison}
+            </span>
+          </p>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <span
+              className={cn(
+                "inline-flex h-9 items-center justify-center gap-1.5 rounded-full text-sm font-medium",
+                toneClasses.brand.solid,
+              )}
+            >
+              <CheckIcon className="size-4" aria-hidden />
+              {order.approve}
+            </span>
+            <span className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full border border-border bg-card text-sm font-medium text-muted-foreground">
+              <XIcon className="size-4" aria-hidden />
+              {order.dismiss}
             </span>
           </div>
         </div>

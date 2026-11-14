@@ -6,8 +6,8 @@ import { Section } from "../primitives"
 import { SectionIntro } from "../section-intro"
 import {
   AccountsVisual,
-  AlertsVisual,
   ApprovalVisual,
+  LearnVisual,
   MovesVisual,
 } from "./feature-visuals"
 
@@ -19,7 +19,7 @@ const bento: Record<
   accounts: { span: "lg:col-span-7", Visual: AccountsVisual },
   moves: { span: "lg:col-span-5", Visual: MovesVisual },
   approval: { span: "lg:col-span-5", Visual: ApprovalVisual },
-  alerts: { span: "lg:col-span-7", Visual: AlertsVisual },
+  learn: { span: "lg:col-span-7", Visual: LearnVisual },
 }
 
 export function Features() {

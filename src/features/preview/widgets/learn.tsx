@@ -6,39 +6,12 @@ import {
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { ProgressRing } from "@/components/product/progress-ring"
+import { toneClasses } from "@/components/product/tone"
 
 import { ComingSoonButton } from "../components/coming-soon"
 import { Panel } from "../components/panel"
-import { toneClasses } from "../components/tone"
 import { learn } from "../data"
-
-/** r=15.915 gives a circumference of 100, so the dash is the percentage. */
-function ProgressRing({ percent }: { percent: number }) {
-  return (
-    <svg viewBox="0 0 36 36" className="size-16 -rotate-90" aria-hidden>
-      <circle
-        cx="18"
-        cy="18"
-        r="15.915"
-        fill="none"
-        strokeWidth="3.5"
-        stroke="currentColor"
-        className="text-learn/15"
-      />
-      <circle
-        cx="18"
-        cy="18"
-        r="15.915"
-        fill="none"
-        strokeWidth="3.5"
-        strokeLinecap="round"
-        stroke="currentColor"
-        strokeDasharray={`${percent} ${100 - percent}`}
-        className="text-learn"
-      />
-    </svg>
-  )
-}
 
 /**
  * The beginner differentiator: Rocca handles the money and teaches along the
@@ -57,19 +30,7 @@ export function LearnWidget({ className }: { className?: string }) {
       className={className}
     >
       <div className="flex items-center gap-4">
-        <div
-          role="progressbar"
-          aria-label="Lessons completed"
-          aria-valuemin={0}
-          aria-valuemax={total}
-          aria-valuenow={done}
-          className="relative shrink-0"
-        >
-          <ProgressRing percent={percent} />
-          <span className="absolute inset-0 grid place-items-center text-sm font-semibold tabular-nums">
-            {done}/{total}
-          </span>
-        </div>
+        <ProgressRing done={done} total={total} />
         <div>
           <p className="text-2xl font-semibold tracking-tight tabular-nums">
             {percent}%

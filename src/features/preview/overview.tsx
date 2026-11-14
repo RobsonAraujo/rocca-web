@@ -2,11 +2,11 @@ import { GaugeIcon } from "lucide-react"
 import { Suspense } from "react"
 
 import { cn } from "@/lib/utils"
+import type { Tone } from "@/components/product/tone"
+import { toneClasses } from "@/components/product/tone"
 
 import { AskRocca } from "./components/ask-rocca"
 import { PageHeader } from "./components/page-header"
-import type { Tone } from "./components/tone"
-import { toneClasses } from "./components/tone"
 import { WelcomeBanner } from "./components/welcome-banner"
 import { autonomy, sections, shell, status } from "./data"
 import { AutonomyWidget } from "./widgets/autonomy"

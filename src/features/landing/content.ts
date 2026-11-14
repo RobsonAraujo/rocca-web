@@ -1,7 +1,7 @@
 import type { LucideIcon } from "lucide-react"
 import {
-  BellRingIcon,
   ChartLineIcon,
+  GraduationCapIcon,
   LandmarkIcon,
   LayersIcon,
   MessageSquareTextIcon,
@@ -25,14 +25,14 @@ export const hero = {
   /** Part of `title` the hero highlights in the brand color. */
   emphasis: "never sleeps.",
   description:
-    "Rocca connects every account you own, tells you what moved your money and why, and turns your ideas into trades, only when you approve.",
+    "Rocca connects every account you own, explains every move in plain English, and turns ideas into trades on your terms. New to investing? You'll learn as you go.",
   /** Shown under both waitlist forms: the instant preview is the signup incentive. */
   note: "No spam. Join and get instant access to a preview of your dashboard.",
 } as const
 
 /** Short promises, restating what the FAQ answers in detail. */
 export const principles = [
-  { icon: ShieldCheckIcon, label: "Nothing executes without your approval" },
+  { icon: ShieldCheckIcon, label: "By default, nothing runs without your OK" },
   { icon: LandmarkIcon, label: "Your money stays at your broker" },
   {
     icon: MessageSquareTextIcon,
@@ -56,11 +56,17 @@ export const preview = {
     ],
     approve: "Approve",
     dismiss: "Not now",
+    /** Where Rocca would place the trade, and what that saves in taxes. */
+    taxSmart: {
+      account: "Roth IRA",
+      estimate: "Est. tax $0",
+      comparison: "vs. ~$765 in your brokerage",
+    },
   },
 } as const
 
 /** Stable key per feature, so a layout can attach visuals without relying on order. */
-export type FeatureId = "accounts" | "moves" | "approval" | "alerts"
+export type FeatureId = "accounts" | "moves" | "approval" | "learn"
 
 export type Feature = {
   id: FeatureId
@@ -85,21 +91,21 @@ export const features = {
       icon: ChartLineIcon,
       title: "Know why it moved",
       description:
-        "A plain-English brief every morning on what changed in your portfolio and what is driving it.",
+        "A plain-English brief every morning on what changed and why, and a heads-up only when something needs you.",
     },
     {
       id: "approval",
       icon: ShieldCheckIcon,
       title: "Ideas to trades, on your terms",
       description:
-        "Ask for an idea and see the reasoning and the risk. Nothing is executed until you approve it.",
+        "See the reasoning, the risk and the tax cost first. You decide how much Rocca handles, and by default nothing runs without your OK.",
     },
     {
-      id: "alerts",
-      icon: BellRingIcon,
-      title: "Alerts that matter",
+      id: "learn",
+      icon: GraduationCapIcon,
+      title: "Learn as you go",
       description:
-        "Rocca watches the market around your holdings and reaches out only when something deserves your attention.",
+        "New to investing? Rocca teaches with short lessons picked from what you own, so every move makes sense to you.",
     },
   ] satisfies Feature[],
 } as const
@@ -130,18 +136,15 @@ export const illustrations = {
     status: "Needs your OK",
     detail: "Sell 84 NVDA · Buy 50 VTI",
   },
-  alerts: [
-    {
-      title: "NVDA is now 18% of your portfolio",
-      detail: "Above your 12% target. Want to rebalance?",
-      time: "9:41",
+  /** Also feeds the dashboard preview's Learn widget, so both show the same lesson. */
+  learn: {
+    progress: { done: 3, total: 12 },
+    next: {
+      meta: "Next lesson · 3 min",
+      title: "Why one stock shouldn't run your portfolio",
+      reason: "Picked for you: NVDA is 18% of your holdings.",
     },
-    {
-      title: "NVDA reports earnings this week",
-      detail: "Here's what could move your position.",
-      time: "Mon",
-    },
-  ],
+  },
 } as const
 
 export const howItWorks = {
@@ -151,7 +154,7 @@ export const howItWorks = {
     {
       title: "Join the waitlist",
       description:
-        "We're opening access in small batches. Your invite arrives by email.",
+        "Explore a preview of your dashboard right away. Full access arrives by email, in small batches.",
     },
     {
       title: "Connect your accounts",
@@ -172,12 +175,17 @@ export const faq = {
     {
       question: "What is Rocca?",
       answer:
-        "Rocca is an AI investing agent. It connects to the accounts you already have, explains what's happening with your money, and helps you act on ideas, always with your approval.",
+        "Rocca is an AI investing agent. It connects to the accounts you already have, explains what's happening with your money, and helps you act on ideas, on your terms.",
+    },
+    {
+      question: "Is Rocca for beginners?",
+      answer:
+        "Yes. You can start in Explain only mode: Rocca watches and teaches, and you make every move. Lessons are picked from what you actually own, so they always apply to you.",
     },
     {
       question: "When will I get access?",
       answer:
-        "We're inviting people from the waitlist in batches. You'll get an email as soon as your spot opens up.",
+        "Right after you join, you can explore a preview of the dashboard with simulated data. Full access opens in batches, and you'll get an email when your spot is ready.",
     },
     {
       question: "How much will it cost?",
@@ -192,7 +200,7 @@ export const faq = {
     {
       question: "Will Rocca trade without asking me?",
       answer:
-        "No. Rocca can suggest trades, but nothing is executed until you review and approve it.",
+        "Not unless you allow it. By default, Rocca suggests trades and waits for your OK. If you turn on Autopilot, it acts only within the rules you set and tells you right after.",
     },
     {
       question: "How will my data be protected?",

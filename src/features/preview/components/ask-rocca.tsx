@@ -12,11 +12,11 @@ import { useId, useRef, useState } from "react"
 import { LogoMark } from "@/components/layout/logo"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { IconTile } from "@/components/product/tone"
 
 import { ask } from "../data"
 import { ComingSoonButton, notifyComingSoon } from "./coming-soon"
 import { panelClass } from "./panel"
-import { IconTile } from "./tone"
 
 /** A short example exchange, so visitors see the plain-English tone. */
 function SampleThread() {

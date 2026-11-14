@@ -8,10 +8,10 @@ import {
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { toneClasses } from "@/components/product/tone"
 
 import { ComingSoonButton } from "../components/coming-soon"
 import { Panel } from "../components/panel"
-import { toneClasses } from "../components/tone"
 import { autonomy, rules } from "../data"
 
 const currentIndex = autonomy.levels.findIndex(

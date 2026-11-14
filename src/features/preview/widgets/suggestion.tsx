@@ -9,44 +9,22 @@ import {
 
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { OrderLines } from "@/components/product/order-lines"
+import { toneClasses } from "@/components/product/tone"
 
 import { ComingSoonButton } from "../components/coming-soon"
 import { panelClass } from "../components/panel"
-import { toneClasses } from "../components/tone"
 import { suggestion } from "../data"
 
-function OrderLines() {
+/** Proposed order: shared Sell/Buy rows inside a titled box. */
+function OrderBox() {
   const { order } = suggestion
   return (
     <div className="rounded-xl border border-border bg-card p-4">
       <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
         {order.title}
       </p>
-      <ul className="mt-2 divide-y divide-border/70 text-sm">
-        {order.lines.map((line) => (
-          <li
-            key={line.detail}
-            className="flex items-center justify-between gap-3 py-2.5"
-          >
-            <span className="flex items-center gap-2.5">
-              <span
-                className={cn(
-                  "inline-flex h-5 w-10 items-center justify-center rounded-md text-xs font-medium",
-                  line.side === "Buy"
-                    ? "bg-brand/10 text-brand"
-                    : "bg-muted text-muted-foreground",
-                )}
-              >
-                {line.side}
-              </span>
-              <span className="font-medium">{line.detail}</span>
-            </span>
-            <span className="font-medium whitespace-nowrap tabular-nums">
-              {line.amount}
-            </span>
-          </li>
-        ))}
-      </ul>
+      <OrderLines lines={order.lines} className="mt-2" />
     </div>
   )
 }
@@ -118,7 +96,7 @@ export function SuggestionWidget({ className }: { className?: string }) {
           </div>
 
           <div className="flex flex-col gap-3">
-            <OrderLines />
+            <OrderBox />
             <div className="flex items-start gap-3 rounded-xl bg-brand/[0.08] p-4 text-sm">
               <ReceiptIcon
                 className="mt-0.5 size-4 shrink-0 text-brand"

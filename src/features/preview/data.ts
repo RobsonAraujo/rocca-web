@@ -141,12 +141,7 @@ export const suggestion = {
     },
   ],
   order: preview.order,
-  taxSmart: {
-    label: "Tax-smart placement",
-    account: "Roth IRA",
-    estimate: "Est. tax $0",
-    comparison: "vs. ~$765 in your brokerage",
-  },
+  taxSmart: { label: "Tax-smart placement", ...preview.order.taxSmart },
   askWhy: "Ask why",
   lesson: "New to rebalancing? 2-min lesson",
   decisionNote: "Nothing happens until you approve.",
@@ -228,13 +223,9 @@ export const rules = {
 export const learn = {
   title: "Learn as you go",
   description: "Lessons picked from what's in your portfolio.",
-  progress: { done: 3, total: 12 },
-  next: {
-    meta: "Next lesson · 3 min",
-    title: "Why one stock shouldn't run your portfolio",
-    reason: "Picked for you: NVDA is 18% of your holdings.",
-    cta: "Start lesson",
-  },
+  // Same lesson the landing's Learn card shows.
+  progress: illustrations.learn.progress,
+  next: { ...illustrations.learn.next, cta: "Start lesson" },
   progressLabel: "lessons done",
   conceptsLabel: "Concepts in your portfolio",
   concepts: [

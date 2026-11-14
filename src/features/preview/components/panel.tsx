@@ -9,9 +9,8 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
-
-import type { Tone } from "./tone"
-import { IconTile, toneClasses } from "./tone"
+import type { Tone } from "@/components/product/tone"
+import { IconTile, toneClasses } from "@/components/product/tone"
 
 /** Card chrome shared by every dashboard widget (same look as the landing bento). */
 export const panelClass =

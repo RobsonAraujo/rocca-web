@@ -45,7 +45,8 @@ src/
 ├─ app/                    # rotas: /, /preview, /preview/portfolio, robots, sitemap
 ├─ components/
 │  ├─ ui/                  # gerado pelo shadcn (não editar à mão sem motivo)
-│  └─ layout/              # logo e ano do copyright (compartilhados)
+│  ├─ layout/              # logo e ano do copyright (compartilhados)
+│  └─ product/             # peças de produto usadas na landing e no preview: cores de identidade, anel de progresso, linhas de ordem
 ├─ config/site.ts          # nome da marca, descrição, URL
 ├─ lib/                    # env (validada com zod), utils
 └─ features/
@@ -96,7 +97,7 @@ Quem entra na lista é levado na hora para `/preview`, uma versão navegável do
 
 A landing tem só um tema, claro. Os tokens ficam em `:root` (`globals.css`): fundo papel quente, texto e botões em tinta, e o verde esmeralda (`--brand`) usado com moderação como destaque. As sombras `shadow-soft` e `shadow-float` também são definidas lá.
 
-O preview do dashboard usa mais três cores de destaque, também como tokens, para cada ideia ter uma identidade visual. Todas passam o contraste 4,5:1 sobre branco e sobre o próprio fundo tingido. Use as classes `bg-*`, `text-*` e `ring-*` delas, ou o mapa `toneClasses` em `features/preview/components/tone.tsx`:
+A landing e o preview do dashboard usam mais três cores de destaque, também como tokens, para cada ideia ter uma identidade visual. Todas passam o contraste 4,5:1 sobre branco e sobre o próprio fundo tingido. Use as classes `bg-*`, `text-*` e `ring-*` delas, ou o mapa `toneClasses` em `components/product/tone.tsx`:
 
 - `attention` (âmbar): algo precisa da sua ação, como a sugestão pendente e a regra estourada.
 - `control` (violeta): autonomia e regras, ou seja, quanto a Rocca faz por você.
