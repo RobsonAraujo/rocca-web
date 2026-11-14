@@ -1,6 +1,9 @@
+import { LockIcon } from "lucide-react"
+
 import { hero } from "@/features/landing/content"
 import { WaitlistForm } from "@/features/waitlist/components/waitlist-form"
 
+import { Container } from "../primitives"
 import { ProductShowcase } from "./product-showcase"
 
 /** Renders the title with `hero.emphasis` highlighted in the brand color. */
@@ -21,20 +24,14 @@ function HeroTitle() {
 
 export function Hero() {
   return (
-    <section
-      id="top"
-      aria-labelledby="hero-title"
-      className="relative isolate overflow-hidden"
-    >
-      <div
-        aria-hidden
-        className="absolute top-24 right-[-10rem] -z-10 hidden size-[36rem] rounded-full bg-brand/10 blur-3xl lg:block"
-      />
-
-      <div className="mx-auto grid max-w-6xl items-center gap-16 px-4 pt-12 pb-20 sm:px-6 sm:pb-28 lg:grid-cols-[1.05fr_1fr] lg:pt-20">
+    <section id="top" aria-labelledby="hero-title" className="overflow-hidden">
+      <Container className="grid items-center gap-14 pt-14 pb-16 sm:pb-28 lg:grid-cols-[1.05fr_1fr] lg:gap-16 lg:pt-20 lg:pb-32">
         <div className="motion-safe:animate-in motion-safe:duration-700 motion-safe:fade-in motion-safe:slide-in-from-bottom-2">
-          <p className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground">
-            <span className="size-1.5 rounded-full bg-brand" aria-hidden />
+          <p className="inline-flex h-7 items-center gap-2 rounded-full border border-border bg-card px-3 text-xs font-medium text-muted-foreground shadow-soft">
+            <span
+              className="size-1.5 rounded-full bg-brand ring-4 ring-brand/15"
+              aria-hidden
+            />
             {hero.eyebrow}
           </p>
 
@@ -49,14 +46,17 @@ export function Hero() {
             {hero.description}
           </p>
 
-          <div id="waitlist" className="mt-9 scroll-mt-28 space-y-3">
+          <div id="waitlist" className="mt-10 max-w-md scroll-mt-28 space-y-3">
             <WaitlistForm variant="pill" />
-            <p className="px-4 text-xs text-muted-foreground">{hero.note}</p>
+            <p className="flex items-center gap-1.5 px-4 text-xs text-muted-foreground">
+              <LockIcon className="size-3.5 shrink-0" aria-hidden />
+              {hero.note}
+            </p>
           </div>
         </div>
 
         <ProductShowcase />
-      </div>
+      </Container>
     </section>
   )
 }

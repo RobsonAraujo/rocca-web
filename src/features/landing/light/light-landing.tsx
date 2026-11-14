@@ -16,7 +16,7 @@ import { SiteHeader } from "./site-header"
  */
 export function LightLanding() {
   return (
-    <div className="flex min-h-svh flex-col bg-background pb-16 text-foreground">
+    <div className="flex min-h-svh flex-col bg-background pb-16 text-foreground selection:bg-brand/15">
       <SiteHeader />
       <main className="flex-1">
         <Hero />

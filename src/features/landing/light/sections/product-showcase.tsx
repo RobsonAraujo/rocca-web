@@ -1,7 +1,12 @@
-import { SparklesIcon, TrendingUpIcon } from "lucide-react"
+import { TrendingUpIcon } from "lucide-react"
 
+import { LogoMark } from "@/components/layout/logo"
 import { Badge } from "@/components/ui/badge"
 import { preview } from "@/features/landing/content"
+import { cn } from "@/lib/utils"
+
+/** A gently rising week for the portfolio card (viewBox 0 0 120 32). */
+const SPARKLINE = "0,26 13,24 26,27 40,19 53,21 66,14 80,16 93,9 106,10 120,4"
 
 /** Static, decorative mock of the agent conversation. Not interactive. */
 export function ProductShowcase() {
@@ -11,11 +16,11 @@ export function ProductShowcase() {
       role="img"
       className="relative mx-auto w-full max-w-md lg:max-w-none"
     >
-      <div className="rounded-[1.75rem] border border-border bg-card p-5 shadow-[0_24px_60px_-24px_oklch(0.2_0.02_260/0.25)] sm:p-6">
-        <div className="flex items-center justify-between">
-          <p className="inline-flex items-center gap-2 text-sm font-medium">
-            <span className="grid size-7 place-items-center rounded-full bg-brand text-brand-foreground">
-              <SparklesIcon className="size-3.5" aria-hidden />
+      <div className="rounded-3xl border border-border bg-card p-5 shadow-float sm:p-6">
+        <div className="flex items-center justify-between gap-3">
+          <p className="inline-flex items-center gap-2.5 text-sm font-medium">
+            <span className="grid size-8 place-items-center rounded-full bg-brand">
+              <LogoMark className="size-4.5 text-brand-foreground" />
             </span>
             Rocca
             <span className="font-normal text-muted-foreground">· now</span>
@@ -25,7 +30,7 @@ export function ProductShowcase() {
           </Badge>
         </div>
 
-        <div className="mt-5 space-y-3">
+        <div className="mt-5 space-y-2.5">
           {preview.messages.map((message) => (
             <p
               key={message}
@@ -40,51 +45,77 @@ export function ProductShowcase() {
           <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
             {preview.order.title}
           </p>
-          <ul className="mt-3 space-y-2 text-sm">
+          <ul className="mt-2 divide-y divide-border/70 text-sm">
             {preview.order.lines.map((line) => (
               <li
                 key={line.detail}
-                className="flex items-center justify-between"
+                className="flex items-center justify-between gap-3 py-2.5"
               >
-                <span>
+                <span className="flex items-center gap-2.5">
                   <span
-                    className={
+                    className={cn(
+                      "inline-flex h-5 w-10 items-center justify-center rounded-md text-xs font-medium",
                       line.side === "Buy"
-                        ? "text-brand"
-                        : "text-muted-foreground"
-                    }
+                        ? "bg-brand/10 text-brand"
+                        : "bg-muted text-muted-foreground",
+                    )}
                   >
                     {line.side}
-                  </span>{" "}
-                  {line.detail}
+                  </span>
+                  <span className="font-medium">{line.detail}</span>
                 </span>
-                <span className="font-mono text-muted-foreground">
-                  {line.amount}
-                </span>
+                <span className="font-medium tabular-nums">{line.amount}</span>
               </li>
             ))}
           </ul>
-          <div className="mt-4 grid grid-cols-2 gap-2">
+          <div className="mt-3 grid grid-cols-2 gap-2">
             <span className="inline-flex h-9 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">
               {preview.order.approve}
             </span>
-            <span className="inline-flex h-9 items-center justify-center rounded-full border border-border text-sm text-muted-foreground">
+            <span className="inline-flex h-9 items-center justify-center rounded-full border border-border bg-card text-sm font-medium text-muted-foreground">
               {preview.order.dismiss}
             </span>
           </div>
         </div>
       </div>
 
-      {/* Floating portfolio card (desktop/tablet only), hanging below the chat card. */}
-      <div className="absolute -bottom-20 -left-4 hidden w-56 rounded-2xl border border-border bg-card p-4 shadow-xl sm:block lg:-left-10">
-        <p className="text-xs text-muted-foreground">Total portfolio</p>
-        <p className="mt-1 font-mono text-xl font-semibold tracking-tight">
-          {preview.portfolio.value}
-        </p>
-        <p className="mt-1 inline-flex items-center gap-1 text-xs text-brand">
-          <TrendingUpIcon className="size-3.5" aria-hidden />
-          {preview.portfolio.change}
-        </p>
+      {/*
+       * Floating portfolio card (tablet/desktop only). Kept compact and hung
+       * low so it only overlaps the chat card's bottom padding, never the
+       * Approve / Not now actions.
+       */}
+      <div className="absolute -bottom-16 -left-4 hidden w-72 items-center gap-4 rounded-2xl border border-border bg-card px-4 py-3 shadow-float sm:flex lg:-left-12">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs text-muted-foreground">Total portfolio</p>
+          <p className="mt-0.5 text-lg font-semibold tracking-tight tabular-nums">
+            {preview.portfolio.value}
+          </p>
+          <p className="mt-0.5 inline-flex items-center gap-1 text-xs font-medium text-brand">
+            <TrendingUpIcon className="size-3.5" aria-hidden />
+            {preview.portfolio.change}
+          </p>
+        </div>
+        <svg
+          viewBox="0 0 120 32"
+          preserveAspectRatio="none"
+          className="h-10 w-20 shrink-0 text-brand"
+          aria-hidden
+        >
+          <polygon
+            points={`${SPARKLINE} 120,32 0,32`}
+            fill="currentColor"
+            fillOpacity={0.08}
+          />
+          <polyline
+            points={SPARKLINE}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
       </div>
     </div>
   )

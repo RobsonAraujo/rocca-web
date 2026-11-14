@@ -1,35 +1,46 @@
 import { howItWorks } from "@/features/landing/content"
 
+import { Section } from "../primitives"
 import { SectionIntro } from "../section-intro"
 
 export function HowItWorks() {
   return (
-    <section
+    <Section
       id="how-it-works"
       aria-labelledby="how-it-works-title"
-      className="scroll-mt-20 bg-secondary/70 px-4 py-24 sm:px-6 lg:py-32"
+      tone="muted"
     >
-      <div className="mx-auto max-w-6xl">
-        <SectionIntro
-          id="how-it-works-title"
-          eyebrow={howItWorks.eyebrow}
-          title={howItWorks.title}
-        />
+      <SectionIntro
+        id="how-it-works-title"
+        eyebrow={howItWorks.eyebrow}
+        title={howItWorks.title}
+      />
 
-        <ol className="mt-14 grid gap-10 sm:grid-cols-3 sm:gap-8">
-          {howItWorks.steps.map((step, index) => (
-            <li key={step.title} className="border-t border-foreground/15 pt-6">
-              <span className="text-5xl font-light tracking-tight text-brand tabular-nums">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <h3 className="mt-4 text-lg font-medium">{step.title}</h3>
+      <ol className="mt-12 grid gap-4 sm:mt-14 md:grid-cols-3 md:gap-5">
+        {howItWorks.steps.map((step, index) => (
+          // Number beside the text on phones (compact), above it from md up.
+          <li
+            key={step.title}
+            className="flex gap-4 rounded-2xl border border-border bg-card p-5 shadow-soft sm:p-6 md:flex-col md:gap-5 lg:p-7"
+          >
+            {/* The <ol> already announces the order; the number is visual. */}
+            <span
+              aria-hidden
+              className="grid size-9 shrink-0 place-items-center rounded-full bg-brand/10 text-sm font-semibold text-brand tabular-nums"
+            >
+              {index + 1}
+            </span>
+            <div className="pt-1 md:pt-0">
+              <h3 className="text-lg leading-7 font-medium tracking-tight">
+                {step.title}
+              </h3>
               <p className="mt-2 leading-relaxed text-muted-foreground">
                 {step.description}
               </p>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </section>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </Section>
   )
 }

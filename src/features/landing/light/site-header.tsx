@@ -3,11 +3,13 @@ import { buttonVariants } from "@/components/ui/button"
 import { navLinks } from "@/features/landing/content"
 import { cn } from "@/lib/utils"
 
+import { Container, focusRing, navLinkClass } from "./primitives"
+
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-4 sm:px-6">
-        <a href="#top" aria-label="Rocca home">
+    <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-md">
+      <Container className="flex h-16 items-center justify-between gap-6">
+        <a href="#top" aria-label="Rocca home" className={focusRing}>
           <Logo />
         </a>
 
@@ -17,11 +19,7 @@ export function SiteHeader() {
             className="hidden items-center gap-7 text-sm md:flex"
           >
             {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="text-muted-foreground transition-colors hover:text-foreground"
-              >
+              <a key={link.href} href={link.href} className={navLinkClass}>
                 {link.label}
               </a>
             ))}
@@ -33,7 +31,7 @@ export function SiteHeader() {
             Join the waitlist
           </a>
         </div>
-      </div>
+      </Container>
     </header>
   )
 }

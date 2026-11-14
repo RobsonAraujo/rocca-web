@@ -29,6 +29,7 @@ type WaitlistFormProps = {
 
 const styles = {
   split: {
+    form: "",
     success: "rounded-xl",
     group: "flex flex-col gap-2 sm:flex-row",
     input: "h-11 bg-background/60 px-3.5 text-base md:text-base",
@@ -36,13 +37,20 @@ const styles = {
     error: "",
     placeholder: "you@example.com",
   },
+  /*
+   * The form is a size container. When it has room (>= 18rem) input and
+   * button share one capsule; when it is narrower (very small phones, padded
+   * panels) they stack at full width instead of clipping the input.
+   */
   pill: {
+    form: "@container/waitlist",
     success: "rounded-2xl",
     group:
-      "flex items-center gap-1 rounded-full border border-input bg-card p-1 shadow-sm transition-shadow focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/30 has-[[aria-invalid=true]]:border-destructive has-[[aria-invalid=true]]:ring-destructive/20",
+      "flex flex-col gap-2 @2xs/waitlist:flex-row @2xs/waitlist:items-center @2xs/waitlist:gap-1 @2xs/waitlist:rounded-full @2xs/waitlist:border @2xs/waitlist:border-input @2xs/waitlist:bg-card @2xs/waitlist:p-1 @2xs/waitlist:shadow-sm @2xs/waitlist:transition-shadow @2xs/waitlist:focus-within:border-ring @2xs/waitlist:focus-within:ring-3 @2xs/waitlist:focus-within:ring-ring/30 @2xs/waitlist:has-[[aria-invalid=true]]:border-destructive @2xs/waitlist:has-[[aria-invalid=true]]:ring-destructive/20",
     input:
-      "h-10 min-w-0 flex-1 rounded-full border-0 bg-transparent px-3.5 text-base shadow-none focus-visible:ring-0 aria-invalid:ring-0 sm:px-4 md:text-base dark:bg-transparent",
-    button: "h-10 shrink-0 rounded-full px-4 sm:px-5",
+      "h-11 rounded-full bg-card px-4 text-base shadow-sm md:text-base dark:bg-transparent @2xs/waitlist:h-10 @2xs/waitlist:min-w-0 @2xs/waitlist:flex-1 @2xs/waitlist:border-0 @2xs/waitlist:bg-transparent @2xs/waitlist:shadow-none @2xs/waitlist:focus-visible:ring-0 @2xs/waitlist:aria-invalid:ring-0",
+    button:
+      "h-11 w-full rounded-full px-5 @2xs/waitlist:h-10 @2xs/waitlist:w-auto @2xs/waitlist:shrink-0",
     error: "px-4",
     // Shorter: the capsule leaves less room for the input on small screens.
     placeholder: "Your email",
@@ -110,7 +118,7 @@ export function WaitlistForm({
   return (
     <form
       action={formAction}
-      className={cn("relative w-full max-w-md", className)}
+      className={cn("relative w-full max-w-md", style.form, className)}
     >
       <Field data-invalid={error ? true : undefined}>
         <FieldLabel htmlFor={emailId} className="sr-only">
