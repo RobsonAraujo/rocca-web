@@ -77,7 +77,7 @@ Existem duas versões da landing para escolher uma:
 
 | Rota    | Versão    | Estilo                                                                    |
 | ------- | --------- | ------------------------------------------------------------------------- |
-| `/`     | **Light** | Editorial e clean: títulos serifados, hero dividido, features em lista    |
+| `/`     | **Light** | Clean: fundo claro, hero dividido, features em lista                      |
 | `/dark` | **Dark**  | Escura e centralizada: preview em formato de dashboard, features em cards |
 
 As duas usam a mesma copy (`content.ts`) e o mesmo formulário, então a comparação é só de layout. Um botão flutuante, o `LayoutSwitcher`, troca entre elas. A rota `/dark` tem `noindex`.

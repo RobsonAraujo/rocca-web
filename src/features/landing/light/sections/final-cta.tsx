@@ -7,7 +7,7 @@ export function FinalCta() {
       <div className="mx-auto flex max-w-6xl flex-col items-center rounded-[2rem] border border-brand/15 bg-brand/[0.06] px-4 py-14 text-center sm:px-6 sm:py-24">
         <h2
           id="final-cta-title"
-          className="font-serif text-4xl leading-[1.05] tracking-tight text-balance sm:text-6xl"
+          className="text-4xl leading-[1.06] font-medium tracking-[-0.04em] text-balance sm:text-6xl"
         >
           {finalCta.title}
         </h2>

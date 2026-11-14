@@ -23,7 +23,7 @@ export const navLinks = [
 export const hero = {
   eyebrow: "Private beta · Join the waitlist",
   title: "Invest with an agent that never sleeps.",
-  /** Part of `title` the light layout sets in italic. */
+  /** Part of `title` the light layout highlights in the brand color. */
   emphasis: "never sleeps.",
   description:
     "Rocca connects every account you own, tells you what moved your money and why, and turns your ideas into trades, only when you approve.",

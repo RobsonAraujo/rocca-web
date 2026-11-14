@@ -11,7 +11,7 @@ import { SiteFooter } from "./site-footer"
 import { SiteHeader } from "./site-header"
 
 /**
- * Layout version "Light": editorial serif headings, split hero with a product
+ * Layout version "Light": clean sans headings, split hero with a product
  * showcase, list-style features. Uses the default (:root) tokens.
  */
 export function LightLanding() {

@@ -19,7 +19,7 @@ export function HowItWorks() {
         <ol className="mt-14 grid gap-10 sm:grid-cols-3 sm:gap-8">
           {howItWorks.steps.map((step, index) => (
             <li key={step.title} className="border-t border-foreground/15 pt-6">
-              <span className="font-serif text-5xl text-brand">
+              <span className="text-5xl font-light tracking-tight text-brand tabular-nums">
                 {String(index + 1).padStart(2, "0")}
               </span>
               <h3 className="mt-4 text-lg font-medium">{step.title}</h3>

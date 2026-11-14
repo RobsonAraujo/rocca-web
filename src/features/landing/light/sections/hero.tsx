@@ -3,7 +3,7 @@ import { WaitlistForm } from "@/features/waitlist/components/waitlist-form"
 
 import { ProductShowcase } from "./product-showcase"
 
-/** Renders the title with `hero.emphasis` in italic emerald, if present. */
+/** Renders the title with `hero.emphasis` highlighted in the brand color. */
 function HeroTitle() {
   const index = hero.title.indexOf(hero.emphasis)
   if (index === -1) return <>{hero.title}</>
@@ -11,7 +11,9 @@ function HeroTitle() {
   return (
     <>
       {hero.title.slice(0, index)}
-      <em className="text-brand">{hero.emphasis}</em>
+      <span data-slot="hero-emphasis" className="text-brand">
+        {hero.emphasis}
+      </span>
       {hero.title.slice(index + hero.emphasis.length)}
     </>
   )
@@ -38,7 +40,7 @@ export function Hero() {
 
           <h1
             id="hero-title"
-            className="mt-6 font-serif text-5xl leading-[1.02] tracking-tight text-balance sm:text-6xl lg:text-7xl"
+            className="mt-6 text-5xl leading-[1.04] font-medium tracking-[-0.04em] text-balance sm:text-6xl lg:text-7xl"
           >
             <HeroTitle />
           </h1>

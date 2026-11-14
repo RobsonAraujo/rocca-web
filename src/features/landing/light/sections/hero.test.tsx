@@ -8,11 +8,13 @@ import { Hero } from "./hero"
 vi.mock("@/features/waitlist/actions", () => ({ joinWaitlist: vi.fn() }))
 
 describe("Light Hero", () => {
-  it("renders the full headline with the emphasized part in italic", () => {
+  it("renders the full headline with the emphasized part highlighted, not italic", () => {
     render(<Hero />)
 
     const heading = screen.getByRole("heading", { level: 1, name: hero.title })
-    expect(heading.querySelector("em")).toHaveTextContent(hero.emphasis)
+    const highlight = heading.querySelector('[data-slot="hero-emphasis"]')
+    expect(highlight).toHaveTextContent(hero.emphasis)
+    expect(heading.querySelector("em, i")).toBeNull()
   })
 
   it("renders the description, waitlist form and product preview", () => {

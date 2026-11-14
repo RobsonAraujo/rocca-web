@@ -7,7 +7,7 @@ type SectionIntroProps = {
   className?: string
 }
 
-/** Left-aligned eyebrow + serif title used by the light layout sections. */
+/** Left-aligned eyebrow + title used by the light layout sections. */
 export function SectionIntro({
   eyebrow,
   title,
@@ -22,7 +22,7 @@ export function SectionIntro({
       </p>
       <h2
         id={id}
-        className="font-serif text-4xl leading-[1.05] tracking-tight text-balance sm:text-5xl"
+        className="text-4xl leading-[1.08] font-medium tracking-[-0.035em] text-balance sm:text-5xl"
       >
         {title}
       </h2>

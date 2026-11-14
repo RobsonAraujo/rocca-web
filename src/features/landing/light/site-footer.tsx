@@ -40,7 +40,7 @@ export function SiteFooter() {
         {/* Oversized wordmark as a quiet sign-off. */}
         <p
           aria-hidden
-          className="mt-10 -mb-[0.22em] text-center font-serif text-[22vw] leading-none tracking-tight text-foreground/[0.05] select-none lg:text-[15rem]"
+          className="mt-10 -mb-[0.2em] text-center text-[21vw] leading-none font-semibold tracking-[-0.06em] text-foreground/[0.05] select-none lg:text-[13rem]"
         >
           {siteConfig.name}
         </p>
