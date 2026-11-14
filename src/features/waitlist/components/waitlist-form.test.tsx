@@ -87,4 +87,16 @@ describe("WaitlistForm", () => {
     expect(data?.get("source")).toBe("newsletter")
     expect(data?.get("company")).toBe("")
   })
+
+  it("behaves the same in the pill variant", async () => {
+    action.mockResolvedValue({ status: "success", alreadyJoined: false })
+    render(<WaitlistForm variant="pill" />)
+
+    expect(screen.getByLabelText("Email address")).toBeRequired()
+    await submit("jane@example.com")
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "You're on the list.",
+    )
+  })
 })

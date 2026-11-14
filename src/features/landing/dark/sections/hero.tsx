@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge"
 import { WaitlistForm } from "@/features/waitlist/components/waitlist-form"
 
-import { hero } from "../content"
+import { hero } from "@/features/landing/content"
 
 export function Hero() {
   return (

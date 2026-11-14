@@ -5,8 +5,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 
-import { faq } from "../content"
-import { SectionHeading } from "../components/section-heading"
+import { faq } from "@/features/landing/content"
+import { SectionHeading } from "@/features/landing/dark/section-heading"
 
 export function Faq() {
   return (

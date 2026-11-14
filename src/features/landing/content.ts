@@ -1,14 +1,17 @@
 import type { LucideIcon } from "lucide-react"
 import {
   BellRingIcon,
-  LayersIcon,
   ChartLineIcon,
+  LandmarkIcon,
+  LayersIcon,
+  MessageSquareTextIcon,
   ShieldCheckIcon,
 } from "lucide-react"
 
 /**
  * All landing page copy lives here so marketing changes (and a future i18n
- * pass) never require touching component markup.
+ * pass) never require touching component markup. Both layout versions
+ * (light and dark) read from this file, so they always say the same thing.
  */
 
 export const navLinks = [
@@ -20,10 +23,22 @@ export const navLinks = [
 export const hero = {
   eyebrow: "Private beta · Join the waitlist",
   title: "Invest with an agent that never sleeps.",
+  /** Part of `title` the light layout sets in italic. */
+  emphasis: "never sleeps.",
   description:
     "Rocca connects every account you own, tells you what moved your money and why, and turns your ideas into trades, only when you approve.",
   note: "No spam. We'll only email you about your invite.",
 } as const
+
+/** Short promises, restating what the FAQ answers in detail. */
+export const principles = [
+  { icon: ShieldCheckIcon, label: "Nothing executes without your approval" },
+  { icon: LandmarkIcon, label: "Your money stays at your broker" },
+  {
+    icon: MessageSquareTextIcon,
+    label: "Every move explained in plain English",
+  },
+] satisfies { icon: LucideIcon; label: string }[]
 
 export const preview = {
   label: "Simulated",

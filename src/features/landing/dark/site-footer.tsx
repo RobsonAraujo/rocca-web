@@ -1,16 +1,7 @@
-import { footer, navLinks } from "@/features/landing/content"
+import { CurrentYear } from "@/components/layout/current-year"
+import { Logo } from "@/components/layout/logo"
 import { siteConfig } from "@/config/site"
-
-import { Logo } from "./logo"
-
-/**
- * With Cache Components, reading the clock during render must be explicit.
- * "use cache" bakes the year into the static shell and refreshes it on revalidation.
- */
-async function CurrentYear() {
-  "use cache"
-  return <>{new Date().getFullYear()}</>
-}
+import { footer, navLinks } from "@/features/landing/content"
 
 export function SiteFooter() {
   return (

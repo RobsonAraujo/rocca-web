@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
-import { hero } from "../content"
+import { hero } from "@/features/landing/content"
 import { Hero } from "./hero"
 
 vi.mock("@/features/waitlist/actions", () => ({ joinWaitlist: vi.fn() }))

@@ -1,5 +1,5 @@
-import { howItWorks } from "../content"
-import { SectionHeading } from "../components/section-heading"
+import { howItWorks } from "@/features/landing/content"
+import { SectionHeading } from "@/features/landing/dark/section-heading"
 
 export function HowItWorks() {
   return (

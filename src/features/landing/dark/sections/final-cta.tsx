@@ -1,6 +1,6 @@
 import { WaitlistForm } from "@/features/waitlist/components/waitlist-form"
 
-import { finalCta } from "../content"
+import { finalCta } from "@/features/landing/content"
 
 export function FinalCta() {
   return (

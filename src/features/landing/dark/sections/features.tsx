@@ -1,5 +1,5 @@
-import { features } from "../content"
-import { SectionHeading } from "../components/section-heading"
+import { features } from "@/features/landing/content"
+import { SectionHeading } from "@/features/landing/dark/section-heading"
 
 export function Features() {
   return (

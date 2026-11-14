@@ -14,15 +14,47 @@ import { WAITLIST_FIELDS } from "../constants"
 import { EMAIL_MAX_LENGTH } from "../schema"
 import { initialWaitlistState } from "../types"
 
+/**
+ * Visual variants only; behavior is identical.
+ * - `split`: input and button side by side (stacked on mobile).
+ * - `pill`: input and button inside one rounded capsule.
+ */
+export type WaitlistFormVariant = "split" | "pill"
+
 type WaitlistFormProps = {
   className?: string
   submitLabel?: string
+  variant?: WaitlistFormVariant
 }
+
+const styles = {
+  split: {
+    success: "rounded-xl",
+    group: "flex flex-col gap-2 sm:flex-row",
+    input: "h-11 bg-background/60 px-3.5 text-base md:text-base",
+    button: "h-11 px-5",
+    error: "",
+    placeholder: "you@example.com",
+  },
+  pill: {
+    success: "rounded-2xl",
+    group:
+      "flex items-center gap-1 rounded-full border border-input bg-card p-1 shadow-sm transition-shadow focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/30 has-[[aria-invalid=true]]:border-destructive has-[[aria-invalid=true]]:ring-destructive/20",
+    input:
+      "h-10 min-w-0 flex-1 rounded-full border-0 bg-transparent px-3.5 text-base shadow-none focus-visible:ring-0 aria-invalid:ring-0 sm:px-4 md:text-base dark:bg-transparent",
+    button: "h-10 shrink-0 rounded-full px-4 sm:px-5",
+    error: "px-4",
+    // Shorter: the capsule leaves less room for the input on small screens.
+    placeholder: "Your email",
+  },
+} satisfies Record<WaitlistFormVariant, Record<string, string>>
 
 export function WaitlistForm({
   className,
   submitLabel = "Join the waitlist",
+  variant = "split",
 }: WaitlistFormProps) {
+  const style = styles[variant]
   const [state, formAction, pending] = useActionState(
     joinWaitlist,
     initialWaitlistState,
@@ -50,7 +82,8 @@ export function WaitlistForm({
       <div
         role="status"
         className={cn(
-          "flex w-full max-w-md items-start gap-3 rounded-xl border border-brand/30 bg-brand/10 p-4 text-left",
+          "flex w-full max-w-md items-start gap-3 border border-brand/30 bg-brand/10 p-4 text-left",
+          style.success,
           className,
         )}
       >
@@ -83,14 +116,14 @@ export function WaitlistForm({
         <FieldLabel htmlFor={emailId} className="sr-only">
           Email address
         </FieldLabel>
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className={style.group}>
           <Input
             id={emailId}
             name={WAITLIST_FIELDS.email}
             type="email"
             inputMode="email"
             autoComplete="email"
-            placeholder="you@example.com"
+            placeholder={style.placeholder}
             required
             maxLength={EMAIL_MAX_LENGTH}
             defaultValue={
@@ -98,19 +131,21 @@ export function WaitlistForm({
             }
             aria-invalid={error ? true : undefined}
             aria-describedby={error ? errorId : undefined}
-            className="h-11 bg-background/60 px-3.5 text-base md:text-base"
+            className={style.input}
           />
           <Button
             type="submit"
             size="lg"
             disabled={pending}
-            className="h-11 px-5"
+            className={style.button}
           >
             {pending && <Loader2Icon className="animate-spin" aria-hidden />}
             {pending ? "Joining…" : submitLabel}
           </Button>
         </div>
-        <FieldError id={errorId}>{error}</FieldError>
+        <FieldError id={errorId} className={style.error}>
+          {error}
+        </FieldError>
       </Field>
 
       <input ref={sourceRef} type="hidden" name={WAITLIST_FIELDS.source} />

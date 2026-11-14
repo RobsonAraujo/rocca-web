@@ -1,7 +1,7 @@
 import { buttonVariants } from "@/components/ui/button"
 import { navLinks } from "@/features/landing/content"
 
-import { Logo } from "./logo"
+import { Logo } from "@/components/layout/logo"
 
 export function SiteHeader() {
   return (

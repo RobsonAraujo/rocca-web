@@ -2,7 +2,7 @@ import { SparklesIcon, TrendingUpIcon } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 
-import { preview } from "../content"
+import { preview } from "@/features/landing/content"
 
 /** Static, decorative mock of the agent experience. Not interactive. */
 export function ProductPreview() {
