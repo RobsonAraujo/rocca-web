@@ -1,10 +1,15 @@
+import { GaugeIcon } from "lucide-react"
 import { Suspense } from "react"
+
+import { cn } from "@/lib/utils"
 
 import { AskRocca } from "./components/ask-rocca"
 import { PageHeader } from "./components/page-header"
+import type { Tone } from "./components/tone"
+import { toneClasses } from "./components/tone"
 import { WelcomeBanner } from "./components/welcome-banner"
-import { shell } from "./data"
-import { AutonomyWidget, RulesWidget } from "./widgets/autonomy"
+import { autonomy, sections, shell, status } from "./data"
+import { AutonomyWidget } from "./widgets/autonomy"
 import {
   MovesWidget,
   SavingsWidget,
@@ -15,11 +20,61 @@ import { PortfolioWidget } from "./widgets/portfolio"
 import { SuggestionWidget } from "./widgets/suggestion"
 
 /**
+ * Current autonomy mode, at a glance. Most useful on phones, where the
+ * autonomy card sits further down the page.
+ */
+function ModePill() {
+  const mode = autonomy.levels.find((level) => level.id === autonomy.current)
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold",
+        toneClasses.control.tile,
+      )}
+    >
+      <GaugeIcon className="size-3.5" aria-hidden />
+      {status.mode}: {mode?.label}
+    </span>
+  )
+}
+
+/** A labeled band of the page; the dot repeats the zone's color. */
+function Zone({
+  label,
+  tone,
+  children,
+}: {
+  label: string
+  tone: Tone
+  children: React.ReactNode
+}) {
+  return (
+    <section aria-label={label} className="space-y-3">
+      <p className="flex items-center gap-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+        <span
+          className={cn("size-2 rounded-full", {
+            "bg-attention": tone === "attention",
+            "bg-learn": tone === "learn",
+            "bg-brand": tone === "brand",
+            "bg-control": tone === "control",
+          })}
+          aria-hidden
+        />
+        {label}
+      </p>
+      {children}
+    </section>
+  )
+}
+
+/**
  * Overview page of the preview, shown right after a waitlist signup. All
  * data is simulated; every action shows a "coming soon" notice.
  *
- * Layout: two stacks plus a row of three on desktop, 2 columns on tablets,
- * 1 on phones.
+ * Three zones, most important first:
+ * 1. Needs your OK: the decision to make, beside how much Rocca handles.
+ * 2. Learn & ask: lessons picked from your portfolio, and the chat.
+ * 3. Your money: portfolio, what moved, savings, track record.
  */
 export function Overview() {
   return (
@@ -29,30 +84,34 @@ export function Overview() {
         <WelcomeBanner />
       </Suspense>
 
-      <PageHeader title={shell.greeting} subtitle={shell.subtitle} />
+      <PageHeader
+        title={shell.greeting}
+        subtitle={shell.subtitle}
+        actions={<ModePill />}
+      />
 
-      <AskRocca />
+      <Zone label={sections.attention} tone="attention">
+        <div className="grid gap-4 lg:grid-cols-12 lg:gap-6">
+          <SuggestionWidget className="lg:col-span-8" />
+          <AutonomyWidget className="lg:col-span-4" />
+        </div>
+      </Zone>
 
-      {/*
-       * Desktop: two independent stacks (8 + 4 columns) so tall and short
-       * cards don't leave gaps, then a row of three. Below lg the stack
-       * wrappers use `display: contents`, so their cards join the 1- or
-       * 2-column grid directly.
-       */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-12 lg:gap-6">
-        <div className="contents lg:col-span-8 lg:flex lg:flex-col lg:gap-6">
-          <PortfolioWidget className="md:col-span-2" />
-          <SuggestionWidget className="md:col-span-2" />
+      <Zone label={sections.learn} tone="learn">
+        <div className="grid gap-4 lg:grid-cols-12 lg:gap-6">
+          <LearnWidget className="lg:col-span-5" />
+          <AskRocca className="lg:col-span-7" />
         </div>
-        <div className="contents lg:col-span-4 lg:flex lg:flex-col lg:gap-6">
-          <AutonomyWidget />
-          <RulesWidget />
-          <LearnWidget />
+      </Zone>
+
+      <Zone label={sections.money} tone="brand">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-12 lg:gap-6">
+          <PortfolioWidget className="md:col-span-2 lg:col-span-8" />
+          <MovesWidget className="lg:col-span-4" />
+          <SavingsWidget className="lg:col-span-6" />
+          <TrackRecordWidget className="md:col-span-2 lg:col-span-6" />
         </div>
-        <MovesWidget className="lg:col-span-4" />
-        <SavingsWidget className="lg:col-span-4" />
-        <TrackRecordWidget className="lg:col-span-4" />
-      </div>
+      </Zone>
     </>
   )
 }

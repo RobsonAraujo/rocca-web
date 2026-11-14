@@ -76,7 +76,7 @@ function TargetStatus({ share, target }: { share: number; target: number }) {
     )
   }
   return (
-    <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium whitespace-nowrap text-amber-700">
+    <span className="rounded-full bg-attention/10 px-2 py-0.5 text-xs font-medium whitespace-nowrap text-attention">
       {/* Percentage points, not a relative %: "70.5% vs 60%" is 10 pts over. */}
       {Math.round(Math.abs(gap) * 100)} {allocationCopy.points}{" "}
       {gap > 0 ? allocationCopy.over : allocationCopy.under}

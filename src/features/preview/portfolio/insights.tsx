@@ -10,7 +10,7 @@ import { insights, insightsCopy } from "./data"
 
 /** Attention = amber (same as rules), opportunity = brand, good news = neutral. */
 const toneStyle: Record<InsightTone, { chip: string; icon: string }> = {
-  attention: { chip: "bg-amber-500/10 text-amber-700", icon: "text-amber-600" },
+  attention: { chip: "bg-attention/10 text-attention", icon: "text-attention" },
   opportunity: { chip: "bg-brand/10 text-brand", icon: "text-brand" },
   good: { chip: "bg-secondary text-foreground", icon: "text-brand" },
 }

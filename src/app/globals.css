@@ -47,6 +47,9 @@
   --color-card: var(--card);
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
+  --color-attention: var(--attention);
+  --color-control: var(--control);
+  --color-learn: var(--learn);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -94,6 +97,15 @@
   --ring: oklch(0.52 0.12 162 / 50%);
   --brand: oklch(0.52 0.12 162);
   --brand-foreground: oklch(0.985 0.003 90);
+  /*
+   * Accents that give each idea in the dashboard its own identity. All pass
+   * 4.5:1 as text on white and on their own 10% tint.
+   * attention = needs your action, control = autonomy and rules,
+   * learn = lessons and explanations.
+   */
+  --attention: oklch(0.53 0.14 55);
+  --control: oklch(0.52 0.19 292);
+  --learn: oklch(0.51 0.15 245);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);

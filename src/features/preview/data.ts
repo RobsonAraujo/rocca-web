@@ -57,8 +57,30 @@ export const shell = {
   ] satisfies NavItem[],
 } as const
 
+/** The overview is split in three zones, most important first. */
+export const sections = {
+  attention: "Needs your OK",
+  learn: "Learn & ask",
+  money: "Your money",
+} as const
+
+/** At-a-glance status in the page header. */
+export const status = {
+  mode: "Mode",
+} as const
+
 export const ask = {
   label: "Ask Rocca",
+  description: "Plain English, no jargon.",
+  /** A sample exchange so visitors see the tone of the answers. */
+  sample: {
+    label: "Example conversation",
+    you: "You",
+    question: "Why did my portfolio go up this week?",
+    answer:
+      "Mostly NVDA. It added $3,120 of your $4,390 gain. Your index funds simply moved with the market.",
+    followUp: "Want me to explain why one stock doing this much matters?",
+  },
   /** Field label; distinct from the section name so screen readers can tell them apart. */
   inputLabel: "Your question",
   placeholder: "Ask Rocca anything about your money…",
@@ -99,7 +121,7 @@ export const portfolio = {
 } as const
 
 export const suggestion = {
-  eyebrow: "Needs your OK",
+  eyebrow: "Rocca suggests",
   title: "Trim NVDA from 18% back to 12%",
   summary:
     "NVDA grew faster than everything else you own. Bringing it back to your target means one stock can't swing your whole portfolio.",
@@ -127,6 +149,15 @@ export const suggestion = {
   },
   askWhy: "Ask why",
   lesson: "New to rebalancing? 2-min lesson",
+  decisionNote: "Nothing happens until you approve.",
+  next: {
+    title: "If you approve",
+    steps: [
+      "Rocca places both orders in your Roth IRA",
+      "You get a receipt with every detail",
+      "Your plan and rules update right away",
+    ],
+  },
 } as const
 
 export const autonomy = {
@@ -135,21 +166,36 @@ export const autonomy = {
   levels: [
     {
       id: "explain",
+      short: "Explain",
       label: "Explain only",
       description: "Rocca watches and teaches. You make every move.",
     },
     {
       id: "approve",
+      short: "Suggest",
       label: "Suggest, I approve",
       description: "Rocca proposes trades. Nothing runs without your OK.",
     },
     {
       id: "autopilot",
+      short: "Autopilot",
       label: "Autopilot",
       description: "Rocca acts within your rules and tells you right after.",
     },
   ],
   current: "approve",
+  inThisMode: {
+    title: "In this mode",
+    rocca: {
+      label: "Rocca",
+      items: [
+        "Watches every account, 24/7",
+        "Proposes trades and explains why",
+      ],
+    },
+    you: { label: "You", items: ["Approve or skip every trade"] },
+  },
+  change: "Switch to",
 } as const
 
 export type RuleStatus = "ok" | "attention"
@@ -157,6 +203,7 @@ export type RuleStatus = "ok" | "attention"
 export const rules = {
   title: "Your rules",
   description: "Rocca checks every move against these.",
+  attentionCount: "1 needs attention",
   items: [
     {
       label: "No single stock above 12%",
@@ -188,8 +235,15 @@ export const learn = {
     reason: "Picked for you: NVDA is 18% of your holdings.",
     cta: "Start lesson",
   },
+  progressLabel: "lessons done",
   conceptsLabel: "Concepts in your portfolio",
-  concepts: ["Rebalancing", "Roth IRA", "Expense ratio", "Tax-loss harvesting"],
+  concepts: [
+    { label: "Rebalancing", done: true },
+    { label: "Roth IRA", done: true },
+    { label: "Expense ratio", done: true },
+    { label: "Tax-loss harvesting", done: false },
+  ],
+  learned: "learned",
 } as const
 
 export const moves = {

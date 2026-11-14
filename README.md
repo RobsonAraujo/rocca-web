@@ -96,6 +96,12 @@ Quem entra na lista é levado na hora para `/preview`, uma versão navegável do
 
 A landing tem só um tema, claro. Os tokens ficam em `:root` (`globals.css`): fundo papel quente, texto e botões em tinta, e o verde esmeralda (`--brand`) usado com moderação como destaque. As sombras `shadow-soft` e `shadow-float` também são definidas lá.
 
+O preview do dashboard usa mais três cores de destaque, também como tokens, para cada ideia ter uma identidade visual. Todas passam o contraste 4,5:1 sobre branco e sobre o próprio fundo tingido. Use as classes `bg-*`, `text-*` e `ring-*` delas, ou o mapa `toneClasses` em `features/preview/components/tone.tsx`:
+
+- `attention` (âmbar): algo precisa da sua ação, como a sugestão pendente e a regra estourada.
+- `control` (violeta): autonomia e regras, ou seja, quanto a Rocca faz por você.
+- `learn` (azul): lições e explicações em inglês simples.
+
 O `@custom-variant dark` continua no `globals.css` de propósito. Ele mantém inativas as classes `dark:` dos componentes do shadcn. Sem ele, o Tailwind seguiria o modo escuro do sistema operacional e aplicaria estilos escuros na página clara.
 
 ### Mock e Supabase
