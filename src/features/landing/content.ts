@@ -26,7 +26,8 @@ export const hero = {
   emphasis: "never sleeps.",
   description:
     "Rocca connects every account you own, tells you what moved your money and why, and turns your ideas into trades, only when you approve.",
-  note: "No spam. We'll only email you about your invite.",
+  /** Shown under both waitlist forms: the instant preview is the signup incentive. */
+  note: "No spam. Join and get instant access to a preview of your dashboard.",
 } as const
 
 /** Short promises, restating what the FAQ answers in detail. */
@@ -49,8 +50,9 @@ export const preview = {
   order: {
     title: "Proposed rebalance",
     lines: [
-      { side: "Sell", detail: "14 NVDA", amount: "$2,486" },
-      { side: "Buy", detail: "8 VTI", amount: "$2,471" },
+      // Sized to bring NVDA from 18% to 12% of $248,310 (about $14.9k).
+      { side: "Sell", detail: "84 NVDA", amount: "$14,868" },
+      { side: "Buy", detail: "50 VTI", amount: "$14,850" },
     ],
     approve: "Approve",
     dismiss: "Not now",
@@ -112,7 +114,7 @@ export const illustrations = {
     { name: "Brokerage", value: "$142,880", share: 57.5 },
     { name: "Roth IRA", value: "$48,211", share: 19.4 },
     { name: "401(k)", value: "$39,512", share: 15.9 },
-    { name: "Crypto", value: "$17,707", share: 7.2 },
+    { name: "Crypto", value: "$17,707", share: 7.1 },
   ],
   moves: {
     title: "What moved this week",
@@ -126,7 +128,7 @@ export const illustrations = {
   approval: {
     title: "Trim NVDA to 12%",
     status: "Needs your OK",
-    detail: "Sell 14 NVDA · Buy 8 VTI",
+    detail: "Sell 84 NVDA · Buy 50 VTI",
   },
   alerts: [
     {

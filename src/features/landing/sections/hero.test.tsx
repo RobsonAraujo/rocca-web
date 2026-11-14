@@ -6,6 +6,9 @@ import { hero } from "@/features/landing/content"
 import { Hero } from "./hero"
 
 vi.mock("@/features/waitlist/actions", () => ({ joinWaitlist: vi.fn() }))
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), prefetch: vi.fn() }),
+}))
 
 describe("Hero", () => {
   it("renders the full headline with the emphasized part highlighted, not italic", () => {

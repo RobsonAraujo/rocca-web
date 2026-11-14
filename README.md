@@ -42,7 +42,7 @@ O código é organizado por feature. Cada feature guarda os próprios componente
 
 ```
 src/
-├─ app/                    # rotas: /, robots, sitemap
+├─ app/                    # rotas: /, /preview, /preview/portfolio, robots, sitemap
 ├─ components/
 │  ├─ ui/                  # gerado pelo shadcn (não editar à mão sem motivo)
 │  └─ layout/              # logo e ano do copyright (compartilhados)
@@ -54,6 +54,13 @@ src/
    │  ├─ landing.tsx       # monta a página: header, sections/, footer
    │  ├─ primitives.tsx    # Container e Section (alinhamento e espaçamento)
    │  └─ sections/         # hero, features (bento), how it works, FAQ, CTA
+   ├─ preview/            # dashboard de demonstração (dados simulados)
+   │  ├─ shell.tsx       # sidebar, barra superior e aviso legal (usado pelo layout)
+   │  ├─ overview.tsx    # página inicial do preview
+   │  ├─ data.ts         # copy e dados simulados da página inicial
+   │  ├─ components/     # painel, gráfico SVG, navegação, chat, "em breve", banner
+   │  ├─ widgets/        # um arquivo por módulo da página inicial
+   │  └─ portfolio/      # página de portfolio: dados, gráficos, insights, posições
    └─ waitlist/
       ├─ schema.ts         # validação (zod), compartilhada entre client e server
       ├─ service.ts        # regra de negócio, recebe o repositório por parâmetro
@@ -68,8 +75,22 @@ Fluxo de um cadastro na lista:
 2. A action ignora bots pelo honeypot e valida o email com `waitlistSchema`.
 3. A action chama `addToWaitlist(entry, getWaitlistRepository())`.
 4. O repositório grava o email.
+5. No sucesso, o formulário abre o preview do dashboard (`/preview?welcome=new`, ou `welcome=back` se o email já estava na lista).
 
 A UI não conhece o banco, e o service não conhece o Next.js.
+
+### Preview do dashboard
+
+Quem entra na lista é levado na hora para `/preview`, uma versão navegável do dashboard, sem login, para ver como o produto vai ser. A ideia é que esse preview seja a recompensa da inscrição.
+
+- A rota não tem link na landing e tem `noindex`. Ela abre para qualquer pessoa com a URL, mas não é divulgada.
+- São duas páginas: a visão geral (`/preview`) e o portfolio (`/preview/portfolio`). O `app/preview/layout.tsx` mantém a sidebar e a barra superior entre elas. Os outros itens do menu mostram "em breve".
+- Todos os dados são simulados. A visão geral usa `features/preview/data.ts`, e o portfolio usa `features/preview/portfolio/data.ts`. O total da carteira, as contas e a ordem de NVDA/VTI vêm do `content.ts` da landing, para as páginas nunca mostrarem números diferentes.
+- No portfolio, as posições são guardadas por conta, e pesos, alocação e totais são calculados a partir delas. Um teste garante que cada conta soma o mesmo valor da landing.
+- O chat é um compositor no estilo ChatGPT: o campo cresce com o texto, Enter envia e Shift+Enter quebra a linha. As sugestões preenchem o campo, e enviar mostra "em breve".
+- Qualquer ação (aprovar, navegar, perguntar) mostra um toast de "em breve". Use `ComingSoonButton` ou `notifyComingSoon()` em `features/preview/components/coming-soon.tsx`.
+- O banner de boas-vindas lê o `?welcome=` no client, dentro de um `<Suspense>`, então a página continua estática.
+- Os módulos mostram os diferenciais contra Astor e Volaren: o raciocínio com a fonte de cada passo, a escolha da conta que paga menos imposto, a trilha de aprendizado para iniciantes, o nível de autonomia com regras próprias, o placar com os erros à mostra e o dinheiro que dá para economizar.
 
 ### Cores e tema
 

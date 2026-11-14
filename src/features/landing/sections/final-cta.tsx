@@ -1,5 +1,6 @@
 import { LogoMark } from "@/components/layout/logo"
 import { finalCta, hero } from "@/features/landing/content"
+import { PREVIEW_PATH } from "@/features/preview/constants"
 import { WaitlistForm } from "@/features/waitlist/components/waitlist-form"
 
 import { Container } from "../primitives"
@@ -19,7 +20,11 @@ export function FinalCta() {
           <p className="mt-4 max-w-lg text-lg text-pretty text-muted-foreground">
             {finalCta.description}
           </p>
-          <WaitlistForm variant="pill" className="mt-9" />
+          <WaitlistForm
+            variant="pill"
+            successHref={PREVIEW_PATH}
+            className="mt-9"
+          />
           <p className="mt-3 text-xs text-muted-foreground">{hero.note}</p>
         </div>
       </Container>

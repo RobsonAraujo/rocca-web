@@ -1,6 +1,7 @@
 "use client"
 
 import { CircleCheckIcon, Loader2Icon } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { useActionState, useEffect, useId, useRef } from "react"
 import { toast } from "sonner"
 
@@ -25,6 +26,18 @@ type WaitlistFormProps = {
   className?: string
   submitLabel?: string
   variant?: WaitlistFormVariant
+  /**
+   * Internal path to open after a successful signup (e.g. the dashboard
+   * preview). Receives `?welcome=new` or `?welcome=back` so the destination
+   * can greet the visitor. Without it, the form shows its success state and
+   * a toast instead.
+   */
+  successHref?: string
+}
+
+/** Builds the post-signup URL; `back` means the email was already on the list. */
+export function buildSuccessUrl(href: string, alreadyJoined: boolean) {
+  return `${href}?welcome=${alreadyJoined ? "back" : "new"}`
 }
 
 const styles = {
@@ -61,8 +74,10 @@ export function WaitlistForm({
   className,
   submitLabel = "Join the waitlist",
   variant = "split",
+  successHref,
 }: WaitlistFormProps) {
   const style = styles[variant]
+  const router = useRouter()
   const [state, formAction, pending] = useActionState(
     joinWaitlist,
     initialWaitlistState,
@@ -72,6 +87,11 @@ export function WaitlistForm({
   const errorId = `${id}-error`
   const sourceRef = useRef<HTMLInputElement>(null)
 
+  // Warm up the destination so the post-signup navigation feels instant.
+  useEffect(() => {
+    if (successHref) router.prefetch(successHref)
+  }, [router, successHref])
+
   // Attribution: copy ?utm_source= into the hidden field. Reading it on the
   // client keeps the page fully static (no searchParams on the server).
   useEffect(() => {
@@ -80,10 +100,14 @@ export function WaitlistForm({
   }, [])
 
   useEffect(() => {
-    if (state.status === "success" && !state.alreadyJoined) {
+    if (state.status !== "success") return
+    if (successHref) {
+      // The destination greets the visitor, so no toast here.
+      router.push(buildSuccessUrl(successHref, state.alreadyJoined))
+    } else if (!state.alreadyJoined) {
       toast.success("You're on the list.")
     }
-  }, [state])
+  }, [state, successHref, router])
 
   if (state.status === "success") {
     return (
@@ -106,7 +130,9 @@ export function WaitlistForm({
               : "You're on the list."}
           </p>
           <p className="text-sm text-muted-foreground">
-            We&apos;ll email you as soon as your invite is ready.
+            {successHref
+              ? "Opening your dashboard preview…"
+              : "We'll email you as soon as your invite is ready."}
           </p>
         </div>
       </div>

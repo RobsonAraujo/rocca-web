@@ -1,6 +1,7 @@
 import { LockIcon } from "lucide-react"
 
 import { hero } from "@/features/landing/content"
+import { PREVIEW_PATH } from "@/features/preview/constants"
 import { WaitlistForm } from "@/features/waitlist/components/waitlist-form"
 
 import { Container } from "../primitives"
@@ -47,7 +48,7 @@ export function Hero() {
           </p>
 
           <div id="waitlist" className="mt-10 max-w-md scroll-mt-28 space-y-3">
-            <WaitlistForm variant="pill" />
+            <WaitlistForm variant="pill" successHref={PREVIEW_PATH} />
             <p className="flex items-center gap-1.5 px-4 text-xs text-muted-foreground">
               <LockIcon className="size-3.5 shrink-0" aria-hidden />
               {hero.note}
