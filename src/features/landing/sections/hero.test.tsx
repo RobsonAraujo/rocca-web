@@ -7,7 +7,7 @@ import { Hero } from "./hero"
 
 vi.mock("@/features/waitlist/actions", () => ({ joinWaitlist: vi.fn() }))
 
-describe("Light Hero", () => {
+describe("Hero", () => {
   it("renders the full headline with the emphasized part highlighted, not italic", () => {
     render(<Hero />)
 

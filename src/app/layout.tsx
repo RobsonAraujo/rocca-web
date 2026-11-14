@@ -38,10 +38,6 @@ export const metadata: Metadata = {
   },
 }
 
-/**
- * Theme-neutral on purpose: each landing layout version sets its own tokens
- * (see features/landing/light and features/landing/dark).
- */
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html

@@ -1,37 +1,32 @@
 import { Toaster } from "@/components/ui/sonner"
 
-import { LayoutSwitcher } from "../components/layout-switcher"
 import { Faq } from "./sections/faq"
 import { Features } from "./sections/features"
 import { FinalCta } from "./sections/final-cta"
 import { Hero } from "./sections/hero"
 import { HowItWorks } from "./sections/how-it-works"
-import { ProductPreview } from "./sections/product-preview"
+import { Principles } from "./sections/principles"
 import { SiteFooter } from "./site-footer"
 import { SiteHeader } from "./site-header"
 
 /**
- * Layout version "Dark": centered hero, dashboard-style preview, card grid.
- * The `dark` class scopes the dark tokens (globals.css) to this page only.
+ * The landing page: split hero with a product showcase, bento features,
+ * timeline steps. Uses the default (:root) tokens from globals.css.
  */
-export function DarkLanding() {
+export function Landing() {
   return (
-    <div
-      data-page-theme="dark"
-      className="dark flex min-h-svh flex-col bg-background pb-16 text-foreground"
-    >
+    <div className="flex min-h-svh flex-col bg-background text-foreground selection:bg-brand/15">
       <SiteHeader />
       <main className="flex-1">
         <Hero />
-        <ProductPreview />
+        <Principles />
         <Features />
         <HowItWorks />
         <Faq />
         <FinalCta />
       </main>
       <SiteFooter />
-      <Toaster theme="dark" position="top-center" />
-      <LayoutSwitcher current="dark" />
+      <Toaster theme="light" position="top-center" />
     </div>
   )
 }

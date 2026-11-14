@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils"
 
 /**
- * Layout primitives for the light layout. Every block goes through the same
+ * Layout primitives for the landing. Every block goes through the same
  * container and section rhythm, so all content shares one left edge and one
  * vertical cadence.
  */

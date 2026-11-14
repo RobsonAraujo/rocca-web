@@ -7,7 +7,7 @@ type SectionIntroProps = {
   className?: string
 }
 
-/** Left-aligned eyebrow + title used by the light layout sections. */
+/** Left-aligned eyebrow + title used by the landing sections. */
 export function SectionIntro({
   eyebrow,
   title,

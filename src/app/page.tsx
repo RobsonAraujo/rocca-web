@@ -1,6 +1,6 @@
 import type { Viewport } from "next"
 
-import { LightLanding } from "@/features/landing/light/light-landing"
+import { Landing } from "@/features/landing/landing"
 
 export const viewport: Viewport = {
   themeColor: "#fbfaf7",
@@ -8,5 +8,5 @@ export const viewport: Viewport = {
 }
 
 export default function HomePage() {
-  return <LightLanding />
+  return <Landing />
 }

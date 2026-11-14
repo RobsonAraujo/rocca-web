@@ -10,8 +10,7 @@ import {
 
 /**
  * All landing page copy lives here so marketing changes (and a future i18n
- * pass) never require touching component markup. Both layout versions
- * (light and dark) read from this file, so they always say the same thing.
+ * pass) never require touching component markup.
  */
 
 export const navLinks = [
@@ -23,7 +22,7 @@ export const navLinks = [
 export const hero = {
   eyebrow: "Private beta · Join the waitlist",
   title: "Invest with an agent that never sleeps.",
-  /** Part of `title` the light layout highlights in the brand color. */
+  /** Part of `title` the hero highlights in the brand color. */
   emphasis: "never sleeps.",
   description:
     "Rocca connects every account you own, tells you what moved your money and why, and turns your ideas into trades, only when you approve.",
@@ -42,7 +41,6 @@ export const principles = [
 
 export const preview = {
   label: "Simulated",
-  accounts: ["Brokerage", "Roth IRA", "401(k)", "Crypto"],
   portfolio: { value: "$248,310.42", change: "+1.8% this week" },
   messages: [
     "Good morning. Your portfolio is up 1.8% this week. NVDA drove most of it and is now 18% of your holdings, above your 12% target.",
@@ -105,7 +103,7 @@ export const features = {
 } as const
 
 /**
- * Simulated data for the small product vignettes on the light layout's
+ * Simulated data for the small product vignettes on the
  * feature cards. Decorative only and consistent with `preview` (the account
  * values add up to `preview.portfolio.value`).
  */

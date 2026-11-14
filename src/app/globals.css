@@ -2,6 +2,12 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/*
+ * There is no dark theme. This keeps the `dark:` classes in the shadcn
+ * components inert (they only match inside a `.dark` element, which the app
+ * never renders). Without it, Tailwind would match prefers-color-scheme and
+ * apply dark styles for visitors whose OS is in dark mode.
+ */
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -51,7 +57,7 @@
 }
 
 /*
- * Elevation for the Light layout (only used there): soft, ink-tinted shadows
+ * Elevation: soft, ink-tinted shadows
  * so cards read as raised paper. `soft` for resting surfaces, `float` for the
  * product showcase.
  */
@@ -63,7 +69,7 @@
 }
 
 /*
- * Layout "Light" (default): warm paper background, ink text and buttons,
+ * Theme tokens: warm paper background, ink text and buttons,
  * emerald used sparingly as the brand accent.
  */
 :root {
@@ -104,49 +110,6 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
-/*
- * Layout "Dark": near-black blue-gray surfaces with an emerald accent.
- * Scoped to the `.dark` wrapper of the /dark page; the :has() selector also
- * flips <html>/<body> so overscroll and scrollbars match that page.
- */
-.dark,
-:root:has([data-page-theme="dark"]) {
-  color-scheme: dark;
-  --background: oklch(0.14 0.008 260);
-  --foreground: oklch(0.97 0.004 260);
-  --card: oklch(0.18 0.01 260);
-  --card-foreground: oklch(0.97 0.004 260);
-  --popover: oklch(0.2 0.01 260);
-  --popover-foreground: oklch(0.97 0.004 260);
-  --primary: oklch(0.8 0.15 162);
-  --primary-foreground: oklch(0.2 0.04 162);
-  --secondary: oklch(0.24 0.012 260);
-  --secondary-foreground: oklch(0.97 0.004 260);
-  --muted: oklch(0.24 0.012 260);
-  --muted-foreground: oklch(0.72 0.015 260);
-  --accent: oklch(0.24 0.012 260);
-  --accent-foreground: oklch(0.97 0.004 260);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 9%);
-  --input: oklch(1 0 0 / 14%);
-  --ring: oklch(0.8 0.15 162 / 60%);
-  --brand: oklch(0.8 0.15 162);
-  --brand-foreground: oklch(0.2 0.04 162);
-  --chart-1: oklch(0.8 0.15 162);
-  --chart-2: oklch(0.7 0.12 230);
-  --chart-3: oklch(0.6 0.02 260);
-  --chart-4: oklch(0.45 0.02 260);
-  --chart-5: oklch(0.35 0.02 260);
-  --sidebar: oklch(0.18 0.01 260);
-  --sidebar-foreground: oklch(0.97 0.004 260);
-  --sidebar-primary: oklch(0.8 0.15 162);
-  --sidebar-primary-foreground: oklch(0.2 0.04 162);
-  --sidebar-accent: oklch(0.24 0.012 260);
-  --sidebar-accent-foreground: oklch(0.97 0.004 260);
-  --sidebar-border: oklch(1 0 0 / 9%);
-  --sidebar-ring: oklch(0.8 0.15 162 / 60%);
-}
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -161,12 +124,4 @@
   [role="button"]:not(:disabled) {
     cursor: pointer;
   }
-}
-
-/* Faint grid used behind the hero. */
-@utility bg-grid {
-  background-image:
-    linear-gradient(to right, oklch(1 0 0 / 4%) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(1 0 0 / 4%) 1px, transparent 1px);
-  background-size: 48px 48px;
 }

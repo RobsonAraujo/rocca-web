@@ -42,7 +42,7 @@ O código é organizado por feature. Cada feature guarda os próprios componente
 
 ```
 src/
-├─ app/                    # rotas: / (light), /dark, robots, sitemap
+├─ app/                    # rotas: /, robots, sitemap
 ├─ components/
 │  ├─ ui/                  # gerado pelo shadcn (não editar à mão sem motivo)
 │  └─ layout/              # logo e ano do copyright (compartilhados)
@@ -50,10 +50,10 @@ src/
 ├─ lib/                    # env (validada com zod), utils
 └─ features/
    ├─ landing/
-   │  ├─ content.ts        # TODA a copy, compartilhada pelas duas versões
-   │  ├─ components/       # layout-switcher (temporário)
-   │  ├─ light/            # versão "Light": header, footer, sections/
-   │  └─ dark/             # versão "Dark": header, footer, sections/
+   │  ├─ content.ts        # TODA a copy da landing
+   │  ├─ landing.tsx       # monta a página: header, sections/, footer
+   │  ├─ primitives.tsx    # Container e Section (alinhamento e espaçamento)
+   │  └─ sections/         # hero, features (bento), how it works, FAQ, CTA
    └─ waitlist/
       ├─ schema.ts         # validação (zod), compartilhada entre client e server
       ├─ service.ts        # regra de negócio, recebe o repositório por parâmetro
@@ -71,24 +71,11 @@ Fluxo de um cadastro na lista:
 
 A UI não conhece o banco, e o service não conhece o Next.js.
 
-### Duas versões de layout (temporário)
+### Cores e tema
 
-Existem duas versões da landing para escolher uma:
+A landing tem só um tema, claro. Os tokens ficam em `:root` (`globals.css`): fundo papel quente, texto e botões em tinta, e o verde esmeralda (`--brand`) usado com moderação como destaque. As sombras `shadow-soft` e `shadow-float` também são definidas lá.
 
-| Rota    | Versão    | Estilo                                                                    |
-| ------- | --------- | ------------------------------------------------------------------------- |
-| `/`     | **Light** | Clara: hero dividido, features em bento, passos em linha do tempo         |
-| `/dark` | **Dark**  | Escura e centralizada: preview em formato de dashboard, features em cards |
-
-As duas usam a mesma copy (`content.ts`) e o mesmo formulário, então a comparação é só de layout. Um botão flutuante, o `LayoutSwitcher`, troca entre elas. A rota `/dark` tem `noindex`.
-
-**Como funcionam as cores:** os tokens da versão Light ficam em `:root` (`globals.css`). A versão Dark envolve a página em `<div class="dark" data-page-theme="dark">`, o que aplica os tokens escuros só nela.
-Depois que vocês escolherem uma versão:
-
-1. Apague a pasta da versão descartada (`features/landing/light` ou `features/landing/dark`) e a rota dela.
-2. Se a escolhida for a Dark, mova a página para `app/page.tsx`.
-3. Apague o `features/landing/components/layout-switcher.tsx` e o teste dele.
-4. Remova o `pb-16` do wrapper da landing, que existe só para o botão flutuante não cobrir o footer.
+O `@custom-variant dark` continua no `globals.css` de propósito. Ele mantém inativas as classes `dark:` dos componentes do shadcn. Sem ele, o Tailwind seguiria o modo escuro do sistema operacional e aplicaria estilos escuros na página clara.
 
 ### Mock e Supabase
 
