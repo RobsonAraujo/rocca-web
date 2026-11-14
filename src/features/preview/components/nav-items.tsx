@@ -61,11 +61,16 @@ export function NavItems({ layout }: { layout: "vertical" | "horizontal" }) {
   )
 }
 
-/** Name of the current page for the desktop top bar. */
-export function CurrentPageTitle() {
+/** Name of the current page (desktop top bar, mobile app bar). */
+export function CurrentPageTitle({
+  className = "hidden text-sm font-medium lg:block",
+  labels,
+}: {
+  className?: string
+  /** Per-path overrides, e.g. "Home" on phones where the tab says Home. */
+  labels?: Record<string, string>
+}) {
   const pathname = usePathname()
   const page = shell.nav.find((item) => item.href === pathname)
-  return (
-    <p className="hidden text-sm font-medium lg:block">{page?.label ?? ""}</p>
-  )
+  return <p className={className}>{labels?.[pathname] ?? page?.label ?? ""}</p>
 }

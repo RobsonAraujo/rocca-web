@@ -16,7 +16,6 @@ import {
   savings,
   suggestion,
   trackRecord,
-  welcome,
 } from "./data"
 import { Overview } from "./overview"
 
@@ -73,24 +72,6 @@ describe("Overview", () => {
 
     await user.click(screen.getByRole("button", { name: rules.add }))
     expect(toast).toHaveBeenCalledTimes(2)
-  })
-
-  it("greets people arriving from the waitlist and can be dismissed", async () => {
-    search.params = new URLSearchParams("welcome=new")
-    const user = userEvent.setup()
-    render(<Overview />)
-
-    expect(screen.getByRole("status")).toHaveTextContent(welcome.new.title)
-
-    await user.click(screen.getByRole("button", { name: welcome.dismiss }))
-    expect(screen.queryByText(welcome.new.title)).not.toBeInTheDocument()
-  })
-
-  it("shows no greeting when opened directly", () => {
-    render(<Overview />)
-
-    expect(screen.queryByText(welcome.new.title)).not.toBeInTheDocument()
-    expect(screen.queryByText(welcome.back.title)).not.toBeInTheDocument()
   })
 })
 

@@ -19,7 +19,7 @@ import { ComingSoonButton, notifyComingSoon } from "./coming-soon"
 import { panelClass } from "./panel"
 
 /** A short example exchange, so visitors see the plain-English tone. */
-function SampleThread() {
+export function SampleThread() {
   const { sample } = ask
   return (
     <div aria-label={sample.label} role="group" className="space-y-3">
@@ -44,44 +44,25 @@ function SampleThread() {
 }
 
 /**
- * "Ask Rocca" card: an example exchange, then a ChatGPT-style composer whose
- * textarea grows with the text (CSS field-sizing, no JS). Sending only shows
- * the coming-soon notice; suggestions fill the box.
+ * ChatGPT-style composer: the textarea grows with the text (CSS
+ * field-sizing, no JS), Enter sends and Shift+Enter breaks the line. Sending
+ * only shows the coming-soon notice; suggestions fill the box. Used by the
+ * desktop card and by the mobile Ask sheet.
  */
-export function AskRocca({ className }: { className?: string }) {
+export function AskComposer({ className }: { className?: string }) {
   const inputId = useId()
-  const titleId = useId()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [question, setQuestion] = useState("")
   const canSend = question.trim().length > 0
 
   return (
-    <section
-      aria-labelledby={titleId}
-      className={cn(
-        "flex flex-col gap-5 bg-card p-5 ring-1 ring-foreground/10 sm:p-6",
-        panelClass,
-        className,
-      )}
-    >
-      <div className="flex items-start gap-3">
-        <IconTile icon={SparklesIcon} tone="brand" />
-        <div>
-          <h2 id={titleId} className="text-lg font-semibold tracking-tight">
-            {ask.label}
-          </h2>
-          <p className="text-sm text-muted-foreground">{ask.description}</p>
-        </div>
-      </div>
-
-      <SampleThread />
-
+    <div className={cn("flex flex-col gap-3", className)}>
       <form
         onSubmit={(event) => {
           event.preventDefault()
           if (canSend) notifyComingSoon()
         }}
-        className="mt-auto rounded-2xl border border-input bg-background p-3 transition-shadow focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/25"
+        className="rounded-2xl border border-input bg-background p-3 transition-shadow focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/25"
       >
         <label htmlFor={inputId} className="sr-only">
           {ask.inputLabel}
@@ -151,7 +132,7 @@ export function AskRocca({ className }: { className?: string }) {
         </div>
       </form>
 
-      <div className="-mt-2 flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2">
         {ask.suggestions.map((suggestion) => (
           <Button
             key={suggestion}
@@ -168,6 +149,34 @@ export function AskRocca({ className }: { className?: string }) {
           </Button>
         ))}
       </div>
+    </div>
+  )
+}
+
+/** "Ask Rocca" card for desktop and tablet: header, example exchange, composer. */
+export function AskRocca({ className }: { className?: string }) {
+  const titleId = useId()
+  return (
+    <section
+      aria-labelledby={titleId}
+      className={cn(
+        "flex flex-col gap-5 bg-card p-5 ring-1 ring-foreground/10 sm:p-6",
+        panelClass,
+        className,
+      )}
+    >
+      <div className="flex items-start gap-3">
+        <IconTile icon={SparklesIcon} tone="brand" />
+        <div>
+          <h2 id={titleId} className="text-lg font-semibold tracking-tight">
+            {ask.label}
+          </h2>
+          <p className="text-sm text-muted-foreground">{ask.description}</p>
+        </div>
+      </div>
+
+      <SampleThread />
+      <AskComposer className="mt-auto" />
     </section>
   )
 }

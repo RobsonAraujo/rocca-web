@@ -1,9 +1,9 @@
 import type { Metadata } from "next"
 
-import { Overview } from "@/features/preview/overview"
+import { OverviewScreen } from "@/features/preview/overview-screen"
 
 export const metadata: Metadata = { title: "Dashboard preview" }
 
 export default function PreviewPage() {
-  return <Overview />
+  return <OverviewScreen />
 }

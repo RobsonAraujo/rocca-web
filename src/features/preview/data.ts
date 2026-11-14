@@ -290,3 +290,48 @@ export const trackRecord = {
   ],
   cta: "See full history",
 } as const
+
+/** Copy for the phone layout (native-app style: tab bar, sheets, carousels). */
+export const mobile = {
+  tabs: {
+    label: "App",
+    home: "Home",
+    portfolio: "Portfolio",
+    ask: "Ask",
+    learn: "Learn",
+    more: "More",
+  },
+  menu: { title: "Menu", backToSite: "Back to site" },
+  appBar: { notifications: "Notifications" },
+  close: "Close",
+  hero: {
+    label: "Total portfolio",
+    simulated: "Simulated preview · Not investment advice",
+  },
+  askBar: "Ask Rocca anything…",
+  sections: {
+    decision: "Needs your OK",
+    controls: "Your controls",
+    forYou: "For you",
+    moves: "What moved this week",
+  },
+  decision: { why: "Why?", whyTitle: "Why Rocca suggests this" },
+  controls: {
+    mode: "Mode",
+    rules: "Rules",
+    needsAttention: "needs attention",
+  },
+  forYou: {
+    savingsCta: "Review savings",
+    trackSummary: "vs. doing nothing",
+    trackCta: "See full history",
+    approvedOf: "approved of",
+    misses: "misses shown",
+  },
+  portfolioViews: {
+    label: "Portfolio sections",
+    overview: "Overview",
+    holdings: "Holdings",
+    accounts: "Accounts",
+  },
+} as const

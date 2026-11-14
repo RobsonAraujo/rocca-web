@@ -88,6 +88,7 @@ Quem entra na lista é levado na hora para `/preview`, uma versão navegável do
 - São duas páginas: a visão geral (`/preview`) e o portfolio (`/preview/portfolio`). O `app/preview/layout.tsx` mantém a sidebar e a barra superior entre elas. Os outros itens do menu mostram "em breve".
 - Todos os dados são simulados. A visão geral usa `features/preview/data.ts`, e o portfolio usa `features/preview/portfolio/data.ts`. O total da carteira, as contas e a ordem de NVDA/VTI vêm do `content.ts` da landing, para as páginas nunca mostrarem números diferentes.
 - No portfolio, as posições são guardadas por conta, e pesos, alocação e totais são calculados a partir delas. Um teste garante que cada conta soma o mesmo valor da landing.
+- No celular (abaixo de 768px) o preview vira um app nativo: barra superior compacta, barra de abas embaixo (Home, Portfolio, Ask, Learn, More), detalhes em bottom sheets (Base UI Drawer) e seletor segmentado no Portfolio. O código fica em `features/preview/mobile/`. Desktop e tablet não mudam.
 - O chat é um compositor no estilo ChatGPT: o campo cresce com o texto, Enter envia e Shift+Enter quebra a linha. As sugestões preenchem o campo, e enviar mostra "em breve".
 - Qualquer ação (aprovar, navegar, perguntar) mostra um toast de "em breve". Use `ComingSoonButton` ou `notifyComingSoon()` em `features/preview/components/coming-soon.tsx`.
 - O banner de boas-vindas lê o `?welcome=` no client, dentro de um `<Suspense>`, então a página continua estática.

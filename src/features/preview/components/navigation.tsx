@@ -25,7 +25,7 @@ export function SimulatedBadge({ className }: { className?: string }) {
   )
 }
 
-function Avatar() {
+export function Avatar() {
   return (
     <span
       aria-label={shell.user.name}
@@ -61,10 +61,15 @@ export function Sidebar() {
   )
 }
 
-/** Sticky top bar: full nav on phones/tablets, page title on desktop. */
-export function TopBar() {
+/** Sticky top bar: nav row on tablets, page title on desktop. Phones use the mobile app bar instead. */
+export function TopBar({ className }: { className?: string }) {
   return (
-    <header className="sticky top-0 z-20 border-b border-border/70 bg-background/85 backdrop-blur-md">
+    <header
+      className={cn(
+        "sticky top-0 z-20 border-b border-border/70 bg-background/85 backdrop-blur-md",
+        className,
+      )}
+    >
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Link
           href="/"

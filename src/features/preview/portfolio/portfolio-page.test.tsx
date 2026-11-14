@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from "vitest"
 import { illustrations, preview } from "@/features/landing/content"
 
 import { PREVIEW_PATH } from "../constants"
-import { comingSoon } from "../data"
+import { comingSoon, mobile } from "../data"
 import {
   accountTotal,
   allocation,
@@ -53,6 +53,26 @@ describe("portfolio data", () => {
 })
 
 describe("PortfolioPage", () => {
+  it("lets phones switch sections with the segmented control", async () => {
+    const user = userEvent.setup()
+    const { container } = render(<PortfolioPage />)
+    const holdingsButton = screen.getByRole("button", {
+      name: mobile.portfolioViews.holdings,
+    })
+
+    expect(container.querySelector("[data-view]")).toHaveAttribute(
+      "data-view",
+      "overview",
+    )
+    await user.click(holdingsButton)
+
+    expect(holdingsButton).toHaveAttribute("aria-pressed", "true")
+    expect(container.querySelector("[data-view]")).toHaveAttribute(
+      "data-view",
+      "holdings",
+    )
+  })
+
   it("renders every section and one row per holding", () => {
     render(<PortfolioPage />)
 

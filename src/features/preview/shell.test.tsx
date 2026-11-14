@@ -26,12 +26,12 @@ describe("PreviewShell", () => {
     expect(screen.getByText(footer.disclaimer)).toBeInTheDocument()
   })
 
-  it("marks the current page in every nav (sidebar and top bar)", () => {
+  it("marks the current page in every nav (sidebar, tablet bar, phone tab bar)", () => {
     nav.pathname = PORTFOLIO_PATH
     render(<PreviewShell>page</PreviewShell>)
 
     const portfolioLinks = screen.getAllByRole("link", { name: "Portfolio" })
-    expect(portfolioLinks).toHaveLength(2)
+    expect(portfolioLinks).toHaveLength(3)
     for (const link of portfolioLinks) {
       expect(link).toHaveAttribute("href", PORTFOLIO_PATH)
       expect(link).toHaveAttribute("aria-current", "page")

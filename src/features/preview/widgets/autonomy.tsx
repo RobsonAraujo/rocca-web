@@ -23,7 +23,7 @@ const currentLevel = autonomy.levels[currentIndex]!
  * A three-stop dial: the filled part of the track is how much Rocca handles
  * today. The other stops are previews (coming soon).
  */
-function AutonomyDial() {
+export function AutonomyDial() {
   const last = autonomy.levels.length - 1
   const fill = (currentIndex / last) * 100
   return (
@@ -82,7 +82,7 @@ function AutonomyDial() {
   )
 }
 
-function InThisMode() {
+export function InThisMode() {
   const { inThisMode } = autonomy
   const sides = [inThisMode.rocca, inThisMode.you]
   return (
@@ -118,7 +118,7 @@ function InThisMode() {
   )
 }
 
-function Rules() {
+export function Rules() {
   return (
     <div className="border-t border-border pt-4">
       <div className="flex items-center justify-between gap-2">

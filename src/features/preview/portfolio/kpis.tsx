@@ -44,16 +44,21 @@ export function KpiStrip() {
   ]
 
   return (
-    <dl className="grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
+    // Phones: the big total sits in the mobile hero, so its card hides and
+    // the other three share one row.
+    <dl className="grid grid-cols-2 gap-4 max-md:grid-cols-3 max-md:gap-2 lg:grid-cols-4 lg:gap-6">
       {items.map((item) => (
         <div
           key={item.label}
-          className={cn("border border-border bg-card p-4 sm:p-5", panelClass)}
+          className={cn(
+            "border border-border bg-card p-4 max-md:p-3 max-md:first:hidden sm:p-5",
+            panelClass,
+          )}
         >
           <dt className="text-xs text-muted-foreground sm:text-sm">
             {item.label}
           </dt>
-          <dd className="mt-1 text-xl font-semibold tracking-tight tabular-nums sm:text-2xl">
+          <dd className="mt-1 text-xl font-semibold tracking-tight tabular-nums max-md:text-base sm:text-2xl">
             {item.value}
           </dd>
           <dd

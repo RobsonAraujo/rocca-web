@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils"
+
 import { SimulatedBadge } from "./navigation"
 
 type PageHeaderProps = {
@@ -5,12 +7,23 @@ type PageHeaderProps = {
   subtitle: string
   /** Optional buttons on the right (desktop) or below the text (phones). */
   actions?: React.ReactNode
+  className?: string
 }
 
 /** Page title block shared by the preview pages. */
-export function PageHeader({ title, subtitle, actions }: PageHeaderProps) {
+export function PageHeader({
+  title,
+  subtitle,
+  actions,
+  className,
+}: PageHeaderProps) {
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div
+      className={cn(
+        "flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between",
+        className,
+      )}
+    >
       <div>
         <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
           {title}

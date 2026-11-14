@@ -1,0 +1,27 @@
+import { Suspense } from "react"
+
+import { WelcomeBanner } from "./components/welcome-banner"
+import { MobileHome } from "./mobile/home"
+import { Overview } from "./overview"
+
+/**
+ * The /preview screen. Tablets and desktop get the dashboard; phones get
+ * the native-app home. Both are rendered and CSS shows one, so the page
+ * stays static (no user-agent sniffing, no layout flash).
+ */
+export function OverviewScreen() {
+  return (
+    <>
+      {/* useSearchParams needs a Suspense boundary to keep the page static. */}
+      <Suspense fallback={null}>
+        <WelcomeBanner />
+      </Suspense>
+      <div className="hidden space-y-6 md:block">
+        <Overview />
+      </div>
+      <div className="space-y-6 md:hidden">
+        <MobileHome />
+      </div>
+    </>
+  )
+}
