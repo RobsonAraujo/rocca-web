@@ -1,41 +1,36 @@
 import {
-  CheckIcon,
-  ChevronRightIcon,
-  GaugeIcon,
   GraduationCapIcon,
   HistoryIcon,
-  LockIcon,
   MicIcon,
   PiggyBankIcon,
   PlayIcon,
   ReceiptIcon,
-  ShieldCheckIcon,
   SparklesIcon,
   TrendingUpIcon,
-  XIcon,
 } from "lucide-react"
 
 import { OrderLines } from "@/components/product/order-lines"
 import { ProgressRing } from "@/components/product/progress-ring"
 import type { Tone } from "@/components/product/tone"
-import { IconTile, toneClasses } from "@/components/product/tone"
+import { toneClasses } from "@/components/product/tone"
 import { cn } from "@/lib/utils"
 
 import { ComingSoonButton } from "../components/coming-soon"
-import { LineChart } from "../components/line-chart"
 import {
   autonomy,
   learn,
   mobile,
   moves,
   portfolio,
-  rules,
   savings,
   shell,
   suggestion,
   trackRecord,
 } from "../data"
 import { AutonomyDial, InThisMode, Rules } from "../widgets/autonomy"
+import { HeroChart } from "../widgets/chart-ranges"
+import { MobileDecision } from "../widgets/suggestion-actions"
+import { ControlsGroup } from "./controls-group"
 import { RevealOnHash } from "./reveal-on-hash"
 import {
   HandleSheet,
@@ -67,7 +62,7 @@ function SectionLabel({ tone, children }: { tone: Tone; children: string }) {
 
 /** Big balance up top, the way investing apps open. */
 function BalanceHero() {
-  const { chart, weekChange } = portfolio
+  const { weekChange } = portfolio
   return (
     <section aria-labelledby="m-balance-label">
       <p id="m-balance-label" className="text-sm text-muted-foreground">
@@ -80,22 +75,7 @@ function BalanceHero() {
         <TrendingUpIcon className="size-4" aria-hidden />
         {weekChange.amount} · {weekChange.label}
       </p>
-      {/* Edge to edge; the line stops short of the right edge so the end dot fits. */}
-      <div className="-mx-4 mt-5 overflow-hidden">
-        <LineChart
-          values={chart.values}
-          label={`Portfolio value over the past month, up ${chart.change}.`}
-          className="mr-3 h-28"
-        />
-      </div>
-      <div className="mt-3 flex items-center justify-between">
-        <p className="text-[11px] text-muted-foreground">
-          {mobile.hero.simulated}
-        </p>
-        <span className="text-xs font-medium text-brand">
-          {chart.caption} {chart.change}
-        </span>
-      </div>
+      <HeroChart note={mobile.hero.simulated} />
     </section>
   )
 }
@@ -104,9 +84,10 @@ function BalanceHero() {
 function AskBar() {
   return (
     <SheetTrigger
+      id="m-ask"
       handle={askSheet}
       className={cn(
-        "flex h-12 w-full items-center gap-3 rounded-2xl bg-card px-4 text-left text-muted-foreground shadow-soft ring-1 ring-foreground/10",
+        "flex h-12 w-full scroll-mt-20 items-center gap-3 rounded-2xl bg-card px-4 text-left text-muted-foreground shadow-soft ring-1 ring-foreground/10",
         pressable,
       )}
     >
@@ -178,6 +159,7 @@ function DecisionCard() {
   return (
     <RevealOnHash hash="suggestion">
       <article
+        id="m-suggestion"
         aria-labelledby="m-suggestion-title"
         className="rounded-3xl border-t-4 border-t-attention bg-card p-5 shadow-soft ring-1 ring-attention/30"
       >
@@ -214,102 +196,26 @@ function DecisionCard() {
           </span>
         </p>
 
-        <ComingSoonButton
-          className={cn(
-            "mt-4 h-12 w-full rounded-2xl text-base",
-            toneClasses.brand.solid,
-          )}
-        >
-          <CheckIcon className="size-5" aria-hidden />
-          {order.approve}
-        </ComingSoonButton>
-        <div className="mt-2 grid grid-cols-2 gap-2">
-          <ComingSoonButton
-            variant="outline"
-            className="h-11 rounded-2xl bg-card text-sm"
-          >
-            <XIcon aria-hidden />
-            {order.dismiss}
-          </ComingSoonButton>
-          <Sheet
-            title={mobile.decision.whyTitle}
-            description={suggestion.title}
-            trigger={
-              <button
-                type="button"
-                className="inline-flex h-11 items-center justify-center gap-1.5 rounded-2xl border border-border bg-card text-sm font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.98]"
-              >
-                {mobile.decision.why}
-              </button>
-            }
-          >
-            <WhyDetails />
-          </Sheet>
-        </div>
-        <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-          <LockIcon className="size-3.5" aria-hidden />
-          {suggestion.decisionNote}
-        </p>
+        <MobileDecision
+          why={
+            <Sheet
+              title={mobile.decision.whyTitle}
+              description={suggestion.title}
+              trigger={
+                <button
+                  type="button"
+                  className="inline-flex h-11 items-center justify-center gap-1.5 rounded-2xl border border-border bg-card text-sm font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.98]"
+                >
+                  {mobile.decision.why}
+                </button>
+              }
+            >
+              <WhyDetails />
+            </Sheet>
+          }
+        />
       </article>
     </RevealOnHash>
-  )
-}
-
-/** iOS grouped list: mode and rules, both opening the controls sheet. */
-function ControlsGroup() {
-  const mode = autonomy.levels.find((level) => level.id === autonomy.current)
-  const attention = rules.items.filter((r) => r.status === "attention").length
-  const rows = [
-    {
-      key: "mode",
-      icon: GaugeIcon,
-      label: mobile.controls.mode,
-      value: mode?.label,
-      badge: null,
-    },
-    {
-      key: "rules",
-      icon: ShieldCheckIcon,
-      label: mobile.controls.rules,
-      value: null,
-      badge: `${attention} ${mobile.controls.needsAttention}`,
-    },
-  ]
-  return (
-    <ul className="divide-y divide-border overflow-hidden rounded-2xl bg-card shadow-soft ring-1 ring-control/20">
-      {rows.map(({ key, icon, label, value, badge }) => (
-        <li key={key}>
-          <SheetTrigger
-            handle={controlsSheet}
-            className="flex min-h-14 w-full items-center gap-3 px-4 py-3 text-left transition-colors active:bg-secondary"
-          >
-            <IconTile
-              icon={icon}
-              tone="control"
-              className="size-8 rounded-lg"
-            />
-            <span className="flex-1 text-[15px] font-medium">{label}</span>
-            {badge && (
-              <span
-                className={cn(
-                  "rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap",
-                  toneClasses.attention.tile,
-                )}
-              >
-                {badge}
-              </span>
-            )}
-            {value && (
-              <span className="text-sm text-muted-foreground">{value}</span>
-            )}
-            <ChevronRightIcon
-              className="size-4 shrink-0 text-muted-foreground"
-              aria-hidden
-            />
-          </SheetTrigger>
-        </li>
-      ))}
-    </ul>
   )
 }
 
@@ -482,7 +388,9 @@ export function MobileHome() {
 
       <section aria-label={mobile.sections.controls} className="space-y-3">
         <SectionLabel tone="control">{mobile.sections.controls}</SectionLabel>
-        <ControlsGroup />
+        <div id="m-controls" className="scroll-mt-20">
+          <ControlsGroup />
+        </div>
         <HandleSheet
           handle={controlsSheet}
           title={autonomy.title}

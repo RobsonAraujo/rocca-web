@@ -1,11 +1,11 @@
-import { render, screen, within } from "@testing-library/react"
+import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { toast } from "sonner"
 import { describe, expect, it, vi } from "vitest"
 
 import {
   autonomy,
-  comingSoon,
+  demo,
   learn,
   mobile,
   portfolio,
@@ -13,12 +13,13 @@ import {
   suggestion,
 } from "../data"
 import { MobileHome } from "./home"
+import { renderWithDemo } from "../test-utils"
 
 vi.mock("sonner", () => ({ toast: vi.fn() }))
 
 describe("MobileHome", () => {
   it("leads with the balance, then the decision that needs you", () => {
-    render(<MobileHome />)
+    renderWithDemo(<MobileHome />)
 
     expect(screen.getByText(portfolio.value)).toBeInTheDocument()
     expect(
@@ -28,21 +29,25 @@ describe("MobileHome", () => {
     expect(screen.getByText(savings.total)).toBeInTheDocument()
   })
 
-  it("answers Approve with the coming-soon notice", async () => {
+  it("simulates Approve with a receipt and a reset", async () => {
     const user = userEvent.setup()
-    render(<MobileHome />)
+    renderWithDemo(<MobileHome />)
 
     await user.click(screen.getByRole("button", { name: "Approve" }))
 
-    expect(toast).toHaveBeenCalledWith(
-      comingSoon.title,
-      expect.objectContaining({ description: comingSoon.description }),
-    )
+    expect(
+      await screen.findByText(suggestion.receipt.title, {}, { timeout: 3000 }),
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/needs attention/)).not.toBeInTheDocument()
+    expect(toast).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole("button", { name: demo.reset }))
+    expect(screen.getByRole("button", { name: "Approve" })).toBeInTheDocument()
   })
 
   it("opens the reasoning in a sheet from Why?", async () => {
     const user = userEvent.setup()
-    render(<MobileHome />)
+    renderWithDemo(<MobileHome />)
 
     await user.click(screen.getByRole("button", { name: mobile.decision.why }))
 
@@ -57,7 +62,7 @@ describe("MobileHome", () => {
 
   it("opens the controls sheet from the Mode row", async () => {
     const user = userEvent.setup()
-    render(<MobileHome />)
+    renderWithDemo(<MobileHome />)
 
     await user.click(screen.getByRole("button", { name: /Mode/ }))
 

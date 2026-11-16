@@ -59,7 +59,8 @@ src/
    │  ├─ shell.tsx       # sidebar, barra superior e aviso legal (usado pelo layout)
    │  ├─ overview.tsx    # página inicial do preview
    │  ├─ data.ts         # copy e dados simulados da página inicial
-   │  ├─ components/     # painel, gráfico SVG, navegação, chat, "em breve", banner
+   │  ├─ demo-state.tsx  # estado simulado compartilhado: decisão da NVDA e modo de autonomia
+   │  ├─ components/     # painel, gráfico SVG, navegação, chat, "em breve", banner, tour
    │  ├─ widgets/        # um arquivo por módulo da página inicial
    │  └─ portfolio/      # página de portfolio: dados, gráficos, insights, posições
    └─ waitlist/
@@ -89,8 +90,15 @@ Quem entra na lista é levado na hora para `/preview`, uma versão navegável do
 - Todos os dados são simulados. A visão geral usa `features/preview/data.ts`, e o portfolio usa `features/preview/portfolio/data.ts`. O total da carteira, as contas e a ordem de NVDA/VTI vêm do `content.ts` da landing, para as páginas nunca mostrarem números diferentes.
 - No portfolio, as posições são guardadas por conta, e pesos, alocação e totais são calculados a partir delas. Um teste garante que cada conta soma o mesmo valor da landing.
 - No celular (abaixo de 768px) o preview vira um app nativo: barra superior compacta, barra de abas embaixo (Home, Portfolio, Ask, Learn, More), detalhes em bottom sheets (Base UI Drawer) e seletor segmentado no Portfolio. O código fica em `features/preview/mobile/`. Desktop e tablet não mudam.
-- O chat é um compositor no estilo ChatGPT: o campo cresce com o texto, Enter envia e Shift+Enter quebra a linha. As sugestões preenchem o campo, e enviar mostra "em breve".
-- Qualquer ação (aprovar, navegar, perguntar) mostra um toast de "em breve". Use `ComingSoonButton` ou `notifyComingSoon()` em `features/preview/components/coming-soon.tsx`.
+- As ações principais são simuladas, para o visitante sentir o produto. Cada simulação termina com a nota da waitlist (`demo.waitlistNote` em `data.ts`):
+  - **Aprovar a sugestão de NVDA:** passa por "placing orders" (1,2 s) e mostra um recibo simulado. A regra dos 12% volta a ficar ok. "Not now" pula a sugestão, e "Reset demo" volta ao começo.
+  - **Modo de autonomia:** os pontos do dial trocam o modo. O pill do cabeçalho, o bloco "In this mode", a nota da decisão e a linha "Mode" do mobile acompanham.
+  - **Ask Rocca:** as três sugestões têm respostas prontas (`ask.answers`), e qualquer outra pergunta recebe `ask.fallback`. A resposta aparece depois de um "typing" curto, que não acontece com `prefers-reduced-motion`.
+  - **Gráfico:** os ranges 1W/1M/1Y/All funcionam com séries simuladas (`portfolio.chart.series`). Todas terminam no total da landing, e um teste garante isso.
+- O estado da simulação fica no `DemoStateProvider` (`demo-state.tsx`), montado pelo `PreviewShell`. Ele se mantém entre Overview e Portfolio, e recarregar a página zera a demo.
+- O chat é um compositor no estilo ChatGPT: o campo cresce com o texto, Enter envia e Shift+Enter quebra a linha. As sugestões preenchem o campo.
+- O que precisaria do produto real (navegar para páginas que não existem, conectar conta, lições, histórico, adicionar regra, anexar, voz) continua mostrando o toast de "em breve". Use `ComingSoonButton` ou `notifyComingSoon()` em `features/preview/components/coming-soon.tsx`.
+- Tour guiado (`components/guided-tour.tsx`): 3 passos (decisão, autonomia, chat) na primeira visita com `?welcome=new`. O anel de destaque não bloqueia cliques, então dá para aprovar no meio do tour. Pular ou terminar fica salvo no `localStorage` (`rocca-tour-done`). Cada passo aponta para um id do desktop e um do mobile, e o tour usa o que estiver visível.
 - O banner de boas-vindas lê o `?welcome=` no client, dentro de um `<Suspense>`, então a página continua estática.
 - Os módulos mostram os diferenciais contra Astor e Volaren: o raciocínio com a fonte de cada passo, a escolha da conta que paga menos imposto, a trilha de aprendizado para iniciantes, o nível de autonomia com regras próprias, o placar com os erros à mostra e o dinheiro que dá para economizar.
 

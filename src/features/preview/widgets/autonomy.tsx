@@ -1,3 +1,5 @@
+"use client"
+
 import {
   CheckIcon,
   CircleAlertIcon,
@@ -7,23 +9,42 @@ import {
   ShieldCheckIcon,
 } from "lucide-react"
 
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { toneClasses } from "@/components/product/tone"
 
 import { ComingSoonButton } from "../components/coming-soon"
 import { Panel } from "../components/panel"
 import { autonomy, rules } from "../data"
+import type { SuggestionStatus } from "../demo-state"
+import { useDemo } from "../demo-state"
 
-const currentIndex = autonomy.levels.findIndex(
-  (level) => level.id === autonomy.current,
-)
-const currentLevel = autonomy.levels[currentIndex]!
+/** The selected level and its position on the dial. */
+function useCurrentLevel() {
+  const { mode } = useDemo()
+  const index = autonomy.levels.findIndex((level) => level.id === mode)
+  return { index, level: autonomy.levels[index]! }
+}
+
+/**
+ * Rules as they stand in the demo: approving the NVDA trim puts the 12% rule
+ * back on track.
+ */
+export function resolveRules(suggestion: SuggestionStatus) {
+  return rules.items.map((rule) =>
+    suggestion === "done" && "resolvedDetail" in rule
+      ? { ...rule, status: "ok" as const, detail: rule.resolvedDetail }
+      : rule,
+  )
+}
 
 /**
  * A three-stop dial: the filled part of the track is how much Rocca handles
- * today. The other stops are previews (coming soon).
+ * today. Tapping another stop switches the (simulated) mode.
  */
 export function AutonomyDial() {
+  const { setMode } = useDemo()
+  const { index: currentIndex } = useCurrentLevel()
   const last = autonomy.levels.length - 1
   const fill = (currentIndex / last) * 100
   return (
@@ -31,30 +52,37 @@ export function AutonomyDial() {
       <div className="relative mx-2.5 h-5">
         <div className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-control/15" />
         <div
-          className="absolute top-1/2 left-0 h-1.5 -translate-y-1/2 rounded-full bg-control"
+          className="absolute top-1/2 left-0 h-1.5 -translate-y-1/2 rounded-full bg-control transition-[width] duration-300 motion-reduce:transition-none"
           style={{ width: `${fill}%` }}
         />
         {autonomy.levels.map((level, index) => {
           const position = { left: `${(index / last) * 100}%` }
-          return index === currentIndex ? (
-            <span
+          const current = index === currentIndex
+          // Every stop stays a button (the current one pressed), so focus
+          // doesn't drop when the mode changes.
+          return (
+            <Button
               key={level.id}
-              aria-hidden
-              style={position}
-              className="absolute top-1/2 size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-card bg-control shadow-soft ring-4 ring-control/20"
-            />
-          ) : (
-            <ComingSoonButton
-              key={level.id}
+              type="button"
               variant="ghost"
-              aria-label={`${autonomy.change} ${level.label}`}
+              onClick={() => setMode(level.id)}
+              aria-pressed={current}
+              aria-label={
+                current ? level.label : `${autonomy.change} ${level.label}`
+              }
               style={position}
               className={cn(
                 // active:-translate-y-1/2 cancels the Button's press nudge, which would knock the stop off the track.
-                "absolute top-1/2 size-4 min-w-0 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 p-0 hover:bg-card active:-translate-y-1/2",
-                index < currentIndex
-                  ? "border-control bg-control"
-                  : "border-control/40 bg-card",
+                // The ::after pseudo widens the tap target past the small dot.
+                "absolute top-1/2 min-w-0 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 after:absolute after:-inset-3 after:content-[''] active:-translate-y-1/2",
+                current
+                  ? "size-5 border-4 border-card bg-control shadow-soft ring-4 ring-control/20 hover:bg-control"
+                  : cn(
+                      "size-4 border-2 hover:bg-card",
+                      index < currentIndex
+                        ? "border-control bg-control"
+                        : "border-control/40 bg-card",
+                    ),
               )}
             />
           )
@@ -66,6 +94,7 @@ export function AutonomyDial() {
             key={level.id}
             aria-current={index === currentIndex ? "true" : undefined}
             className={cn(
+              "transition-colors",
               index === 0 && "text-left",
               index === 1 && "text-center",
               index === 2 && "text-right",
@@ -84,9 +113,14 @@ export function AutonomyDial() {
 
 export function InThisMode() {
   const { inThisMode } = autonomy
-  const sides = [inThisMode.rocca, inThisMode.you]
+  const { level: currentLevel } = useCurrentLevel()
+  const split = inThisMode.byLevel[currentLevel.id]
+  const sides = [
+    { label: inThisMode.labels.rocca, items: split.rocca },
+    { label: inThisMode.labels.you, items: split.you },
+  ]
   return (
-    <div>
+    <div aria-live="polite">
       <p className="text-sm font-semibold">{currentLevel.label}</p>
       <p className="mt-0.5 text-sm text-pretty text-muted-foreground">
         {currentLevel.description}
@@ -119,6 +153,9 @@ export function InThisMode() {
 }
 
 export function Rules() {
+  const { suggestion } = useDemo()
+  const items = resolveRules(suggestion)
+  const attention = items.some((rule) => rule.status === "attention")
   return (
     <div className="border-t border-border pt-4">
       <div className="flex items-center justify-between gap-2">
@@ -129,14 +166,14 @@ export function Rules() {
         <span
           className={cn(
             "rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap",
-            toneClasses.attention.tile,
+            attention ? toneClasses.attention.tile : toneClasses.control.tile,
           )}
         >
-          {rules.attentionCount}
+          {attention ? rules.attentionCount : rules.allClear}
         </span>
       </div>
       <ul className="mt-3 space-y-2.5">
-        {rules.items.map((rule) => {
+        {items.map((rule) => {
           const attention = rule.status === "attention"
           const Icon = attention ? CircleAlertIcon : CircleCheckIcon
           return (

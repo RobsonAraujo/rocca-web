@@ -1,12 +1,10 @@
-import { GaugeIcon } from "lucide-react"
-
 import { cn } from "@/lib/utils"
 import type { Tone } from "@/components/product/tone"
-import { toneClasses } from "@/components/product/tone"
 
 import { AskRocca } from "./components/ask-rocca"
+import { ModePill } from "./components/mode-pill"
 import { PageHeader } from "./components/page-header"
-import { autonomy, sections, shell, status } from "./data"
+import { sections, shell } from "./data"
 import { AutonomyWidget } from "./widgets/autonomy"
 import {
   MovesWidget,
@@ -16,25 +14,6 @@ import {
 import { LearnWidget } from "./widgets/learn"
 import { PortfolioWidget } from "./widgets/portfolio"
 import { SuggestionWidget } from "./widgets/suggestion"
-
-/**
- * Current autonomy mode, at a glance. Most useful on phones, where the
- * autonomy card sits further down the page.
- */
-function ModePill() {
-  const mode = autonomy.levels.find((level) => level.id === autonomy.current)
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold",
-        toneClasses.control.tile,
-      )}
-    >
-      <GaugeIcon className="size-3.5" aria-hidden />
-      {status.mode}: {mode?.label}
-    </span>
-  )
-}
 
 /** A labeled band of the page; the dot repeats the zone's color. */
 function Zone({

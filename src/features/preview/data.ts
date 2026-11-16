@@ -24,6 +24,17 @@ export const comingSoon = {
   description: "Coming soon. As a waitlist member, you'll get early access.",
 } as const
 
+/**
+ * Copy shared by the simulated actions (approve, switch mode, ask). Every
+ * simulation ends by pointing back at the waitlist, never at a live product.
+ */
+export const demo = {
+  simulated: "Simulated",
+  reset: "Reset demo",
+  waitlistNote:
+    "In the real app, this runs at your broker. You'll get access when your invite is ready.",
+} as const
+
 export const welcome = {
   new: {
     title: "You're on the list.",
@@ -96,6 +107,19 @@ export const ask = {
     "Am I diversified enough?",
     "Why did my portfolio go up?",
   ],
+  /** Canned answers for the suggestions, consistent with the simulated data. */
+  answers: {
+    "What's a Roth IRA?":
+      "A retirement account you fund with money you've already paid tax on. In return, it grows tax-free and you can take it out tax-free after 59½. That's why Rocca put the NVDA trade there: selling inside it costs you $0 in tax.",
+    "Am I diversified enough?":
+      "Mostly, with one gap. NVDA is 18% of your holdings, and your index funds hold another 4.1% of it, so about 22% of your money rides on one company. Your rule caps a single stock at 12%. Everything else is spread across thousands of companies.",
+    "Why did my portfolio go up?":
+      "Mostly NVDA. It added $3,120 of your $4,390 gain this week. Your index funds simply moved with the market.",
+  } as Record<string, string>,
+  /** Any question without a canned answer. */
+  fallback:
+    "Good question. In the beta, Rocca answers anything about your accounts, using your real holdings. In this preview it only knows the three suggested questions.",
+  thinking: "Rocca is typing…",
 } as const
 
 export const portfolio = {
@@ -105,17 +129,47 @@ export const portfolio = {
   value: preview.portfolio.value,
   weekChange: { amount: "+$4,390", label: preview.portfolio.change },
   chart: {
-    caption: "Past month",
-    change: "+3.4%",
     ranges: ["1W", "1M", "1Y", "All"],
-    activeRange: "1M",
-    /** Daily closes, oldest first; the last value is today's total. */
-    values: [
-      240120, 239480, 240950, 241700, 241050, 242300, 243100, 242600, 243800,
-      244350, 243700, 242900, 243600, 244800, 245300, 244100, 243500, 244200,
-      245100, 244600, 243400, 243920, 244700, 245900, 245300, 246800, 247600,
-      247100, 248310,
-    ],
+    defaultRange: "1M",
+    /**
+     * Closes per range, oldest first. Every series ends on today's total
+     * ($248,310), and 1W starts at $243,920 so it matches "+$4,390 this week".
+     * The change shown next to the chart is computed from these values.
+     */
+    series: {
+      "1W": {
+        caption: "Past week",
+        values: [
+          243920, 244700, 245900, 245300, 246800, 247600, 247100, 248310,
+        ],
+      },
+      "1M": {
+        caption: "Past month",
+        values: [
+          240120, 239480, 240950, 241700, 241050, 242300, 243100, 242600,
+          243800, 244350, 243700, 242900, 243600, 244800, 245300, 244100,
+          243500, 244200, 245100, 244600, 243400, 243920, 244700, 245900,
+          245300, 246800, 247600, 247100, 248310,
+        ],
+      },
+      "1Y": {
+        caption: "Past year",
+        // The dip in the middle is March (see the track record's misses).
+        values: [
+          217400, 219800, 222100, 220500, 224300, 226900, 225100, 228400,
+          231200, 229800, 226300, 222900, 225600, 229100, 232400, 234900,
+          233100, 236800, 239400, 238100, 241600, 240120, 243920, 248310,
+        ],
+      },
+      All: {
+        caption: "All time",
+        values: [
+          162000, 158400, 166900, 171200, 168500, 176300, 181900, 179200,
+          188600, 194100, 191300, 199800, 207500, 204200, 213900, 217400,
+          226900, 231200, 222900, 234900, 241600, 248310,
+        ],
+      },
+    },
   },
   accounts: illustrations.accounts,
 } as const
@@ -145,6 +199,20 @@ export const suggestion = {
   askWhy: "Ask why",
   lesson: "New to rebalancing? 2-min lesson",
   decisionNote: "Nothing happens until you approve.",
+  /** Shown instead of `decisionNote` while the mode is Autopilot. */
+  autopilotNote:
+    "On Autopilot, Rocca would do this within your rules and tell you right after.",
+  placing: "Placing both orders in your Roth IRA…",
+  receipt: {
+    eyebrow: "Simulated receipt",
+    title: "Done. NVDA is back to 12%.",
+    rule: "Your 12% rule is on track again.",
+  },
+  skipped: {
+    title: "Skipped for now",
+    description:
+      "Rocca will check NVDA again tomorrow and tell you if anything changes.",
+  },
   next: {
     title: "If you approve",
     steps: [
@@ -179,16 +247,27 @@ export const autonomy = {
     },
   ],
   current: "approve",
+  /** What each side does, per level (keyed by level id). */
   inThisMode: {
     title: "In this mode",
-    rocca: {
-      label: "Rocca",
-      items: [
-        "Watches every account, 24/7",
-        "Proposes trades and explains why",
-      ],
+    labels: { rocca: "Rocca", you: "You" },
+    byLevel: {
+      explain: {
+        rocca: ["Watches every account, 24/7", "Explains what moved and why"],
+        you: ["Make every trade yourself"],
+      },
+      approve: {
+        rocca: [
+          "Watches every account, 24/7",
+          "Proposes trades and explains why",
+        ],
+        you: ["Approve or skip every trade"],
+      },
+      autopilot: {
+        rocca: ["Trades within your rules", "Tells you right after"],
+        you: ["Set the rules, review the receipts"],
+      },
     },
-    you: { label: "You", items: ["Approve or skip every trade"] },
   },
   change: "Switch to",
 } as const
@@ -199,11 +278,14 @@ export const rules = {
   title: "Your rules",
   description: "Rocca checks every move against these.",
   attentionCount: "1 needs attention",
+  allClear: "All on track",
   items: [
     {
       label: "No single stock above 12%",
       detail: "NVDA is at 18%",
       status: "attention",
+      /** Once the simulated rebalance is approved, the rule is back on track. */
+      resolvedDetail: "NVDA is back at 12%",
     },
     { label: "Crypto stays under 10%", detail: "7.1% today", status: "ok" },
     {
@@ -216,7 +298,12 @@ export const rules = {
       detail: "Next: NVDA on Wednesday",
       status: "ok",
     },
-  ] satisfies { label: string; detail: string; status: RuleStatus }[],
+  ] satisfies {
+    label: string
+    detail: string
+    status: RuleStatus
+    resolvedDetail?: string
+  }[],
   add: "Add a rule",
 } as const
 
@@ -334,4 +421,34 @@ export const mobile = {
     holdings: "Holdings",
     accounts: "Accounts",
   },
+} as const
+
+/**
+ * First-visit tour. Each step lists the ids it can point at, desktop first
+ * then phone; the tour picks whichever is visible (both layouts are
+ * rendered and CSS hides one).
+ */
+export const tour = {
+  label: "Quick tour",
+  next: "Next",
+  back: "Back",
+  done: "Got it",
+  skip: "Skip tour",
+  steps: [
+    {
+      targets: ["suggestion", "m-suggestion"],
+      title: "This needs your OK",
+      body: "Rocca spotted something and shows its reasoning. Try Approve: it's a simulation, so nothing real happens.",
+    },
+    {
+      targets: ["autonomy", "m-controls"],
+      title: "You choose how much Rocca handles",
+      body: "Start with suggestions you approve. Switch modes to see what changes.",
+    },
+    {
+      targets: ["ask", "m-ask"],
+      title: "Ask anything, in plain English",
+      body: "Pick a suggested question to see how Rocca answers.",
+    },
+  ],
 } as const

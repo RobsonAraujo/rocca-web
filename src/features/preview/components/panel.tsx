@@ -17,7 +17,7 @@ export const panelClass =
   "rounded-2xl shadow-soft [--card-spacing:--spacing(5)] sm:[--card-spacing:--spacing(6)]"
 
 type PanelProps = {
-  /** Unique slug; the heading gets `${id}-title` and labels the region. */
+  /** Unique slug: the card's id (an anchor), and `${id}-title` labels the region. */
   id: string
   title: string
   description?: string
@@ -64,9 +64,15 @@ export function Panel({
 
   return (
     <Card
+      id={id}
       role="region"
       aria-labelledby={titleId}
-      className={cn(panelClass, tone && toneClasses[tone].ring, className)}
+      className={cn(
+        panelClass,
+        "scroll-mt-24",
+        tone && toneClasses[tone].ring,
+        className,
+      )}
     >
       <CardHeader>
         {tone && Icon ? (

@@ -1,10 +1,7 @@
 import {
-  CheckIcon,
   GraduationCapIcon,
-  LockIcon,
   MessageCircleQuestionIcon,
   ReceiptIcon,
-  XIcon,
 } from "lucide-react"
 
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
@@ -15,6 +12,7 @@ import { toneClasses } from "@/components/product/tone"
 import { ComingSoonButton } from "../components/coming-soon"
 import { panelClass } from "../components/panel"
 import { suggestion } from "../data"
+import { DecisionBar } from "./suggestion-actions"
 
 /** Proposed order: shared Sell/Buy rows inside a titled box. */
 function OrderBox() {
@@ -35,7 +33,7 @@ function OrderBox() {
  * approve" note make the control explicit; the timeline shows what follows.
  */
 export function SuggestionWidget({ className }: { className?: string }) {
-  const { taxSmart, order, next } = suggestion
+  const { taxSmart, next } = suggestion
   return (
     <Card
       id="suggestion"
@@ -118,30 +116,7 @@ export function SuggestionWidget({ className }: { className?: string }) {
         </div>
 
         {/* The decision: big, unmistakable, and nothing runs until you choose. */}
-        <div className="flex flex-col gap-3 rounded-2xl border border-border bg-secondary/50 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
-          <p className="flex items-center gap-2 text-sm text-muted-foreground">
-            <LockIcon className="size-4 shrink-0" aria-hidden />
-            {suggestion.decisionNote}
-          </p>
-          <div className="flex gap-2">
-            <ComingSoonButton
-              className={cn(
-                "h-11 flex-1 rounded-full px-6 text-sm sm:flex-none",
-                toneClasses.brand.solid,
-              )}
-            >
-              <CheckIcon aria-hidden />
-              {order.approve}
-            </ComingSoonButton>
-            <ComingSoonButton
-              variant="outline"
-              className="h-11 flex-1 rounded-full bg-card px-5 text-sm sm:flex-none"
-            >
-              <XIcon aria-hidden />
-              {order.dismiss}
-            </ComingSoonButton>
-          </div>
-        </div>
+        <DecisionBar />
 
         <div>
           <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
