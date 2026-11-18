@@ -64,14 +64,26 @@ fi
 # The CLI reads the password from this variable, which keeps it out of `ps`.
 export SUPABASE_DB_PASSWORD
 
-# From here on, always unlink on exit (success, failure or Ctrl+C).
-trap 'supabase unlink >/dev/null 2>&1 || true' EXIT
+# Copy of the link output (no secrets in it), to explain a failure below.
+link_log=$(mktemp)
 
-if ! supabase link --project-ref "$ref"; then
-  if [[ "$password_source" == "keychain" ]]; then
-    fail "Link failed with the Keychain password. If it changed, update it: security add-generic-password -U -s $KEYCHAIN_SERVICE -a $ref -T \"\" -w"
+# From here on, always unlink on exit (success, failure or Ctrl+C).
+trap 'rm -f "$link_log"; supabase unlink >/dev/null 2>&1 || true' EXIT
+
+# tee keeps the output live; pipefail keeps the link's exit status.
+if ! supabase link --project-ref "$ref" 2>&1 | tee "$link_log"; then
+  # The API check runs before the database connection: an account problem
+  # here means the password wasn't even tried.
+  if grep -qiE "privileges|unauthorized|forbidden|access token|not logged in" "$link_log"; then
+    fail "The Supabase CLI is logged in with an account that can't access $ref. Run \`supabase logout && supabase login\` with the account that owns it (\`supabase projects list\` must show it), then try again."
   fi
-  fail "Could not link $ref. Check the password, and that \`supabase login\` used the account that owns this project."
+  if grep -qi "password authentication failed" "$link_log"; then
+    if [[ "$password_source" == "keychain" ]]; then
+      fail "Wrong database password in the Keychain. Update it: security add-generic-password -U -s $KEYCHAIN_SERVICE -a $ref -T \"\" -w"
+    fi
+    fail "Wrong database password (Supabase → Project Settings → Database)."
+  fi
+  fail "Could not link $ref (see the error above)."
 fi
 
 bold "3/4 Dry run: what would be applied to PRODUCTION"

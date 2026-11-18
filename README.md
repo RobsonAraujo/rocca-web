@@ -200,7 +200,11 @@ security delete-generic-password -s rocca-supabase-prod -a aygzutbnbsevguzqqjth
 ```
 
 > [!WARNING]
-> Por causa do `-T ""`, o macOS mostra um diálogo pedindo permissão **toda vez** que algo tenta ler a senha. Clique em **"Permitir"**, nunca em **"Sempre permitir"**. Com "Sempre permitir", qualquer processo (um agente de IA incluso) passa a ler a senha de prod sem aviso. Se você negar, ou se o item não existir, o script volta a pedir a senha no terminal.
+> Por causa do `-T ""`, o macOS mostra um diálogo pedindo permissão **toda vez** que algo tenta ler a senha.
+>
+> - O campo do diálogo pede a **senha de login do Mac**, a que protege o Keychain. **Não** é a senha do banco do Supabase. Se a janela só treme, a senha está errada. Se nem a do Mac funcionar, o Keychain pode ter ficado com a senha antiga do Mac: teste a anterior.
+> - Depois de digitar, clique em **"Permitir"**, nunca em **"Sempre permitir"**. Com "Sempre permitir", qualquer processo (um agente de IA incluso) passa a ler a senha de prod sem aviso.
+> - Se você clicar em **"Negar"**, ou se o item não existir, o script pede a senha do banco no terminal e segue normalmente.
 
 - Se o projeto de prod mudar, o ref muda e o item antigo deixa de ser usado. Salve um novo e apague o antigo.
 - **Não use um `.env` para a senha.** Ela é de superusuário (`postgres`), e em texto puro fica legível por qualquer ferramenta com acesso ao repo, que poderia conectar direto via `psql`. Além disso, o Next carrega sozinho o `.env.local` e o `.env.production.local`: com dados de prod num deles, `pnpm dev` ou `pnpm start` na sua máquina passariam a falar com produção.
