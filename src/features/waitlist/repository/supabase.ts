@@ -13,8 +13,8 @@ export const WAITLIST_TABLE = "waitlist"
 export type WaitlistSupabaseClient = Pick<SupabaseClient, "from">
 
 /**
- * Writes to `public.waitlist` (see supabase/migrations). Uses the service role
- * key server-side; the table has RLS on and no public policies.
+ * Writes to `public.waitlist` (see supabase/migrations). Uses the secret key
+ * (sb_secret_...) server-side; the table has RLS on and no public policies.
  */
 export class SupabaseWaitlistRepository implements WaitlistRepository {
   constructor(private readonly client: WaitlistSupabaseClient) {}
@@ -35,9 +35,9 @@ export class SupabaseWaitlistRepository implements WaitlistRepository {
 
 export function createSupabaseWaitlistRepository(
   url: string,
-  serviceRoleKey: string,
+  secretKey: string,
 ): SupabaseWaitlistRepository {
-  const client = createClient(url, serviceRoleKey, {
+  const client = createClient(url, secretKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   })
   return new SupabaseWaitlistRepository(client)

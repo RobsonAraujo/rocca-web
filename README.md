@@ -16,23 +16,31 @@ Landing page com lista de espera da Rocca, um agente de investimentos com IA par
 
 ```bash
 pnpm install
-cp .env.example .env.local   # opcional: sem Supabase, usa o mock em memória
+cp .env.example .env.local   # sem as chaves do Supabase, usa o mock em memória
+pnpm db:start                # opcional: Supabase local em Docker (veja "Banco local")
 pnpm dev                     # http://localhost:3000
 ```
 
 ## Scripts
 
-| Script               | O que faz                                        |
-| -------------------- | ------------------------------------------------ |
-| `pnpm dev`           | Servidor de desenvolvimento                      |
-| `pnpm build`         | Build de produção                                |
-| `pnpm start`         | Sobe o build de produção                         |
-| `pnpm lint`          | ESLint (`lint:fix` corrige)                      |
-| `pnpm format`        | Prettier em tudo (`format:check` só verifica)    |
-| `pnpm typecheck`     | Gera os tipos de rota do Next e roda `tsc`       |
-| `pnpm test`          | Vitest em modo watch                             |
-| `pnpm test:run`      | Vitest uma vez (CI)                              |
-| `pnpm test:coverage` | Testes com relatório de cobertura em `coverage/` |
+| Script                  | O que faz                                        |
+| ----------------------- | ------------------------------------------------ |
+| `pnpm dev`              | Servidor de desenvolvimento                      |
+| `pnpm build`            | Build de produção                                |
+| `pnpm start`            | Sobe o build de produção                         |
+| `pnpm lint`             | ESLint (`lint:fix` corrige)                      |
+| `pnpm format`           | Prettier em tudo (`format:check` só verifica)    |
+| `pnpm typecheck`        | Gera os tipos de rota do Next e roda `tsc`       |
+| `pnpm test`             | Vitest em modo watch                             |
+| `pnpm test:run`         | Vitest uma vez (CI)                              |
+| `pnpm test:coverage`    | Testes com relatório de cobertura em `coverage/` |
+| `pnpm test:integration` | Testes de integração contra o Supabase **local** |
+| `pnpm db:start`         | Sobe o Supabase local (Docker)                   |
+| `pnpm db:stop`          | Para o Supabase local                            |
+| `pnpm db:migrate`       | Aplica as migrations pendentes no banco local    |
+| `pnpm db:reset`         | Recria o banco local: migrations + `seed.sql`    |
+| `pnpm db:status`        | URLs e chaves do Supabase local                  |
+| `pnpm db:migrate:prod`  | Aplica as migrations em **prod** (só por você)   |
 
 No pre-commit, o Husky roda o `lint-staged`, que aplica `eslint --fix` e `prettier --write` nos arquivos staged.
 
@@ -118,17 +126,100 @@ O `@custom-variant dark` continua no `globals.css` de propósito. Ele mantém in
 
 `getWaitlistRepository()` escolhe o backend pelas variáveis de ambiente:
 
-- **Sem `SUPABASE_*`:** usa o `InMemoryWaitlistRepository`. Os dados vivem na memória do processo e somem ao reiniciar. Um aviso aparece no log do servidor.
-- **Com `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY`:** usa o `SupabaseWaitlistRepository`.
+- **Sem `NEXT_PUBLIC_SUPABASE_URL` e `SUPABASE_SECRET_KEY`:** usa o `InMemoryWaitlistRepository`. Os dados vivem na memória do processo e somem ao reiniciar. Um aviso aparece no log do servidor.
+- **Com as duas:** usa o `SupabaseWaitlistRepository`.
+- **Com só uma delas**, ou com uma publishable key no lugar da secret: o servidor recusa a configuração com um erro claro ([`src/lib/env.ts`](src/lib/env.ts)), em vez de cair no mock calado.
 
-Para ligar o Supabase:
+Local e Vercel usam **os mesmos nomes de variável**; só os valores mudam. Em desenvolvimento, o `.env.local` aponta para o **Supabase local** (veja abaixo). As credenciais de produção ficam só na Vercel, nunca em arquivo local.
 
-1. Crie o projeto no Supabase.
-2. Rode [`supabase/migrations/0001_create_waitlist.sql`](supabase/migrations/0001_create_waitlist.sql) no SQL Editor, ou use `supabase db push`.
-3. Preencha `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` no `.env.local` e na Vercel.
-4. Reinicie o `pnpm dev`.
+A tabela tem RLS ligado e nenhuma policy pública, e a migration `0002` ainda revoga os privilégios de `anon` e `authenticated`. Só o servidor, com a secret key (`sb_secret_…`, a antiga service role key), consegue ler e escrever. Emails duplicados são barrados por um índice único em `lower(email)`.
 
-A tabela tem RLS ligado e nenhuma policy pública: só o servidor, com a service role, consegue escrever. Emails duplicados são barrados por um índice único em `lower(email)`.
+A publishable key (`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`) não grava nada: a tabela a barra de propósito, e os testes de integração conferem isso. Ela fica configurada para quando surgir uma feature client-side, como o Supabase Auth. A `SUPABASE_SECRET_KEY` **nunca** leva o prefixo `NEXT_PUBLIC_`, porque esse prefixo manda o valor para o bundle do browser.
+
+### Banco local
+
+Regra: **tudo roda e é testado localmente primeiro.** O único caminho até produção é o `pnpm db:migrate:prod`, rodado por uma pessoa (veja abaixo). O [`.claude/settings.json`](.claude/settings.json) proíbe agentes de rodar `supabase link`, `db push`, `--linked`, `--db-url` e esse script.
+
+Pré-requisitos: Docker rodando e o [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started).
+
+```bash
+pnpm db:start           # 1ª vez baixa as imagens; aplica migrations e seed
+pnpm db:status          # copie a URL e as chaves para o .env.local
+pnpm test:integration   # tabela real, índice único, RLS barrando a chave pública
+pnpm dev
+```
+
+- As portas ficam na faixa **5442x** (API `54421`, banco `54422`, Studio `54423`), para rodar ao lado de outros projetos Supabase locais, que usam 5432x.
+- `.env.local` usa `NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54421`, a `SECRET_KEY` local em `SUPABASE_SECRET_KEY` e a `PUBLISHABLE_KEY` local em `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. São as chaves demo fixas do CLI, sem valor fora da sua máquina.
+- Os testes de integração **recusam rodar** se `NEXT_PUBLIC_SUPABASE_URL` não for `127.0.0.1`/`localhost`, e apagam as linhas que criaram.
+- `supabase/seed.sql` fica vazio de propósito: nada de dados reais de inscritos.
+
+Aplicar migrations no banco local:
+
+- `pnpm db:migrate`: aplica **só as pendentes** e mantém os dados. Use depois de um `git pull` que trouxe migration nova.
+- `pnpm db:reset`: **apaga** o banco local e reaplica todas as migrations + `seed.sql`. Use para validar o schema do zero (o deploy de prod sempre roda este antes).
+
+Nova mudança de schema:
+
+1. `supabase migration new <nome>` e escreva o SQL.
+2. `pnpm db:migrate` para aplicar e testar no app (`pnpm dev`).
+3. `pnpm db:reset`, depois `pnpm test:integration` e `pnpm test:run`, para garantir que tudo sobe do zero.
+4. Commit da migration. O deploy em prod é o passo seguinte, abaixo.
+
+### Deploy do schema em produção
+
+**Feito por uma pessoa, depois de validar localmente.** Pré-requisito: `supabase login` com a conta dona do projeto de prod.
+
+```bash
+pnpm db:migrate:prod
+```
+
+O script ([`scripts/migrate-prod.sh`](scripts/migrate-prod.sh)) faz, em ordem:
+
+1. Exige um terminal interativo. Em CI, script ou agente, ele para na hora.
+2. Lê `SUPABASE_PROD_PROJECT_REF` do `.env.local`. O ref não é segredo, e o app nunca lê essa variável.
+3. Roda `pnpm db:reset` e `pnpm test:integration` localmente. Se algo falhar, para antes de tocar em prod.
+4. Busca a senha do banco de prod, nesta ordem: `SUPABASE_DB_PASSWORD` no shell, o Keychain do macOS (veja abaixo) ou o prompt. A senha nunca vai para arquivo nem para a linha de comando.
+5. Faz o `supabase link` e mostra o `db push --dry-run`. Se não houver nada pendente, encerra.
+6. Pede que você digite `yes`, e só então roda o `supabase db push`.
+7. Ao sair, por qualquer motivo (sucesso, erro ou Ctrl+C), roda `supabase unlink`. Assim nenhum comando `supabase` posterior cai em prod por engano.
+
+### Senha de prod no Keychain (opcional)
+
+Para não digitar a senha toda vez, salve-a **uma vez** no Keychain do macOS. A conta do item é o project ref:
+
+```bash
+# Salvar. O -w no fim faz o comando pedir a senha, que assim não fica no histórico do shell.
+security add-generic-password -s rocca-supabase-prod -a aygzutbnbsevguzqqjth -T "" -w
+
+# Trocar (depois de resetar a senha no dashboard): o mesmo comando com -U.
+security add-generic-password -U -s rocca-supabase-prod -a aygzutbnbsevguzqqjth -T "" -w
+
+# Remover.
+security delete-generic-password -s rocca-supabase-prod -a aygzutbnbsevguzqqjth
+```
+
+> [!WARNING]
+> Por causa do `-T ""`, o macOS mostra um diálogo pedindo permissão **toda vez** que algo tenta ler a senha. Clique em **"Permitir"**, nunca em **"Sempre permitir"**. Com "Sempre permitir", qualquer processo (um agente de IA incluso) passa a ler a senha de prod sem aviso. Se você negar, ou se o item não existir, o script volta a pedir a senha no terminal.
+
+- Se o projeto de prod mudar, o ref muda e o item antigo deixa de ser usado. Salve um novo e apague o antigo.
+- **Não use um `.env` para a senha.** Ela é de superusuário (`postgres`), e em texto puro fica legível por qualquer ferramenta com acesso ao repo, que poderia conectar direto via `psql`. Além disso, o Next carrega sozinho o `.env.local` e o `.env.production.local`: com dados de prod num deles, `pnpm dev` ou `pnpm start` na sua máquina passariam a falar com produção.
+
+### Produção (Vercel)
+
+O app em produção lê as credenciais só das Environment Variables da Vercel. Projeto de prod: `aygzutbnbsevguzqqjth`.
+
+| Variável                               | Production                                 | Preview            |
+| -------------------------------------- | ------------------------------------------ | ------------------ |
+| `NEXT_PUBLIC_SUPABASE_URL`             | `https://aygzutbnbsevguzqqjth.supabase.co` | vazio (usa o mock) |
+| `SUPABASE_SECRET_KEY`                  | secret key `sb_secret_…` do projeto        | vazio (usa o mock) |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | publishable key `sb_publishable_…`         | vazio              |
+| `NEXT_PUBLIC_SITE_URL`                 | domínio de produção                        | URL do preview     |
+
+- As duas chaves ficam em Supabase → Project Settings → API Keys. Sem a **secret**, o app não grava: a publishable é barrada pela tabela.
+- Preview sem `NEXT_PUBLIC_SUPABASE_URL` e `SUPABASE_SECRET_KEY` usa o mock em memória, para que deploys de PR não gravem inscrições de teste em prod.
+- Variáveis `NEXT_PUBLIC_*` são embutidas no build. Depois de mudar qualquer variável na Vercel, faça um redeploy.
+- Primeiro deploy de um projeto novo: **schema antes, app depois**. Rode o `pnpm db:migrate:prod`, depois configure as variáveis e faça o redeploy. Na ordem inversa, o app tenta gravar numa tabela que ainda não existe.
 
 ### Cache Components
 

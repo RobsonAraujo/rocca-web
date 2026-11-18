@@ -1,0 +1,2 @@
+-- Local seed, applied by `supabase db reset` after the migrations.
+-- Intentionally empty: never put real signups (personal data) here.

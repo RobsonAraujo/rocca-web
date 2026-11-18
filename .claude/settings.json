@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(supabase start)",
+      "Bash(supabase stop)",
+      "Bash(supabase status)",
+      "Bash(supabase db reset)",
+      "Bash(supabase migration up --local)",
+      "Bash(supabase migration new *)",
+      "Bash(supabase db diff *)"
+    ],
+    "deny": [
+      "Bash(supabase link*)",
+      "Bash(supabase db push*)",
+      "Bash(supabase * --linked*)",
+      "Bash(supabase * --db-url*)",
+      "Bash(pnpm db:migrate:prod*)",
+      "Bash(bash scripts/migrate-prod.sh*)",
+      "Bash(security find-generic-password*)"
+    ]
+  }
+}

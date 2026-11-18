@@ -20,6 +20,8 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
     include: ["src/**/*.test.{ts,tsx}"],
+    // Integration tests need the local Supabase: `pnpm test:integration`.
+    exclude: ["src/**/*.integration.test.ts", "node_modules/**"],
     clearMocks: true,
     restoreMocks: true,
     unstubEnvs: true,

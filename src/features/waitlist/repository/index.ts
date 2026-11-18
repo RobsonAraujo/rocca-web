@@ -23,10 +23,10 @@ export function getWaitlistRepository(): WaitlistRepository {
   const env = getServerEnv()
   let repository: WaitlistRepository
 
-  if (env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY) {
+  if (env.NEXT_PUBLIC_SUPABASE_URL && env.SUPABASE_SECRET_KEY) {
     repository = createSupabaseWaitlistRepository(
-      env.SUPABASE_URL,
-      env.SUPABASE_SERVICE_ROLE_KEY,
+      env.NEXT_PUBLIC_SUPABASE_URL,
+      env.SUPABASE_SECRET_KEY,
     )
   } else {
     console.warn(

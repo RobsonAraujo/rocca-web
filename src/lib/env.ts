@@ -2,23 +2,31 @@ import "server-only"
 
 import { z } from "zod"
 
-/** Treats empty strings (e.g. `SUPABASE_URL=` in .env) as "not set". */
+/** Treats empty strings (e.g. `SUPABASE_SECRET_KEY=` in .env) as "not set". */
 const optional = <T extends z.ZodType>(schema: T) =>
   z.preprocess((value) => (value === "" ? undefined : value), schema.optional())
 
 const serverEnvSchema = z
   .object({
-    SUPABASE_URL: optional(z.url()),
-    SUPABASE_SERVICE_ROLE_KEY: optional(z.string()),
+    // The project URL isn't a secret; same name as in the Supabase docs.
+    NEXT_PUBLIC_SUPABASE_URL: optional(z.url()),
+    // The secret key (sb_secret_...). Server only: never prefix with NEXT_PUBLIC_.
+    SUPABASE_SECRET_KEY: optional(z.string()),
   })
   .refine(
     (env) =>
-      Boolean(env.SUPABASE_URL) === Boolean(env.SUPABASE_SERVICE_ROLE_KEY),
+      Boolean(env.NEXT_PUBLIC_SUPABASE_URL) ===
+      Boolean(env.SUPABASE_SECRET_KEY),
     {
       error:
-        "Set both SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY, or neither (to use the in-memory waitlist).",
+        "Set both NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY, or neither (to use the in-memory waitlist).",
     },
   )
+  .refine((env) => !env.SUPABASE_SECRET_KEY?.startsWith("sb_publishable_"), {
+    // The publishable key can't write to the waitlist (RLS + revoked grants).
+    error:
+      "SUPABASE_SECRET_KEY holds a publishable key (sb_publishable_...). Use the project's secret key (sb_secret_...).",
+  })
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>
 
