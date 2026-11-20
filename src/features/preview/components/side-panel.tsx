@@ -18,6 +18,10 @@ export const reasoningPanel = Drawer.createHandle()
 
 type PanelHandle = typeof askPanel
 
+/** Icon buttons in a panel header (close, and any `actions`). */
+export const panelIconClass =
+  "grid size-8 shrink-0 place-items-center rounded-lg text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-40"
+
 const backdropClass =
   "fixed inset-0 z-50 min-h-dvh bg-black [--backdrop-opacity:0.18] opacity-[calc(var(--backdrop-opacity)*(1-var(--drawer-swipe-progress)))] transition-opacity duration-[450ms] ease-[cubic-bezier(0.32,0.72,0,1)] data-swiping:duration-0 data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)] motion-reduce:transition-none"
 
@@ -30,14 +34,20 @@ type SidePanelProps = {
   handle: PanelHandle
   title: string
   description?: string
+  /** Buttons in the header, before Close (e.g. New chat, Open full chat). */
+  actions?: React.ReactNode
+  /** Pinned below the scrolling body (e.g. a chat composer). */
+  footer?: React.ReactNode
   children: React.ReactNode
 }
 
-/** The panel itself: header with title and close, a scrolling body. */
+/** The panel itself: header with title and close, a scrolling body, an optional footer. */
 export function SidePanel({
   handle,
   title,
   description,
+  actions,
+  footer,
   children,
 }: SidePanelProps) {
   return (
@@ -57,16 +67,24 @@ export function SidePanel({
                   </Drawer.Description>
                 )}
               </div>
-              <Drawer.Close
-                aria-label={shell.close}
-                className="grid size-8 shrink-0 place-items-center rounded-lg text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
-              >
-                <XIcon className="size-4" aria-hidden />
-              </Drawer.Close>
+              <div className="flex shrink-0 items-center gap-0.5">
+                {actions}
+                <Drawer.Close
+                  aria-label={shell.close}
+                  className={panelIconClass}
+                >
+                  <XIcon className="size-4" aria-hidden />
+                </Drawer.Close>
+              </div>
             </header>
             <Drawer.Content className="flex-1 overflow-y-auto overscroll-contain px-5 py-5">
               {children}
             </Drawer.Content>
+            {footer && (
+              <div className="border-t border-border px-4 pt-3 pb-4">
+                {footer}
+              </div>
+            )}
           </Drawer.Popup>
         </Drawer.Viewport>
       </Drawer.Portal>

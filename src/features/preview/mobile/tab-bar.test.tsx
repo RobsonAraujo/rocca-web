@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { PORTFOLIO_PATH, PREVIEW_PATH } from "../constants"
 import { ask, comingSoon, mobile } from "../data"
+import { renderWithDemo } from "../test-utils"
 import { AskSheet } from "./ask-sheet"
 import { MobileTabBar } from "./tab-bar"
 
@@ -14,7 +15,7 @@ vi.mock("next/navigation", () => ({ usePathname: () => nav.pathname }))
 vi.mock("sonner", () => ({ toast: vi.fn() }))
 
 function renderTabBar() {
-  return render(
+  return renderWithDemo(
     <>
       <MobileTabBar />
       <AskSheet />

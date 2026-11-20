@@ -10,7 +10,7 @@ import {
 
 import { illustrations, preview } from "@/features/landing/content"
 
-import { PORTFOLIO_PATH, PREVIEW_PATH } from "./constants"
+import { ASK_PATH, PORTFOLIO_PATH, PREVIEW_PATH } from "./constants"
 
 /**
  * Copy and simulated data for the dashboard preview. Nothing here is real or
@@ -72,7 +72,7 @@ export const shell = {
   nav: [
     { label: "Overview", icon: LayoutDashboardIcon, href: PREVIEW_PATH },
     { label: "Portfolio", icon: ChartPieIcon, href: PORTFOLIO_PATH },
-    { label: "Agent", icon: SparklesIcon },
+    { label: "Ask Rocca", icon: SparklesIcon, href: ASK_PATH },
     { label: "Learn", icon: GraduationCapIcon },
     { label: "Rules", icon: ShieldCheckIcon },
     { label: "Settings", icon: SettingsIcon },
@@ -89,45 +89,179 @@ export const status = {
   clear: "Nothing waiting on you",
 } as const
 
+/**
+ * One piece of a chat answer: a paragraph (with **bold**), a bullet list, or
+ * a live dashboard component rendered inside the conversation.
+ */
+export type AnswerBlock =
+  | { type: "text"; text: string }
+  | { type: "list"; items: readonly string[] }
+  | { type: "movers" | "allocation" | "trade" | "account" }
+
+/** A scripted exchange: the preview answers these, richly and consistently. */
+export type AskScript = {
+  question: string
+  /** Other phrasings that get the same answer ("Ask why" on the card). */
+  aliases?: readonly string[]
+  blocks: readonly AnswerBlock[]
+  sources: readonly string[]
+  followUps: readonly string[]
+}
+
+/** Beginner-friendly starters: the questions the preview answers. */
+const askSuggestions = [
+  "Why did my portfolio go up?",
+  "Am I diversified enough?",
+  "What should I do about NVDA?",
+  "What's a Roth IRA?",
+] as const
+
 export const ask = {
   label: "Ask Rocca",
   description: "Plain English, no jargon.",
-  /** A sample exchange so visitors see the tone of the answers. */
-  sample: {
-    label: "Example conversation",
-    you: "You",
-    question: "Why did my portfolio go up this week?",
-    answer:
-      "Mostly NVDA. It added $3,120 of your $4,390 gain. Your index funds simply moved with the market.",
-    followUp: "Want me to explain why one stock doing this much matters?",
-  },
+  you: "You",
+  /** The empty chat, ChatGPT-style: a question, the composer, starters. */
+  greeting: "What do you want to know about your money?",
+  greetingNote: "Rocca answers from your accounts, in plain English.",
+  conversation: "Conversation",
   /** Field label; distinct from the section name so screen readers can tell them apart. */
   inputLabel: "Your question",
-  placeholder: "Ask Rocca anything about your money…",
+  placeholder: "Ask Rocca anything…",
   submit: "Send",
+  stop: "Stop answering",
   attach: "Attach a statement",
+  voice: "Ask out loud",
   /** Beginner mode: answers without jargon. */
   explainSimply: "Explain simply",
   hint: "Enter to send · Shift + Enter for a new line",
-  /** Beginner-friendly prompts: the tone is "learn while Rocca handles it". */
-  suggestions: [
-    "What's a Roth IRA?",
-    "Am I diversified enough?",
-    "Why did my portfolio go up?",
-  ],
-  /** Canned answers for the suggestions, consistent with the simulated data. */
-  answers: {
-    "What's a Roth IRA?":
-      "A retirement account you fund with money you've already paid tax on. In return, it grows tax-free and you can take it out tax-free after 59½. That's why Rocca put the NVDA trade there: selling inside it costs you $0 in tax.",
-    "Am I diversified enough?":
-      "Mostly, with one gap. NVDA is 18% of your holdings, and your index funds hold another 4.1% of it, so about 22% of your money rides on one company. Your rule caps a single stock at 12%. Everything else is spread across thousands of companies.",
-    "Why did my portfolio go up?":
-      "Mostly NVDA. It added $3,120 of your $4,390 gain this week. Your index funds simply moved with the market.",
-  } as Record<string, string>,
-  /** Any question without a canned answer. */
-  fallback:
-    "Good question. In the beta, Rocca answers anything about your accounts, using your real holdings. In this preview it only knows the three suggested questions.",
-  thinking: "Rocca is typing…",
+  /** Under the composer, like any AI chat: what this is and isn't. */
+  disclaimer: "Simulated answers · Not investment advice",
+  thinking: "Rocca is thinking…",
+  sourcesLabel: "Sources",
+  actions: {
+    copy: "Copy answer",
+    copied: "Copied",
+    good: "Good answer",
+    bad: "Bad answer",
+    retry: "Answer again",
+  },
+  openFull: "Open full chat",
+  newChat: "New chat",
+  history: {
+    label: "Chats",
+    today: "Today",
+    earlier: "Previous 7 days",
+    items: [
+      "Is my Roth IRA set up right?",
+      "How do index funds work?",
+      "What happened in March?",
+      "Should I keep this much cash?",
+    ],
+  },
+  /** Titles of the components Rocca shows inside answers. */
+  blocks: {
+    movers: "What moved this week",
+    allocation: "Your mix vs. your targets",
+    allocationLink: "See allocation",
+    trade: "Trim NVDA to 12%",
+    tradeStatus: "Needs your OK",
+    tradeLink: "Open on the dashboard",
+    account: "Your Roth IRA",
+  },
+  suggestions: askSuggestions,
+  /** Answers consistent with the simulated data, component by component. */
+  scripts: [
+    {
+      question: "Why did my portfolio go up?",
+      blocks: [
+        {
+          type: "text",
+          text: "Mostly **NVDA**. It added $3,120 of your $4,390 gain this week. Your index funds simply moved with the market.",
+        },
+        { type: "movers" },
+        {
+          type: "text",
+          text: "One thing to watch: NVDA is now **18% of your money**, above your 12% rule. That's why a suggestion is waiting for you.",
+        },
+      ],
+      sources: ["Your accounts", "Market data"],
+      followUps: ["What should I do about NVDA?", "Am I diversified enough?"],
+    },
+    {
+      question: "Am I diversified enough?",
+      blocks: [
+        {
+          type: "text",
+          text: "Mostly, with **one gap**. NVDA is 18% of your holdings, and your index funds hold another 4.1% of it, so about 22% of your money rides on one company.",
+        },
+        { type: "allocation" },
+        {
+          type: "list",
+          items: [
+            "US stocks are 70.5% of your money; your target is 60%.",
+            "International is 9%, below your 20% target.",
+            "Everything else is spread across thousands of companies.",
+          ],
+        },
+      ],
+      sources: ["Your rules", "Fund holdings"],
+      followUps: ["What should I do about NVDA?", "What's a Roth IRA?"],
+    },
+    {
+      question: "What should I do about NVDA?",
+      aliases: ["Why trim NVDA?"],
+      blocks: [
+        {
+          type: "text",
+          text: "Trim it back to your **12% limit**. Here's the trade I'd place. It runs in your Roth IRA, so it costs **$0 in tax** instead of about $765 in your brokerage.",
+        },
+        { type: "trade" },
+        {
+          type: "text",
+          text: "Your call: approve it here or on the dashboard. If you skip it, I'll check NVDA again tomorrow and tell you if anything changes.",
+        },
+      ],
+      sources: ["Your rules", "Tax lots", "Broker access"],
+      followUps: ["What's a Roth IRA?", "Why did my portfolio go up?"],
+    },
+    {
+      question: "What's a Roth IRA?",
+      blocks: [
+        {
+          type: "text",
+          text: "A retirement account you fund with money you've **already paid tax on**. In return:",
+        },
+        {
+          type: "list",
+          items: [
+            "It grows tax-free.",
+            "You can take it out tax-free after 59½.",
+            "Selling inside it costs you $0 in tax.",
+          ],
+        },
+        { type: "account" },
+        {
+          type: "text",
+          text: "That's why Rocca put the NVDA trade in yours.",
+        },
+      ],
+      sources: ["Your accounts"],
+      followUps: ["What should I do about NVDA?", "Am I diversified enough?"],
+    },
+  ] satisfies AskScript[],
+  /** Any question without a script. */
+  fallback: {
+    blocks: [
+      {
+        type: "text",
+        text: "Good question. In the beta, Rocca answers anything about your accounts, using your real holdings. In this preview, it knows the questions below.",
+      },
+    ],
+    sources: [],
+    followUps: askSuggestions,
+  } satisfies Omit<AskScript, "question">,
+  /** "Ask why" on the decision card asks this. */
+  askWhy: "Why trim NVDA?",
 } as const
 
 /** What Rocca can do at each account's broker (`illustrations.accounts[].access`). */

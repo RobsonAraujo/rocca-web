@@ -4,10 +4,10 @@ import { OrderLines } from "@/components/product/order-lines"
 import { cn } from "@/lib/utils"
 
 import { panelClass, panelLinkClass } from "../components/panel"
+import { AskWhyButton } from "../components/ask-panel"
 import {
   SidePanel,
   SidePanelTrigger,
-  askPanel,
   reasoningPanel,
 } from "../components/side-panel"
 import { accountAccess, suggestion } from "../data"
@@ -105,8 +105,7 @@ export function SuggestionWidget({ className }: { className?: string }) {
             {suggestion.review}
             <ArrowRightIcon className="size-3.5" aria-hidden />
           </SidePanelTrigger>
-          <SidePanelTrigger
-            handle={askPanel}
+          <AskWhyButton
             className={cn(
               panelLinkClass,
               "text-muted-foreground hover:text-foreground",
@@ -114,7 +113,7 @@ export function SuggestionWidget({ className }: { className?: string }) {
           >
             <MessageCircleQuestionIcon className="size-3.5" aria-hidden />
             {suggestion.askWhy}
-          </SidePanelTrigger>
+          </AskWhyButton>
         </div>
       </div>
 

@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { footer } from "@/features/landing/content"
 
-import { PORTFOLIO_PATH, PREVIEW_PATH } from "./constants"
+import { ASK_PATH, PORTFOLIO_PATH, PREVIEW_PATH } from "./constants"
 import { ask, comingSoon, shell } from "./data"
 import { PreviewShell } from "./shell"
 
@@ -57,7 +57,7 @@ describe("PreviewShell", () => {
       within(sidebar).getByRole("link", { name: "Portfolio" }),
     ).toHaveAttribute("href", PORTFOLIO_PATH)
     expect(
-      within(sidebar).getByRole("button", { name: "Agent, coming soon" }),
+      within(sidebar).getByRole("button", { name: "Learn, coming soon" }),
     ).toBeInTheDocument()
     expect(
       within(sidebar).getByRole("link", { name: shell.backToSite }),
@@ -85,6 +85,15 @@ describe("PreviewShell", () => {
         selector: "[data-slot=tooltip-content]",
       }),
     ).toBeInTheDocument()
+  })
+
+  it("links the full Ask Rocca chat from the nav", () => {
+    render(<PreviewShell>page</PreviewShell>)
+
+    const sidebar = screen.getByRole("complementary")
+    expect(
+      within(sidebar).getByRole("link", { name: ask.label }),
+    ).toHaveAttribute("href", ASK_PATH)
   })
 
   it("opens Ask Rocca in a side panel from the top bar", async () => {
@@ -120,8 +129,8 @@ describe("PreviewShell", () => {
     const user = userEvent.setup()
     render(<PreviewShell>page</PreviewShell>)
 
-    const [agent] = screen.getAllByRole("button", { name: /^Agent/ })
-    await user.click(agent!)
+    const [learn] = screen.getAllByRole("button", { name: /^Learn/ })
+    await user.click(learn!)
 
     expect(toast).toHaveBeenCalledWith(
       comingSoon.title,

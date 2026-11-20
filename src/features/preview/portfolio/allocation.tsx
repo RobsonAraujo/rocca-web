@@ -11,7 +11,7 @@ import { allocation, allocationCopy } from "./data"
  * One hue (brand) at decreasing strength, plus a neutral for cash: the bars
  * read clearly without adding colors to the palette.
  */
-const classColor: Record<AssetClass, string> = {
+export const classColor: Record<AssetClass, string> = {
   "US stocks": "bg-brand",
   International: "bg-brand/65",
   Bonds: "bg-brand/40",
@@ -20,7 +20,7 @@ const classColor: Record<AssetClass, string> = {
 }
 
 /** One stacked bar: every asset class side by side, widths by share. */
-function MixBar({
+export function MixBar({
   label,
   shares,
 }: {

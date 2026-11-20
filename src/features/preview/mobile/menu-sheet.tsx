@@ -17,7 +17,8 @@ const rowClass =
 
 /**
  * The desktop sidebar, as a phone sheet (opened by the "More" tab). Built
- * pages close the sheet as they navigate; the rest show coming soon.
+ * pages are real links that close the sheet as they navigate (a Close
+ * rendered as a link would lose link semantics); the rest show coming soon.
  */
 export function MenuSheet() {
   const pathname = usePathname()
@@ -47,17 +48,14 @@ export function MenuSheet() {
             return (
               <li key={label}>
                 {href ? (
-                  <Drawer.Close
-                    render={
-                      <Link
-                        href={href}
-                        aria-current={current ? "page" : undefined}
-                      />
-                    }
+                  <Link
+                    href={href}
+                    aria-current={current ? "page" : undefined}
+                    onClick={() => menuSheet.close()}
                     className={cn(rowClass, current && "text-brand")}
                   >
                     {content}
-                  </Drawer.Close>
+                  </Link>
                 ) : (
                   <ComingSoonButton
                     variant="ghost"
@@ -73,13 +71,14 @@ export function MenuSheet() {
             )
           })}
         </ul>
-        <Drawer.Close
-          render={<Link href="/" />}
+        <Link
+          href="/"
+          onClick={() => menuSheet.close()}
           className="mt-4 flex h-12 items-center justify-center gap-2 rounded-2xl text-sm text-muted-foreground outline-none active:bg-secondary"
         >
           <ArrowLeftIcon className="size-4" aria-hidden />
           {mobile.menu.backToSite}
-        </Drawer.Close>
+        </Link>
       </SheetFrame>
     </Drawer.Root>
   )
