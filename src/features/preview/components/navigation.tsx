@@ -1,15 +1,18 @@
+import { BellIcon } from "lucide-react"
 import Link from "next/link"
 
 import { Logo } from "@/components/layout/logo"
 import { cn } from "@/lib/utils"
 
 import { shell } from "../data"
-import { CurrentPageTitle, NavItems } from "./nav-items"
+import { AskTrigger } from "./ask-panel"
+import { ComingSoonButton } from "./coming-soon"
+import { NavItems } from "./nav-items"
 
 export const focusRing =
   "rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
 
-/** Always on screen somewhere: top bar from sm up, page header on phones. */
+/** Always on screen somewhere: the top bar on wide screens, else the page header. */
 export function SimulatedBadge({ className }: { className?: string }) {
   return (
     <span
@@ -24,45 +27,73 @@ export function SimulatedBadge({ className }: { className?: string }) {
   )
 }
 
-export function Avatar() {
+export function Avatar({ className }: { className?: string }) {
   return (
     <span
       aria-label={shell.user.name}
       role="img"
-      className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-sm font-semibold text-primary-foreground"
+      className={cn(
+        "grid size-9 shrink-0 place-items-center rounded-full bg-primary text-sm font-semibold text-primary-foreground",
+        className,
+      )}
     >
       {shell.user.initials}
     </span>
   )
 }
 
-/** Sticky top bar: nav row on tablets, page title on desktop. Phones use the mobile app bar instead. */
+/** Bell with an amber dot: one unread item, the suggestion waiting for you. */
+export function NotificationsButton({ className }: { className?: string }) {
+  return (
+    <ComingSoonButton
+      variant="ghost"
+      size="icon"
+      aria-label={shell.notifications}
+      className={cn("relative size-9 rounded-lg", className)}
+    >
+      <BellIcon className="size-[1.125rem]" aria-hidden />
+      <span
+        aria-hidden
+        className="absolute top-2 right-2 size-2 rounded-full bg-attention ring-2 ring-background"
+      />
+    </ComingSoonButton>
+  )
+}
+
+/**
+ * Sticky top bar for tablets and desktop (phones use the mobile app bar):
+ * the Ask Rocca field on the left, status, notifications and profile on the
+ * right. The page title lives in each page's header. Tablets also get the
+ * nav in a row below.
+ */
 export function TopBar({ className }: { className?: string }) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-20 border-b border-border/70 bg-background/85 backdrop-blur-md",
+        "sticky top-0 z-20 border-b border-border bg-background/85 backdrop-blur-md",
         className,
       )}
     >
-      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-14 w-full max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
         <Link
           href="/"
           aria-label="Rocca home"
-          className={cn("lg:hidden", focusRing)}
+          className={cn("shrink-0 lg:hidden", focusRing)}
         >
           <Logo />
         </Link>
-        <CurrentPageTitle />
-        <div className="flex items-center gap-3">
-          <SimulatedBadge className="hidden sm:inline-flex" />
-          <Avatar />
+        <AskTrigger className="w-full max-w-sm" />
+        <div className="ml-auto flex items-center gap-2">
+          <SimulatedBadge className="hidden xl:inline-flex" />
+          <NotificationsButton />
+          {/* Desktop shows the profile at the bottom of the sidebar. */}
+          <Avatar className="size-8 text-xs lg:hidden" />
         </div>
       </div>
-      {/* Phones and tablets: the nav scrolls sideways inside its own row. */}
+      {/* Tablets: the nav scrolls sideways inside its own row. */}
       <nav
         aria-label="Dashboard"
-        className="overflow-x-auto border-t border-border/70 lg:hidden"
+        className="overflow-x-auto border-t border-border lg:hidden"
       >
         <div className="mx-auto w-full max-w-7xl px-3 py-2 sm:px-5">
           <NavItems layout="horizontal" />

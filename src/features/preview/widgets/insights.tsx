@@ -8,10 +8,20 @@ import {
 import { cn } from "@/lib/utils"
 
 import { ComingSoonButton } from "../components/coming-soon"
-import { Panel } from "../components/panel"
+import { Delta } from "../components/delta"
+import { Panel, panelLinkClass, panelSection } from "../components/panel"
 import { moves, savings, trackRecord } from "../data"
 
-/** Smaller widgets for the bottom row: what moved, money leaks, honesty. */
+/** Smaller widgets for the overview's lower rows: what moved, money leaks, honesty. */
+
+/** A quiet "coming soon" link for a panel header. */
+function HeaderLink({ children }: { children: string }) {
+  return (
+    <ComingSoonButton variant="link" className={panelLinkClass}>
+      {children}
+    </ComingSoonButton>
+  )
+}
 
 export function MovesWidget({ className }: { className?: string }) {
   return (
@@ -19,9 +29,7 @@ export function MovesWidget({ className }: { className?: string }) {
       id="moves"
       title={moves.title}
       icon={ActivityIcon}
-      action={
-        <span className="text-xs font-medium text-brand">{moves.change}</span>
-      }
+      action={<Delta value={moves.change} className="text-[13px]" />}
       className={className}
     >
       <ul className="space-y-3">
@@ -33,22 +41,20 @@ export function MovesWidget({ className }: { className?: string }) {
             <span className="font-medium">{move.symbol}</span>
             <span className="h-1.5 overflow-hidden rounded-full bg-secondary">
               <span
-                className="block h-full rounded-full bg-brand"
+                className="block h-full rounded-full bg-brand/70"
                 style={{ width: `${move.share}%` }}
               />
             </span>
-            <span className="font-medium whitespace-nowrap tabular-nums">
-              {move.amount}
-            </span>
+            <Delta value={move.amount} className="justify-self-end" />
           </li>
         ))}
       </ul>
-      <p className="mt-4 text-sm leading-relaxed text-pretty text-muted-foreground">
+      <p className="mt-4 text-[13px] leading-relaxed text-pretty text-muted-foreground">
         {moves.explanation}
       </p>
 
-      <div className="mt-auto border-t border-border pt-4">
-        <h3 className="mt-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+      <div className={cn(panelSection, "mt-auto")}>
+        <h3 className="text-xs font-medium text-muted-foreground">
           {moves.upcomingTitle}
         </h3>
         <ul className="mt-2 space-y-2 text-sm">
@@ -80,6 +86,7 @@ export function SavingsWidget({ className }: { className?: string }) {
       title={savings.title}
       description={savings.description}
       icon={PiggyBankIcon}
+      action={<HeaderLink>{savings.cta}</HeaderLink>}
       className={className}
     >
       <p className="text-3xl font-semibold tracking-tight tabular-nums">
@@ -92,7 +99,7 @@ export function SavingsWidget({ className }: { className?: string }) {
         {savings.items.map((item) => (
           <li
             key={item.label}
-            className="flex items-start justify-between gap-3 py-3"
+            className="flex items-start justify-between gap-3 py-3 last:pb-0"
           >
             <div>
               <p className="text-sm font-medium">{item.label}</p>
@@ -100,17 +107,12 @@ export function SavingsWidget({ className }: { className?: string }) {
                 {item.detail}
               </p>
             </div>
-            <span className="shrink-0 text-sm font-semibold whitespace-nowrap text-brand tabular-nums">
+            <span className="shrink-0 text-sm font-semibold whitespace-nowrap tabular-nums">
               {item.amount}
             </span>
           </li>
         ))}
       </ul>
-      <div className="mt-auto pt-3">
-        <ComingSoonButton variant="outline" className="h-9 w-full rounded-full">
-          {savings.cta}
-        </ComingSoonButton>
-      </div>
     </Panel>
   )
 }
@@ -122,52 +124,58 @@ export function TrackRecordWidget({ className }: { className?: string }) {
       title={trackRecord.title}
       description={trackRecord.description}
       icon={HistoryIcon}
+      action={<HeaderLink>{trackRecord.cta}</HeaderLink>}
       className={className}
     >
-      <dl className="divide-y divide-border rounded-xl border border-border">
-        {trackRecord.stats.map((stat) => (
-          <div
-            key={stat.label}
-            className="flex items-baseline justify-between gap-3 px-3 py-2.5"
-          >
-            <dt className="text-sm text-muted-foreground">
-              {stat.label}
-              {"hint" in stat && (
-                <span className="block text-xs">{stat.hint}</span>
-              )}
-            </dt>
-            <dd
-              className={cn(
-                "text-lg font-semibold tabular-nums",
-                "hint" in stat && "text-brand",
-              )}
-            >
-              {stat.value}
-            </dd>
-          </div>
-        ))}
-      </dl>
+      {/* Wide panels: the numbers beside the misses; narrow: stacked. */}
+      <div className="grid gap-5 md:grid-cols-2 md:gap-8">
+        <div>
+          <dl className="grid grid-cols-3 divide-x divide-border rounded-lg border border-border">
+            {trackRecord.stats.map((stat) => (
+              <div key={stat.label} className="min-w-0 px-3 py-2.5">
+                <dt className="truncate text-xs text-muted-foreground">
+                  {stat.label}
+                </dt>
+                <dd
+                  className={cn(
+                    "mt-0.5 text-lg font-semibold tabular-nums",
+                    "hint" in stat && "text-brand",
+                  )}
+                >
+                  {stat.value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+          {trackRecord.stats.map(
+            (stat) =>
+              "hint" in stat && (
+                <p
+                  key={stat.label}
+                  className="mt-2 text-xs text-muted-foreground"
+                >
+                  {stat.label}: {stat.hint}
+                </p>
+              ),
+          )}
+        </div>
 
-      <h3 className="mt-5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-        {trackRecord.missesTitle}
-      </h3>
-      <ul className="mt-2 space-y-2 text-sm">
-        {trackRecord.misses.map((miss) => (
-          <li
-            key={miss.label}
-            className="flex items-center justify-between gap-3"
-          >
-            <span>{miss.label}</span>
-            <span className="shrink-0 font-medium whitespace-nowrap text-destructive tabular-nums">
-              {miss.impact}
-            </span>
-          </li>
-        ))}
-      </ul>
-      <div className="mt-auto pt-4">
-        <ComingSoonButton variant="ghost" className="h-9 w-full rounded-full">
-          {trackRecord.cta}
-        </ComingSoonButton>
+        <div>
+          <h3 className="text-xs font-medium text-muted-foreground">
+            {trackRecord.missesTitle}
+          </h3>
+          <ul className="mt-1 divide-y divide-border text-sm">
+            {trackRecord.misses.map((miss) => (
+              <li
+                key={miss.label}
+                className="flex items-center justify-between gap-3 py-2 last:pb-0"
+              >
+                <span>{miss.label}</span>
+                <Delta value={miss.impact} className="shrink-0" />
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </Panel>
   )

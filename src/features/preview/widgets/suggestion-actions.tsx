@@ -45,7 +45,7 @@ function ResetButton({ className }: { className?: string }) {
       variant="outline"
       size="sm"
       onClick={reset}
-      className={cn("rounded-full bg-card px-3", className)}
+      className={cn("rounded-lg bg-card px-3", className)}
     >
       <RotateCcwIcon aria-hidden />
       {demo.reset}
@@ -72,7 +72,7 @@ function Receipt() {
           <CheckIcon className="size-4" aria-hidden />
         </span>
         <div>
-          <p className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+          <p className="text-xs font-medium text-muted-foreground">
             {receipt.eyebrow}
           </p>
           <p className="font-semibold">{receipt.title}</p>
@@ -119,9 +119,9 @@ function Outcome({ className }: { className?: string }) {
       {status === "done" && <Receipt />}
       {status === "skipped" && <Skipped />}
       {status !== "placing" && (
-        <div className="flex flex-col gap-3 border-t border-border pt-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col items-start gap-3 border-t border-border pt-3">
           <WaitlistNote />
-          <ResetButton className="self-start sm:self-auto" />
+          <ResetButton />
         </div>
       )}
     </div>
@@ -129,28 +129,22 @@ function Outcome({ className }: { className?: string }) {
 }
 
 /**
- * Desktop decision bar: Approve / Not now, then the simulated outcome in the
- * same spot. `aria-live` announces "placing" and the receipt.
+ * Desktop decision: Approve / Not now side by side, the "nothing happens
+ * until you approve" note, then the simulated outcome in the same spot.
+ * `aria-live` announces "placing" and the receipt.
  */
 export function DecisionBar() {
   const { suggestion: status, approve, skip } = useDemo()
   const { order } = suggestion
   return (
-    <div
-      aria-live="polite"
-      className="rounded-2xl border border-border bg-secondary/50 p-3 sm:p-4"
-    >
+    <div aria-live="polite">
       {status === "pending" ? (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <DecisionNote />
-          <div className="flex gap-2">
+        <>
+          <div className="grid grid-cols-[1fr_auto] gap-2">
             <Button
               type="button"
               onClick={approve}
-              className={cn(
-                "h-11 flex-1 rounded-full px-6 text-sm sm:flex-none",
-                toneClasses.brand.solid,
-              )}
+              className={cn("h-10 rounded-lg text-sm", toneClasses.brand.solid)}
             >
               <CheckIcon aria-hidden />
               {order.approve}
@@ -159,13 +153,13 @@ export function DecisionBar() {
               type="button"
               variant="outline"
               onClick={skip}
-              className="h-11 flex-1 rounded-full bg-card px-5 text-sm sm:flex-none"
+              className="h-10 rounded-lg bg-card px-4 text-sm"
             >
-              <XIcon aria-hidden />
               {order.dismiss}
             </Button>
           </div>
-        </div>
+          <DecisionNote className="mt-3 text-xs [&_svg]:size-3.5" />
+        </>
       ) : (
         <Outcome />
       )}

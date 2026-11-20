@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react"
+import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { toast } from "sonner"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { footer } from "@/features/landing/content"
 
 import { PORTFOLIO_PATH, PREVIEW_PATH } from "./constants"
-import { comingSoon, shell } from "./data"
+import { ask, comingSoon, shell } from "./data"
 import { PreviewShell } from "./shell"
 
 const nav = vi.hoisted(() => ({ pathname: "/preview" }))
@@ -85,6 +85,35 @@ describe("PreviewShell", () => {
         selector: "[data-slot=tooltip-content]",
       }),
     ).toBeInTheDocument()
+  })
+
+  it("opens Ask Rocca in a side panel from the top bar", async () => {
+    const user = userEvent.setup()
+    render(<PreviewShell>page</PreviewShell>)
+
+    await user.click(
+      screen.getByRole("button", { name: shell.askTrigger.label }),
+    )
+
+    const panel = await screen.findByRole("dialog", { name: ask.label })
+    expect(within(panel).getByLabelText(ask.inputLabel)).toBeInTheDocument()
+  })
+
+  it("opens and closes Ask Rocca with ⌘K", async () => {
+    const user = userEvent.setup()
+    render(<PreviewShell>page</PreviewShell>)
+
+    await user.keyboard("{Meta>}k{/Meta}")
+    expect(
+      await screen.findByRole("dialog", { name: ask.label }),
+    ).toBeInTheDocument()
+
+    await user.keyboard("{Meta>}k{/Meta}")
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("dialog", { name: ask.label }),
+      ).not.toBeInTheDocument(),
+    )
   })
 
   it("shows the coming-soon notice for sections that aren't built", async () => {

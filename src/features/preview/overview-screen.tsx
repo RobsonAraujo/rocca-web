@@ -28,7 +28,7 @@ export function OverviewScreen({
         <WelcomeBanner />
         <GuidedTour />
       </Suspense>
-      <div className="hidden space-y-6 md:block">
+      <div className="hidden space-y-5 md:block">
         <Overview news={news} />
       </div>
       <div className="space-y-6 md:hidden">

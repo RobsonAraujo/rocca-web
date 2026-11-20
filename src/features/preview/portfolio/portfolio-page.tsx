@@ -1,9 +1,10 @@
-import { PlusIcon, TrendingUpIcon } from "lucide-react"
+import { PlusIcon } from "lucide-react"
 
 import { buttonVariants } from "@/components/ui/button"
 import { preview } from "@/features/landing/content"
 import { cn } from "@/lib/utils"
 
+import { Delta } from "../components/delta"
 import { PageHeader } from "../components/page-header"
 import { AccountsWidget } from "./accounts"
 import { AllocationWidget } from "./allocation"
@@ -27,18 +28,18 @@ function MobilePortfolioHero() {
       <p className="mt-1 text-[2.5rem] leading-none font-semibold tracking-tight tabular-nums">
         {preview.portfolio.value}
       </p>
-      <p className="mt-3 inline-flex items-center gap-1 rounded-full bg-brand/10 px-2.5 py-1 text-sm font-medium text-brand">
-        <TrendingUpIcon className="size-4" aria-hidden />
-        {kpis.value.hint}
+      <p className="mt-3 flex items-center gap-1.5 text-sm">
+        <Delta value={kpis.value.delta} />
+        <span className="text-muted-foreground">{kpis.value.hint}</span>
       </p>
     </section>
   )
 }
 
 /**
- * Simulated Portfolio page: headline numbers, allocation vs targets,
- * look-through exposure and Rocca's insights, then accounts and holdings.
- * Phones get a hero and a segmented control instead of the page header.
+ * Simulated Portfolio page: headline numbers, then allocation vs targets and
+ * look-through exposure beside Rocca's insights and the accounts, then every
+ * holding. Phones get a hero and a segmented control instead of the header.
  */
 export function PortfolioPage() {
   return (
@@ -50,7 +51,10 @@ export function PortfolioPage() {
         subtitle={page.subtitle}
         actions={
           <ConnectTrigger
-            className={cn(buttonVariants({ size: "sm" }), "rounded-full px-3")}
+            className={cn(
+              buttonVariants({ size: "sm" }),
+              "h-8 rounded-lg px-3",
+            )}
           >
             <PlusIcon aria-hidden />
             {page.connect}
@@ -61,15 +65,15 @@ export function PortfolioPage() {
       <KpiStrip />
 
       <PortfolioViews>
-        {/* Desktop: allocation, exposure and accounts stacked beside the insights column. */}
+        {/* Desktop: allocation, exposure and accounts stacked beside the insights column (similar heights). */}
         {/* Phones, Holdings view: everything in this grid is hidden, so drop the grid too (no stray gap). */}
-        <div className="grid gap-4 max-md:in-data-[view=holdings]:hidden lg:grid-cols-12 lg:gap-6">
-          <div className="flex flex-col gap-4 lg:col-span-7 lg:gap-6">
+        <div className="grid gap-4 max-md:in-data-[view=holdings]:hidden lg:grid-cols-12 lg:gap-5">
+          <div className="flex flex-col gap-4 lg:col-span-8 lg:gap-5">
             <AllocationWidget className={viewClasses.overview} />
             <ExposureWidget className={viewClasses.overview} />
             <AccountsWidget className={viewClasses.accounts} />
           </div>
-          <InsightsWidget className={`lg:col-span-5 ${viewClasses.overview}`} />
+          <InsightsWidget className={`lg:col-span-4 ${viewClasses.overview}`} />
         </div>
 
         <HoldingsWidget className={viewClasses.holdings} />

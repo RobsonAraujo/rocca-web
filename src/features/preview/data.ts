@@ -59,7 +59,14 @@ export const shell = {
   expandMenu: "Expand menu",
   greeting: "Good morning",
   subtitle: "Here's what your agent is watching today.",
-  user: { name: "You", initials: "Y" },
+  user: { name: "You", initials: "Y", plan: "Waitlist preview" },
+  notifications: "Notifications",
+  /** The search-like field in the top bar that opens the Ask panel. */
+  askTrigger: {
+    label: "Ask Rocca",
+    placeholder: "Ask Rocca about your money…",
+  },
+  close: "Close",
   nav: [
     { label: "Overview", icon: LayoutDashboardIcon, href: PREVIEW_PATH },
     { label: "Portfolio", icon: ChartPieIcon, href: PORTFOLIO_PATH },
@@ -68,14 +75,6 @@ export const shell = {
     { label: "Rules", icon: ShieldCheckIcon },
     { label: "Settings", icon: SettingsIcon },
   ] satisfies NavItem[],
-} as const
-
-/** The overview is split in three zones, most important first. */
-export const sections = {
-  attention: "Needs your OK",
-  learn: "Learn & ask",
-  money: "Your money",
-  news: "In the news",
 } as const
 
 /** At-a-glance status in the page header. */
@@ -130,60 +129,113 @@ export const accountAccess = {
   view: "View only",
 } as const
 
+/** How far apart two chart points are, for "12 days ago" while scrubbing. */
+export type ChartStep = { unit: "day" | "week" | "month"; size: number }
+
 export const portfolio = {
-  title: "Your portfolio",
+  title: "Total portfolio",
   description: "All your accounts, in one place.",
   viewAll: "View portfolio",
   value: preview.portfolio.value,
   weekChange: { amount: "+$4,390", label: preview.portfolio.change },
+  byAccount: "By account",
   chart: {
     ranges: ["1W", "1M", "1Y", "All"],
     defaultRange: "1M",
+    today: "Today",
+    benchmark: {
+      name: "S&P 500",
+      toggle: "vs S&P 500",
+      /** Shown in the legend: the benchmark line is made up like the rest. */
+      note: "simulated",
+    },
     /**
      * Closes per range, oldest first. Every series ends on today's total
      * ($248,310), and 1W starts at $243,920 so it matches "+$4,390 this week".
      * The change shown next to the chart is computed from these values.
+     *
+     * `benchmark` is what the same starting amount would be worth in the
+     * S&P 500 (simulated), so both lines start together.
      */
     series: {
       "1W": {
         caption: "Past week",
+        since: "1 week ago",
+        step: { unit: "day", size: 1 },
         values: [
           243920, 244700, 245900, 245300, 246800, 247600, 247100, 248310,
+        ],
+        benchmark: [
+          243920, 243500, 244580, 245210, 244830, 245310, 245360, 246120,
         ],
       },
       "1M": {
         caption: "Past month",
+        since: "1 month ago",
+        step: { unit: "day", size: 1 },
         values: [
           240120, 239480, 240950, 241700, 241050, 242300, 243100, 242600,
           243800, 244350, 243700, 242900, 243600, 244800, 245300, 244100,
           243500, 244200, 245100, 244600, 243400, 243920, 244700, 245900,
           245300, 246800, 247600, 247100, 248310,
         ],
+        benchmark: [
+          240120, 240320, 240520, 240310, 240270, 241470, 241780, 241310,
+          241190, 241380, 241470, 241850, 241710, 242900, 242690, 243320,
+          243340, 242570, 243420, 243010, 244240, 243850, 244040, 244190,
+          244060, 243920, 244120, 245690, 245170,
+        ],
       },
       "1Y": {
         caption: "Past year",
+        since: "1 year ago",
+        step: { unit: "week", size: 2 },
         // The dip in the middle is March (see the track record's misses).
         values: [
           217400, 219800, 222100, 220500, 224300, 226900, 225100, 228400,
           231200, 229800, 226300, 222900, 225600, 229100, 232400, 234900,
           233100, 236800, 239400, 238100, 241600, 240120, 243920, 248310,
         ],
+        benchmark: [
+          217400, 220010, 219900, 222040, 222310, 221850, 223080, 223540,
+          225060, 227690, 227250, 226610, 230260, 229300, 231970, 232350,
+          232670, 233030, 239100, 237760, 236340, 242310, 240330, 241750,
+        ],
       },
       All: {
         caption: "All time",
+        since: "5 years ago",
+        step: { unit: "month", size: 3 },
         values: [
           162000, 158400, 166900, 171200, 168500, 176300, 181900, 179200,
           188600, 194100, 191300, 199800, 207500, 204200, 213900, 217400,
           226900, 231200, 222900, 234900, 241600, 248310,
         ],
+        benchmark: [
+          162000, 162390, 168220, 174810, 171210, 178150, 178770, 182030,
+          187450, 185780, 193830, 196730, 193920, 196300, 200080, 207080,
+          207930, 209800, 214820, 217870, 217420, 223560,
+        ],
       },
-    },
+    } satisfies Record<
+      string,
+      {
+        caption: string
+        /** Left end of the time axis. */
+        since: string
+        step: ChartStep
+        values: number[]
+        benchmark: number[]
+      }
+    >,
   },
   accounts: illustrations.accounts,
 } as const
 
 export const suggestion = {
   eyebrow: "Rocca suggests",
+  /** Header of the decision card, with the count of pending decisions. */
+  needsOk: "Needs your OK",
   title: "Trim NVDA from 18% back to 12%",
   summary:
     "NVDA grew faster than everything else you own. Bringing it back to your target means one stock can't swing your whole portfolio.",
@@ -209,6 +261,16 @@ export const suggestion = {
   order: preview.order,
   taxSmart: { label: "Tax-smart placement", ...preview.order.taxSmart },
   askWhy: "Ask why",
+  review: "Review reasoning",
+  reviewTitle: "Why Rocca suggests this",
+  /** Rows under the order: what it costs, which rule, where it runs. */
+  impact: {
+    tax: "Tax",
+    rule: "Rule",
+    ruleValue: "No single stock above 12%",
+    account: "Account",
+    accountValue: "E*TRADE Roth IRA",
+  },
   lesson: "New to rebalancing? 2-min lesson",
   decisionNote: "Nothing happens until you approve.",
   /** Shown instead of `decisionNote` while the mode is Autopilot. */
@@ -472,7 +534,7 @@ export const tour = {
     {
       targets: ["ask", "m-ask"],
       title: "Ask anything, in plain English",
-      body: "Pick a suggested question to see how Rocca answers.",
+      body: "Open Ask Rocca from any page, then pick a suggested question to see how it answers.",
     },
   ],
 } as const

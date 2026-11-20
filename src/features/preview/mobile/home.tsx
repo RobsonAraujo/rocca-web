@@ -6,16 +6,15 @@ import {
   PlayIcon,
   ReceiptIcon,
   SparklesIcon,
-  TrendingUpIcon,
 } from "lucide-react"
 
 import { OrderLines } from "@/components/product/order-lines"
 import { ProgressRing } from "@/components/product/progress-ring"
-import type { Tone } from "@/components/product/tone"
 import { toneClasses } from "@/components/product/tone"
 import { cn } from "@/lib/utils"
 
 import { ComingSoonButton } from "../components/coming-soon"
+import { Delta } from "../components/delta"
 import {
   autonomy,
   learn,
@@ -30,6 +29,7 @@ import {
 import { AutonomyDial, InThisMode, Rules } from "../widgets/autonomy"
 import { HeroChart } from "../widgets/chart-ranges"
 import { MobileDecision } from "../widgets/suggestion-actions"
+import { SuggestionDetails } from "../widgets/suggestion-details"
 import { ControlsGroup } from "./controls-group"
 import { RevealOnHash } from "./reveal-on-hash"
 import {
@@ -43,20 +43,9 @@ import {
 /** Tappable surfaces get a small press feedback, like native buttons. */
 const pressable = "transition-transform active:scale-[0.98]"
 
-function SectionLabel({ tone, children }: { tone: Tone; children: string }) {
+function SectionLabel({ children }: { children: string }) {
   return (
-    <p className="flex items-center gap-2 px-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-      <span
-        aria-hidden
-        className={cn("size-2 rounded-full", {
-          "bg-attention": tone === "attention",
-          "bg-control": tone === "control",
-          "bg-learn": tone === "learn",
-          "bg-brand": tone === "brand",
-        })}
-      />
-      {children}
-    </p>
+    <p className="px-1 text-[15px] font-semibold tracking-tight">{children}</p>
   )
 }
 
@@ -71,9 +60,9 @@ function BalanceHero() {
       <p className="mt-1 text-[2.5rem] leading-none font-semibold tracking-tight tabular-nums">
         {portfolio.value}
       </p>
-      <p className="mt-3 inline-flex items-center gap-1 rounded-full bg-brand/10 px-2.5 py-1 text-sm font-medium text-brand">
-        <TrendingUpIcon className="size-4" aria-hidden />
-        {weekChange.amount} · {weekChange.label}
+      <p className="mt-3 flex items-center gap-1.5 text-sm">
+        <Delta value={weekChange.amount} />
+        <span className="text-muted-foreground">{weekChange.label}</span>
       </p>
       <HeroChart note={mobile.hero.simulated} />
     </section>
@@ -87,7 +76,7 @@ function AskBar() {
       id="m-ask"
       handle={askSheet}
       className={cn(
-        "flex h-12 w-full scroll-mt-20 items-center gap-3 rounded-2xl bg-card px-4 text-left text-muted-foreground shadow-soft ring-1 ring-foreground/10",
+        "flex h-12 w-full scroll-mt-20 items-center gap-3 rounded-2xl bg-card px-4 text-left text-muted-foreground ring-1 ring-border",
         pressable,
       )}
     >
@@ -95,61 +84,6 @@ function AskBar() {
       <span className="flex-1 truncate text-[15px]">{mobile.askBar}</span>
       <MicIcon className="size-5 shrink-0" aria-hidden />
     </SheetTrigger>
-  )
-}
-
-/** Reasoning and next steps, shown in the "Why?" sheet. */
-function WhyDetails() {
-  return (
-    <div className="space-y-6">
-      <ol className="space-y-4">
-        {suggestion.reasoning.map((step, index) => (
-          <li key={step.source} className="flex gap-3">
-            <span
-              aria-hidden
-              className="grid size-6 shrink-0 place-items-center rounded-full bg-secondary text-xs font-semibold tabular-nums"
-            >
-              {index + 1}
-            </span>
-            <div className="text-sm leading-relaxed">
-              <p>{step.text}</p>
-              <span className="mt-1.5 inline-flex rounded-md bg-secondary px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
-                Source: {step.source}
-              </span>
-            </div>
-          </li>
-        ))}
-      </ol>
-      <div>
-        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-          {suggestion.next.title}
-        </p>
-        <ol className="mt-3 space-y-3">
-          {suggestion.next.steps.map((step, index) => (
-            <li key={step} className="flex items-start gap-2.5 text-sm">
-              <span
-                aria-hidden
-                className="grid size-6 shrink-0 place-items-center rounded-full border border-brand/40 text-xs font-semibold text-brand tabular-nums"
-              >
-                {index + 1}
-              </span>
-              {step}
-            </li>
-          ))}
-        </ol>
-      </div>
-      <ComingSoonButton
-        variant="ghost"
-        className={cn(
-          "h-11 w-full justify-start rounded-xl px-3 text-sm font-medium",
-          toneClasses.learn.soft,
-          toneClasses.learn.text,
-        )}
-      >
-        <GraduationCapIcon aria-hidden />
-        {suggestion.lesson}
-      </ComingSoonButton>
-    </div>
   )
 }
 
@@ -161,7 +95,7 @@ function DecisionCard() {
       <article
         id="m-suggestion"
         aria-labelledby="m-suggestion-title"
-        className="rounded-3xl border-t-4 border-t-attention bg-card p-5 shadow-soft ring-1 ring-attention/30"
+        className="rounded-3xl bg-card p-5 ring-1 ring-border"
       >
         <p
           className={cn(
@@ -210,7 +144,7 @@ function DecisionCard() {
                 </button>
               }
             >
-              <WhyDetails />
+              <SuggestionDetails />
             </Sheet>
           }
         />
@@ -226,9 +160,7 @@ const cardClass = cn(
 
 function LearnCard() {
   return (
-    <article
-      className={cn(cardClass, toneClasses.learn.soft, toneClasses.learn.ring)}
-    >
+    <article className={cn(cardClass, "bg-card ring-border")}>
       <p
         className={cn(
           "flex items-center gap-1.5 text-xs font-semibold",
@@ -267,9 +199,7 @@ function LearnCard() {
 
 function SavingsCard() {
   return (
-    <article
-      className={cn(cardClass, toneClasses.brand.soft, toneClasses.brand.ring)}
-    >
+    <article className={cn(cardClass, "bg-card ring-border")}>
       <p className="flex items-center gap-1.5 text-xs font-semibold text-brand">
         <PiggyBankIcon className="size-4" aria-hidden />
         {savings.title}
@@ -304,7 +234,7 @@ function SavingsCard() {
 function TrackCard() {
   const [suggestions, approved, impact] = trackRecord.stats
   return (
-    <article className={cn(cardClass, "bg-card ring-foreground/10")}>
+    <article className={cn(cardClass, "bg-card ring-border")}>
       <p className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
         <HistoryIcon className="size-4" aria-hidden />
         {trackRecord.title}
@@ -343,7 +273,7 @@ function ForYou() {
 
 function MovesList() {
   return (
-    <div className="rounded-2xl bg-card p-4 shadow-soft ring-1 ring-foreground/10">
+    <div className="rounded-2xl bg-card p-4 ring-1 ring-border">
       <ul className="space-y-3">
         {moves.items.map((move) => (
           <li
@@ -357,9 +287,7 @@ function MovesList() {
                 style={{ width: `${move.share}%` }}
               />
             </span>
-            <span className="font-medium whitespace-nowrap tabular-nums">
-              {move.amount}
-            </span>
+            <Delta value={move.amount} className="justify-self-end" />
           </li>
         ))}
       </ul>
@@ -382,19 +310,19 @@ export function MobileHome({ news }: { news?: React.ReactNode } = {}) {
       <AskBar />
 
       <section aria-label={mobile.sections.decision} className="space-y-3">
-        <SectionLabel tone="attention">{mobile.sections.decision}</SectionLabel>
+        <SectionLabel>{mobile.sections.decision}</SectionLabel>
         <DecisionCard />
       </section>
 
       {news && (
         <section aria-label={mobile.sections.news} className="space-y-3">
-          <SectionLabel tone="brand">{mobile.sections.news}</SectionLabel>
+          <SectionLabel>{mobile.sections.news}</SectionLabel>
           {news}
         </section>
       )}
 
       <section aria-label={mobile.sections.controls} className="space-y-3">
-        <SectionLabel tone="control">{mobile.sections.controls}</SectionLabel>
+        <SectionLabel>{mobile.sections.controls}</SectionLabel>
         <div id="m-controls" className="scroll-mt-20">
           <ControlsGroup />
         </div>
@@ -412,12 +340,12 @@ export function MobileHome({ news }: { news?: React.ReactNode } = {}) {
       </section>
 
       <section aria-label={mobile.sections.forYou} className="space-y-3">
-        <SectionLabel tone="learn">{mobile.sections.forYou}</SectionLabel>
+        <SectionLabel>{mobile.sections.forYou}</SectionLabel>
         <ForYou />
       </section>
 
       <section aria-label={mobile.sections.moves} className="space-y-3">
-        <SectionLabel tone="brand">{mobile.sections.moves}</SectionLabel>
+        <SectionLabel>{mobile.sections.moves}</SectionLabel>
         <MovesList />
       </section>
     </>

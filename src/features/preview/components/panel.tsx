@@ -1,35 +1,43 @@
 import type { LucideIcon } from "lucide-react"
 
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { cn } from "@/lib/utils"
 import type { Tone } from "@/components/product/tone"
-import { IconTile, toneClasses } from "@/components/product/tone"
+import { toneClasses } from "@/components/product/tone"
+import { cn } from "@/lib/utils"
 
-/** Card chrome shared by every dashboard widget (same look as the landing bento). */
+/**
+ * Surface shared by every dashboard widget: white on the app canvas, a
+ * hairline border and no shadow (the sober, Mercury/Stripe look). Sections
+ * inside a panel are split by hairlines, not nested boxes.
+ */
 export const panelClass =
-  "rounded-2xl shadow-soft [--card-spacing:--spacing(5)] sm:[--card-spacing:--spacing(6)]"
+  "rounded-xl border border-border bg-card text-card-foreground"
+
+/** Horizontal padding of a panel; full-bleed rows use the negative margin. */
+export const panelPadding = "px-5"
+
+/** A full-width hairline section inside a panel's body. */
+export const panelSection = "-mx-5 mt-5 border-t border-border px-5 pt-4"
+
+/** Small text link or button in a panel header ("See full history"). */
+export const panelLinkClass =
+  "inline-flex h-auto items-center gap-1 rounded-sm p-0 text-[13px] font-medium whitespace-nowrap text-brand outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
 
 type PanelProps = {
-  /** Unique slug: the card's id (an anchor), and `${id}-title` labels the region. */
+  /** Unique slug: the panel's id (an anchor), and `${id}-title` labels the region. */
   id: string
   title: string
   description?: string
   icon?: LucideIcon
   /**
-   * Gives the widget its own identity: icon on a colored tile and a tinted
-   * outline. Use it for the differentiators; leave it off for the rest.
+   * The widget's idea (control, learn…). Only its icon takes the color:
+   * the panel itself stays neutral, so the page keeps a single accent.
    */
   tone?: Tone
-  /** Rendered top-right of the header (a chip, tabs, a small button). */
+  /** Rendered top-right of the header (a link, tabs, a small chip). */
   action?: React.ReactNode
   className?: string
+  /** Classes for the body (below the header). */
+  bodyClassName?: string
   children: React.ReactNode
 }
 
@@ -41,57 +49,55 @@ export function Panel({
   tone,
   action,
   className,
+  bodyClassName,
   children,
 }: PanelProps) {
   const titleId = `${id}-title`
-
-  const heading = (
-    <CardTitle>
-      <h2
-        id={titleId}
+  return (
+    <section
+      id={id}
+      aria-labelledby={titleId}
+      className={cn(panelClass, "flex scroll-mt-24 flex-col", className)}
+    >
+      <header
         className={cn(
-          "flex items-center gap-2 font-semibold tracking-tight",
-          tone ? "text-lg" : "text-base",
+          "flex items-start justify-between gap-4 pt-4",
+          panelPadding,
         )}
       >
-        {Icon && !tone && (
-          <Icon className="size-4 shrink-0 text-brand" aria-hidden />
+        <div className="min-w-0">
+          <h2
+            id={titleId}
+            className="flex items-center gap-2 text-sm font-semibold tracking-tight"
+          >
+            {Icon && (
+              <Icon
+                className={cn(
+                  "size-4 shrink-0",
+                  tone ? toneClasses[tone].text : "text-muted-foreground",
+                )}
+                aria-hidden
+              />
+            )}
+            {title}
+          </h2>
+          {description && (
+            <p className="mt-0.5 text-[13px] text-muted-foreground">
+              {description}
+            </p>
+          )}
+        </div>
+        {action && <div className="shrink-0">{action}</div>}
+      </header>
+      <div
+        className={cn(
+          "flex flex-1 flex-col pt-4 pb-5",
+          panelPadding,
+          bodyClassName,
         )}
-        {title}
-      </h2>
-    </CardTitle>
-  )
-
-  return (
-    <Card
-      id={id}
-      role="region"
-      aria-labelledby={titleId}
-      className={cn(
-        panelClass,
-        "scroll-mt-24",
-        tone && toneClasses[tone].ring,
-        className,
-      )}
-    >
-      <CardHeader>
-        {tone && Icon ? (
-          <div className="flex items-start gap-3">
-            <IconTile icon={Icon} tone={tone} />
-            <div className="min-w-0 space-y-0.5">
-              {heading}
-              {description && <CardDescription>{description}</CardDescription>}
-            </div>
-          </div>
-        ) : (
-          <>
-            {heading}
-            {description && <CardDescription>{description}</CardDescription>}
-          </>
-        )}
-        {action && <CardAction>{action}</CardAction>}
-      </CardHeader>
-      <CardContent className="flex flex-1 flex-col">{children}</CardContent>
-    </Card>
+      >
+        {children}
+      </div>
+    </section>
   )
 }

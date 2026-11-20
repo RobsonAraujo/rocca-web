@@ -4,6 +4,7 @@ import { buttonVariants } from "@/components/ui/button"
 import { illustrations } from "@/features/landing/content"
 import { cn } from "@/lib/utils"
 
+import { Delta } from "../components/delta"
 import { Panel } from "../components/panel"
 import { accountAccess } from "../data"
 import { formatPercent, formatUsd } from "../format"
@@ -16,12 +17,14 @@ import {
   portfolioTotal,
 } from "./data"
 
-const badgeClass =
-  "rounded-md px-1.5 py-0.5 text-[11px] font-medium whitespace-nowrap"
+/** "E*TRADE" -> "E", "Coinbase" -> "C": the broker's mark in the row. */
+function initial(institution: string) {
+  return institution.replace(/[^A-Za-z]/g, "").charAt(0)
+}
 
 /**
- * One tile per account: its broker, what Rocca can do there (trade or only
- * view) and its tax treatment (the tax-smart angle).
+ * One row per account: its broker, what Rocca can do there (trade or only
+ * view), its tax treatment (the tax-smart angle), value and return.
  */
 export function AccountsWidget({ className }: { className?: string }) {
   return (
@@ -32,52 +35,58 @@ export function AccountsWidget({ className }: { className?: string }) {
       icon={LandmarkIcon}
       className={className}
     >
-      <ul className="grid gap-3 sm:grid-cols-2">
+      {/* One column on phones; two from sm, each row topped by a hairline but the first two. */}
+      <ul className="-my-3 divide-y divide-border sm:grid sm:grid-cols-2 sm:gap-x-8 sm:divide-y-0">
         {illustrations.accounts.map(({ name, institution, access }) => {
           const total = accountTotal(name)
           const details = accountsCopy.details[name]
           const count = holdings.filter((h) => h.positions[name]).length
           return (
-            <li key={name} className="rounded-xl border border-border p-4">
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="font-medium">{name}</p>
-                  <p className="text-xs text-muted-foreground">{institution}</p>
-                </div>
-                <div className="flex flex-col items-end gap-1">
+            <li
+              key={name}
+              className="flex items-start gap-3 py-3 sm:border-t sm:border-border sm:[&:nth-child(-n+2)]:border-t-0"
+            >
+              <span
+                aria-hidden
+                className="grid size-8 shrink-0 place-items-center rounded-lg bg-secondary text-xs font-semibold"
+              >
+                {initial(institution)}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium">{name}</p>
+                <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
+                  <span>{institution}</span>
+                  <span aria-hidden>·</span>
                   <span
                     className={cn(
-                      badgeClass,
-                      access === "trade"
-                        ? "bg-brand/10 text-brand"
-                        : "bg-secondary text-muted-foreground",
+                      access === "trade" && "font-medium text-brand",
                     )}
                   >
                     {accountAccess[access]}
                   </span>
-                  <span
-                    className={cn(
-                      badgeClass,
-                      "bg-secondary text-muted-foreground",
-                    )}
-                  >
-                    {details.tax}
-                  </span>
-                </div>
-              </div>
-              <p className="mt-3 text-xl font-semibold tracking-tight tabular-nums">
-                {formatUsd(total)}
-              </p>
-              <p className="mt-1 flex flex-wrap gap-x-2 text-xs text-muted-foreground">
-                <span className="font-medium text-brand">
-                  {formatPercent(details.ytd, { signed: true })}{" "}
-                  {accountsCopy.ytd}
-                </span>
-                <span>
-                  {formatPercent(total / portfolioTotal)} · {count}{" "}
+                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {details.tax} · {count}{" "}
                   {count === 1 ? accountsCopy.holding : accountsCopy.holdings}
-                </span>
-              </p>
+                </p>
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="text-sm font-semibold tabular-nums">
+                  {formatUsd(total)}
+                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground tabular-nums">
+                  {formatPercent(total / portfolioTotal)}
+                </p>
+                <p className="mt-0.5 text-xs">
+                  <Delta
+                    value={formatPercent(details.ytd, { signed: true })}
+                    className="text-xs"
+                  />{" "}
+                  <span className="text-muted-foreground">
+                    {accountsCopy.ytd}
+                  </span>
+                </p>
+              </div>
             </li>
           )
         })}
@@ -87,7 +96,7 @@ export function AccountsWidget({ className }: { className?: string }) {
       <ConnectTrigger
         className={cn(
           buttonVariants({ variant: "outline" }),
-          "mt-4 h-10 w-full rounded-full md:hidden",
+          "mt-6 h-10 w-full rounded-lg md:hidden",
         )}
       >
         <PlusIcon aria-hidden />

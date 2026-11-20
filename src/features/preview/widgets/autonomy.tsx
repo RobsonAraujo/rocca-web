@@ -48,7 +48,7 @@ export function AutonomyDial() {
   const last = autonomy.levels.length - 1
   const fill = (currentIndex / last) * 100
   return (
-    <div className={cn("rounded-2xl p-4 sm:p-5", toneClasses.control.soft)}>
+    <div className="rounded-lg border border-border p-4">
       <div className="relative mx-2.5 h-5">
         <div className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-control/15" />
         <div
@@ -145,8 +145,8 @@ export function InThisMode() {
       )}
       <div className="mt-3 grid grid-cols-2 gap-2">
         {sides.map((side) => (
-          <div key={side.label} className="rounded-xl border border-border p-3">
-            <p className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+          <div key={side.label} className="rounded-lg bg-secondary/60 p-3">
+            <p className="text-xs font-medium text-muted-foreground">
               {side.label}
             </p>
             <ul className="mt-1.5 space-y-1.5">
@@ -184,7 +184,9 @@ export function Rules() {
         <span
           className={cn(
             "rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap",
-            attention ? toneClasses.attention.tile : toneClasses.control.tile,
+            attention
+              ? toneClasses.attention.tile
+              : "bg-secondary text-muted-foreground",
           )}
         >
           {attention ? rules.attentionCount : rules.allClear}
@@ -226,7 +228,7 @@ export function Rules() {
       <ComingSoonButton
         variant="outline"
         size="sm"
-        className="mt-4 w-full rounded-full"
+        className="mt-4 w-full rounded-lg"
       >
         <PlusIcon aria-hidden />
         {rules.add}

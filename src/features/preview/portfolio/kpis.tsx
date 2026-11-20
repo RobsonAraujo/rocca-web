@@ -1,7 +1,6 @@
 import { preview } from "@/features/landing/content"
-import { cn } from "@/lib/utils"
 
-import { panelClass } from "../components/panel"
+import { Stat } from "../components/stat"
 import { formatPercent, formatSignedUsd, formatUsd } from "../format"
 import {
   holdingValue,
@@ -12,7 +11,10 @@ import {
   totalGainPercent,
 } from "./data"
 
-/** Four headline numbers across the top of the Portfolio page. */
+/**
+ * Four headline numbers across the top of the Portfolio page, in one
+ * surface split by hairlines (the gap-px over a border-colored background).
+ */
 export function KpiStrip() {
   const cash = holdings
     .filter((h) => h.kind === "Cash")
@@ -22,14 +24,14 @@ export function KpiStrip() {
     {
       label: kpis.value.label,
       value: preview.portfolio.value,
+      delta: kpis.value.delta,
       hint: kpis.value.hint,
-      positive: true,
     },
     {
       label: kpis.gain.label,
       value: formatSignedUsd(totalGain),
-      hint: `${formatPercent(totalGainPercent, { signed: true })} ${kpis.gain.hint}`,
-      positive: true,
+      delta: formatPercent(totalGainPercent, { signed: true }),
+      hint: kpis.gain.hint,
     },
     {
       label: kpis.dividends.label,
@@ -44,34 +46,15 @@ export function KpiStrip() {
   ]
 
   return (
-    // Phones: the big total sits in the mobile hero, so its card hides and
+    // Phones: the big total sits in the mobile hero, so its cell hides and
     // the other three share one row.
-    <dl className="grid grid-cols-2 gap-4 max-md:grid-cols-3 max-md:gap-2 lg:grid-cols-4 lg:gap-6">
+    <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border max-md:grid-cols-3 lg:grid-cols-4">
       {items.map((item) => (
-        <div
+        <Stat
           key={item.label}
-          className={cn(
-            "border border-border bg-card p-4 max-md:p-3 max-md:first:hidden sm:p-5",
-            panelClass,
-          )}
-        >
-          <dt className="text-xs text-muted-foreground sm:text-sm">
-            {item.label}
-          </dt>
-          <dd className="mt-1 text-xl font-semibold tracking-tight tabular-nums max-md:text-base sm:text-2xl">
-            {item.value}
-          </dd>
-          <dd
-            className={cn(
-              "mt-1 text-xs",
-              item.positive
-                ? "font-medium text-brand"
-                : "text-muted-foreground",
-            )}
-          >
-            {item.hint}
-          </dd>
-        </div>
+          {...item}
+          className="bg-card p-5 max-md:p-3 max-md:first:hidden"
+        />
       ))}
     </dl>
   )

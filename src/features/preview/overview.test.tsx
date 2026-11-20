@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react"
+import { fireEvent, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { toast } from "sonner"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -6,7 +6,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { parseWelcome } from "./components/welcome-banner"
 import { PORTFOLIO_PATH } from "./constants"
 import {
-  ask,
   autonomy,
   comingSoon,
   demo,
@@ -75,6 +74,59 @@ describe("Overview", () => {
     ).toBeInTheDocument()
   })
 
+  it("shows the value at the point under the pointer while scrubbing", () => {
+    renderWithDemo(<Overview />)
+    const chart = screen.getByRole("img", { name: /^Portfolio value/ })
+    vi.spyOn(chart, "getBoundingClientRect").mockReturnValue(
+      DOMRect.fromRect({ x: 0, y: 0, width: 280, height: 200 }),
+    )
+    expect(screen.getByText(portfolio.value)).toBeInTheDocument()
+
+    // The left edge is the first close of the month.
+    fireEvent.pointerMove(chart, { clientX: 0 })
+    expect(screen.getByText("$240,120")).toBeInTheDocument()
+    expect(screen.getByText("28 days ago")).toBeInTheDocument()
+
+    fireEvent.pointerLeave(chart)
+    expect(screen.getByText(portfolio.value)).toBeInTheDocument()
+    expect(
+      screen.getByText(portfolio.chart.series["1M"].caption),
+    ).toBeInTheDocument()
+  })
+
+  it("compares the portfolio with the S&P 500", async () => {
+    const user = userEvent.setup()
+    renderWithDemo(<Overview />)
+    const toggle = screen.getByRole("button", {
+      name: portfolio.chart.benchmark.toggle,
+    })
+
+    await user.click(toggle)
+
+    expect(toggle).toHaveAttribute("aria-pressed", "true")
+    expect(
+      screen.getByRole("img", { name: /S&P 500: \+2\.1%/ }),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/S&P 500 \(simulated\)/)).toBeInTheDocument()
+  })
+
+  it("opens the reasoning, with its sources, in a side panel", async () => {
+    const user = userEvent.setup()
+    renderWithDemo(<Overview />)
+
+    await user.click(screen.getByRole("button", { name: suggestion.review }))
+
+    const panel = await screen.findByRole("dialog", {
+      name: suggestion.reviewTitle,
+    })
+    for (const step of suggestion.reasoning) {
+      expect(within(panel).getByText(step.text)).toBeInTheDocument()
+    }
+    expect(
+      within(panel).getByText(suggestion.next.steps[0]),
+    ).toBeInTheDocument()
+  })
+
   it("links to the full portfolio page", () => {
     renderWithDemo(<Overview />)
 
@@ -140,58 +192,6 @@ describe("Overview", () => {
 
     await user.click(screen.getByRole("button", { name: rules.add }))
     expectComingSoon()
-  })
-})
-
-describe("Ask Rocca composer", () => {
-  it("keeps Send disabled until there is a question", async () => {
-    const user = userEvent.setup()
-    renderWithDemo(<Overview />)
-    const send = screen.getByRole("button", { name: ask.submit })
-
-    expect(send).toBeDisabled()
-    await user.type(screen.getByLabelText(ask.inputLabel), "Am I diversified?")
-    expect(send).toBeEnabled()
-  })
-
-  it("answers a suggested question with its canned answer", async () => {
-    const user = userEvent.setup()
-    renderWithDemo(<Overview />)
-    const question = ask.suggestions[1]
-
-    await user.click(screen.getByRole("button", { name: question }))
-    await user.click(screen.getByRole("button", { name: ask.submit }))
-
-    expect(screen.getByText(ask.thinking)).toBeInTheDocument()
-    expect(await screen.findByText(ask.answers[question]!)).toBeInTheDocument()
-    expect(screen.getByLabelText(ask.inputLabel)).toHaveValue("")
-    expect(toast).not.toHaveBeenCalled()
-  })
-
-  it("sends with Enter, breaks lines with Shift+Enter, and falls back for free questions", async () => {
-    const user = userEvent.setup()
-    renderWithDemo(<Overview />)
-    const box = screen.getByLabelText(ask.inputLabel)
-
-    await user.type(box, "First line{Shift>}{Enter}{/Shift}second line")
-    expect(box).toHaveValue("First line\nsecond line")
-    expect(screen.queryByText(ask.thinking)).not.toBeInTheDocument()
-
-    await user.type(box, "{Enter}")
-    expect(await screen.findByText(ask.fallback)).toBeInTheDocument()
-    expect(screen.getByText(demo.waitlistNote)).toBeInTheDocument()
-  })
-
-  it("fills the box when a suggestion is picked", async () => {
-    const user = userEvent.setup()
-    renderWithDemo(<Overview />)
-    const [first] = ask.suggestions
-
-    await user.click(screen.getByRole("button", { name: first }))
-
-    expect(screen.getByLabelText(ask.inputLabel)).toHaveValue(first)
-    expect(screen.getByLabelText(ask.inputLabel)).toHaveFocus()
-    expect(toast).not.toHaveBeenCalled()
   })
 })
 

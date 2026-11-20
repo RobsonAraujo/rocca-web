@@ -5,12 +5,12 @@ import { SimulatedBadge } from "./navigation"
 type PageHeaderProps = {
   title: string
   subtitle: string
-  /** Optional buttons on the right (desktop) or below the text (phones). */
+  /** Optional controls on the right (desktop) or below the text (phones). */
   actions?: React.ReactNode
   className?: string
 }
 
-/** Page title block shared by the preview pages. */
+/** Page title block shared by the preview pages: compact, like an app's. */
 export function PageHeader({
   title,
   subtitle,
@@ -25,14 +25,14 @@ export function PageHeader({
       )}
     >
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+        <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
           {title}
         </h1>
-        <p className="mt-1 text-muted-foreground">{subtitle}</p>
+        <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        {/* The top bar hides the badge on phones, so it shows here instead. */}
-        <SimulatedBadge className="w-fit sm:hidden" />
+        {/* The top bar only has room for the badge on wide screens. */}
+        <SimulatedBadge className="w-fit xl:hidden" />
         {actions}
       </div>
     </div>

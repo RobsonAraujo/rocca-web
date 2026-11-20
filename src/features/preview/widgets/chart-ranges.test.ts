@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 import { preview } from "@/features/landing/content"
 
 import { portfolio } from "../data"
-import { seriesChange } from "./chart-ranges"
+import { pointAge, seriesChange } from "./chart-ranges"
 
 const total = Number(preview.portfolio.value.replace(/[$,]/g, ""))
 
@@ -24,5 +24,26 @@ describe("portfolio chart series", () => {
 
   it("keeps the past month at +3.4%", () => {
     expect(seriesChange(portfolio.chart.series["1M"].values)).toBe("+3.4%")
+  })
+})
+
+describe("benchmark series", () => {
+  it("starts with the portfolio and has a point for every close", () => {
+    for (const range of portfolio.chart.ranges) {
+      const { values, benchmark } = portfolio.chart.series[range]
+      expect(benchmark).toHaveLength(values.length)
+      expect(benchmark[0]).toBe(values[0])
+    }
+  })
+})
+
+describe("pointAge", () => {
+  it("counts back from today in the range's own unit", () => {
+    expect(pointAge({ unit: "day", size: 1 }, 0)).toBe(portfolio.chart.today)
+    expect(pointAge({ unit: "day", size: 1 }, 1)).toBe("Yesterday")
+    expect(pointAge({ unit: "day", size: 1 }, 12)).toBe("12 days ago")
+    expect(pointAge({ unit: "week", size: 2 }, 3)).toBe("6 weeks ago")
+    expect(pointAge({ unit: "week", size: 2 }, 23)).toBe("11 months ago")
+    expect(pointAge({ unit: "month", size: 3 }, 21)).toBe("5 years ago")
   })
 })

@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils"
 
 import { shell } from "../data"
 import { NavItems, RailTooltip } from "./nav-items"
-import { focusRing } from "./navigation"
+import { Avatar, focusRing } from "./navigation"
 
 /**
  * Fixed left rail on large screens. The icon at the top collapses it to
@@ -69,6 +69,16 @@ export function Sidebar() {
         <nav aria-label="Dashboard" className="mt-6 flex-1">
           <NavItems layout="vertical" collapsed={collapsed} />
         </nav>
+        {/* Who is signed in: avatar alone when collapsed (it keeps its name). */}
+        <div className="mb-2 flex items-center gap-2.5 border-t border-border px-1 pt-4">
+          <Avatar className="size-8 text-xs" />
+          <div className={cn("min-w-0 leading-tight", collapsed && "sr-only")}>
+            <p className="truncate text-sm font-medium">{shell.user.name}</p>
+            <p className="truncate text-xs text-muted-foreground">
+              {shell.user.plan}
+            </p>
+          </div>
+        </div>
         <RailTooltip label={shell.backToSite} enabled={collapsed}>
           <Link
             href="/"

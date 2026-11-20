@@ -9,8 +9,20 @@ const usd = new Intl.NumberFormat("en-US", {
 /** Typographic minus (U+2212): same width as "+", reads better in tables. */
 const MINUS = "−"
 
+const compactUsd = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  notation: "compact",
+  maximumFractionDigits: 0,
+})
+
 export function formatUsd(value: number) {
   return usd.format(value)
+}
+
+/** 248310 -> "$248K": chart axis labels. */
+export function formatCompactUsd(value: number) {
+  return compactUsd.format(value)
 }
 
 export function formatSignedUsd(value: number) {

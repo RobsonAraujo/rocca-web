@@ -24,9 +24,9 @@ export function InsightsWidget({ className }: { className?: string }) {
       icon={SparklesIcon}
       className={className}
     >
-      <ul className="space-y-3">
+      <ul className="-my-3 divide-y divide-border">
         {insights.map(({ id, tone, tag, icon: Icon, title, body, action }) => (
-          <li key={id} className="rounded-xl border border-border p-4">
+          <li key={id} className="py-4">
             <div className="flex items-start gap-3">
               <Icon
                 className={cn("mt-0.5 size-4 shrink-0", toneStyle[tone].icon)}

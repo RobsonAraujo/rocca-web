@@ -2,9 +2,6 @@
 
 import { GaugeIcon } from "lucide-react"
 
-import { toneClasses } from "@/components/product/tone"
-import { cn } from "@/lib/utils"
-
 import { autonomy, status } from "../data"
 import { useDemo } from "../demo-state"
 
@@ -16,14 +13,9 @@ export function ModePill() {
   const { mode } = useDemo()
   const level = autonomy.levels.find((item) => item.id === mode)
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold",
-        toneClasses.control.tile,
-      )}
-    >
-      <GaugeIcon className="size-3.5" aria-hidden />
-      {status.mode}: {level?.label}
+    <span className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 text-xs font-medium">
+      <GaugeIcon className="size-3.5 text-control" aria-hidden />
+      {`${status.mode}: ${level?.label}`}
     </span>
   )
 }

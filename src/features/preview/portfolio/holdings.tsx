@@ -3,6 +3,7 @@ import { ListIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 import { ComingSoonButton } from "../components/coming-soon"
+import { Delta } from "../components/delta"
 import { Panel } from "../components/panel"
 import { formatPercent, formatUsd } from "../format"
 import type { AccountName, Holding } from "./data"
@@ -17,6 +18,15 @@ function badgeText(holding: Holding) {
     .slice(0, 2)
     .map((word) => word[0])
     .join("")
+}
+
+/** A holding's return; "—" (no cost basis, e.g. cash) stays quiet. */
+function Gain({ value }: { value: string }) {
+  return value === "—" ? (
+    <span className="text-muted-foreground">{value}</span>
+  ) : (
+    <Delta value={value} className="justify-end" />
+  )
 }
 
 function FilterTabs() {
@@ -66,7 +76,7 @@ export function HoldingsWidget({ className }: { className?: string }) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border text-left text-xs text-muted-foreground">
+            <tr className="border-b border-border text-left text-[11px] tracking-wide text-muted-foreground uppercase">
               <th scope="col" className={cn(cell, "font-medium")}>
                 {columns.asset}
               </th>
@@ -96,7 +106,7 @@ export function HoldingsWidget({ className }: { className?: string }) {
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border/70">
+          <tbody className="divide-y divide-border">
             {holdings.map((holding) => {
               const value = holdingValue(holding)
               const weight = value / portfolioTotal
@@ -105,17 +115,14 @@ export function HoldingsWidget({ className }: { className?: string }) {
                 holding.gain === undefined
                   ? "—"
                   : formatPercent(holding.gain, { signed: true })
-              const gainColor =
-                holding.gain === undefined
-                  ? "text-muted-foreground"
-                  : holding.gain < 0
-                    ? "text-destructive"
-                    : "text-brand"
               return (
-                <tr key={holding.name}>
+                <tr
+                  key={holding.name}
+                  className="transition-colors hover:bg-muted/40"
+                >
                   <td className={cell}>
                     <div className="flex items-center gap-3">
-                      <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-secondary text-[10px] font-semibold tracking-tight">
+                      <span className="grid size-8 shrink-0 place-items-center rounded-md bg-secondary text-[10px] font-semibold tracking-tight">
                         {badgeText(holding)}
                       </span>
                       <div className="min-w-0">
@@ -148,15 +155,15 @@ export function HoldingsWidget({ className }: { className?: string }) {
                   >
                     {formatUsd(value)}
                     {/* Phones: the Return column is hidden, so show it here. */}
-                    <span className={cn("block text-xs sm:hidden", gainColor)}>
-                      {gainText}
+                    <span className="block text-xs sm:hidden">
+                      <Gain value={gainText} />
                     </span>
                   </td>
                   <td className={cn(cell, "hidden sm:table-cell")}>
                     <div className="flex items-center gap-2">
                       <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-secondary">
                         <span
-                          className="block h-full rounded-full bg-brand"
+                          className="block h-full rounded-full bg-brand/70"
                           style={{ width: `${(weight / 0.25) * 100}%` }}
                         />
                       </span>
@@ -168,11 +175,10 @@ export function HoldingsWidget({ className }: { className?: string }) {
                   <td
                     className={cn(
                       cell,
-                      "hidden text-right font-medium whitespace-nowrap tabular-nums sm:table-cell",
-                      gainColor,
+                      "hidden text-right whitespace-nowrap sm:table-cell",
                     )}
                   >
-                    {gainText}
+                    <Gain value={gainText} />
                   </td>
                 </tr>
               )

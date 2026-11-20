@@ -234,7 +234,7 @@ export const connectCopy = {
 } as const
 
 export const kpis = {
-  value: { label: "Total value", hint: "+1.8% this week" },
+  value: { label: "Total value", delta: "+1.8%", hint: "this week" },
   gain: { label: "Total gain", hint: "since you started" },
   dividends: {
     label: "Est. dividends",

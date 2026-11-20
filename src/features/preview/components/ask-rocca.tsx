@@ -1,22 +1,15 @@
 "use client"
 
-import {
-  ArrowUpIcon,
-  GraduationCapIcon,
-  PlusIcon,
-  SparklesIcon,
-} from "lucide-react"
+import { ArrowUpIcon, GraduationCapIcon, PlusIcon } from "lucide-react"
 import { useEffect, useId, useRef, useState } from "react"
 
 import { LogoMark } from "@/components/layout/logo"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { IconTile } from "@/components/product/tone"
 
 import { ask } from "../data"
 import { ComingSoonButton } from "./coming-soon"
 import { WaitlistNote } from "./waitlist-note"
-import { panelClass } from "./panel"
 
 function UserBubble({ you, children }: { you: string; children: string }) {
   return (
@@ -109,8 +102,8 @@ function Thread({ exchanges }: { exchanges: Exchange[] }) {
  * ChatGPT-style composer: the textarea grows with the text (CSS
  * field-sizing, no JS), Enter sends and Shift+Enter breaks the line.
  * Suggestions fill the box; sending adds a simulated exchange with a canned
- * answer (or a fallback that points at the waitlist). Used by the desktop
- * card and by the mobile Ask sheet.
+ * answer (or a fallback that points at the waitlist). Used by the Ask
+ * side panel (tablet and desktop) and by the mobile Ask sheet.
  */
 export function AskComposer({ className }: { className?: string }) {
   const inputId = useId()
@@ -233,34 +226,5 @@ export function AskComposer({ className }: { className?: string }) {
         ))}
       </div>
     </div>
-  )
-}
-
-/** "Ask Rocca" card for desktop and tablet: header, example exchange, composer. */
-export function AskRocca({ className }: { className?: string }) {
-  const titleId = useId()
-  return (
-    <section
-      id="ask"
-      aria-labelledby={titleId}
-      className={cn(
-        "flex flex-col gap-5 bg-card p-5 ring-1 ring-foreground/10 sm:p-6",
-        panelClass,
-        className,
-      )}
-    >
-      <div className="flex items-start gap-3">
-        <IconTile icon={SparklesIcon} tone="brand" />
-        <div>
-          <h2 id={titleId} className="text-lg font-semibold tracking-tight">
-            {ask.label}
-          </h2>
-          <p className="text-sm text-muted-foreground">{ask.description}</p>
-        </div>
-      </div>
-
-      <SampleThread />
-      <AskComposer className="mt-auto" />
-    </section>
   )
 }

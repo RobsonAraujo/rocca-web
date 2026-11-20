@@ -1,168 +1,127 @@
-import {
-  GraduationCapIcon,
-  MessageCircleQuestionIcon,
-  ReceiptIcon,
-} from "lucide-react"
+import { ArrowRightIcon, MessageCircleQuestionIcon } from "lucide-react"
 
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { cn } from "@/lib/utils"
 import { OrderLines } from "@/components/product/order-lines"
-import { toneClasses } from "@/components/product/tone"
+import { cn } from "@/lib/utils"
 
-import { ComingSoonButton } from "../components/coming-soon"
-import { panelClass } from "../components/panel"
-import { suggestion } from "../data"
+import { panelClass, panelLinkClass } from "../components/panel"
+import {
+  SidePanel,
+  SidePanelTrigger,
+  askPanel,
+  reasoningPanel,
+} from "../components/side-panel"
+import { accountAccess, suggestion } from "../data"
 import { DecisionBar } from "./suggestion-actions"
+import { SuggestionDetails } from "./suggestion-details"
 
-/** Proposed order: shared Sell/Buy rows inside a titled box. */
-function OrderBox() {
-  const { order } = suggestion
+/** What the order costs, which rule it serves, where it runs. */
+function Impact() {
+  const { taxSmart, impact } = suggestion
+  const rows = [
+    {
+      label: impact.tax,
+      value: (
+        <>
+          <span className="font-semibold text-brand">{taxSmart.estimate}</span>{" "}
+          <span className="text-muted-foreground">{taxSmart.comparison}</span>
+        </>
+      ),
+    },
+    { label: impact.rule, value: impact.ruleValue },
+    {
+      label: impact.account,
+      value: `${impact.accountValue} · ${accountAccess.trade}`,
+    },
+  ]
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
-      <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-        {order.title}
-      </p>
-      <OrderLines lines={order.lines} className="mt-2" />
-    </div>
+    <dl className="divide-y divide-border rounded-lg border border-border text-[13px]">
+      {rows.map((row) => (
+        <div key={row.label} className="flex gap-3 px-3 py-2">
+          <dt className="w-16 shrink-0 text-muted-foreground">{row.label}</dt>
+          <dd className="min-w-0 text-pretty">{row.value}</dd>
+        </div>
+      ))}
+    </dl>
   )
 }
 
 /**
- * The page's main card: the one action that needs a decision. Amber marks it
- * as "needs you"; the big green Approve and the "nothing happens until you
- * approve" note make the control explicit; the timeline shows what follows.
+ * The one decision waiting for you, beside the portfolio: what Rocca
+ * proposes, what it costs and the Approve / Not now choice. The reasoning
+ * (steps and sources) opens in a side panel, so the card stays scannable.
+ * The amber count is the only "needs you" color on the page.
  */
 export function SuggestionWidget({ className }: { className?: string }) {
-  const { taxSmart, next } = suggestion
+  const { order } = suggestion
   return (
-    <Card
+    <section
       id="suggestion"
-      role="region"
       aria-labelledby="suggestion-title"
-      // scroll-mt clears the sticky top bar (taller on phones: it holds the nav).
+      // scroll-mt clears the sticky top bar (taller on tablets: it holds the nav).
       className={cn(
         panelClass,
-        "scroll-mt-36 border-t-4 border-t-attention ring-attention/30 lg:scroll-mt-24",
+        "flex scroll-mt-36 flex-col p-5 lg:scroll-mt-24",
         className,
       )}
     >
-      <CardHeader>
-        <p
-          className={cn(
-            "inline-flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold",
-            toneClasses.attention.tile,
-          )}
-        >
-          <span className="size-1.5 rounded-full bg-attention" aria-hidden />
-          {suggestion.eyebrow}
+      <div className="flex items-center justify-between gap-3">
+        <p className="flex items-center gap-2 text-sm font-semibold">
+          {suggestion.needsOk}
+          <span className="grid h-5 min-w-5 place-items-center rounded-full bg-attention px-1.5 text-[11px] font-semibold text-white tabular-nums">
+            1
+          </span>
         </p>
-        <h2
-          id="suggestion-title"
-          className="mt-2 text-xl font-semibold tracking-tight text-balance sm:text-2xl"
-        >
-          {suggestion.title}
-        </h2>
-        <p className="max-w-2xl text-sm leading-relaxed text-pretty text-muted-foreground">
-          {suggestion.summary}
-        </p>
-      </CardHeader>
+        <p className="text-xs text-muted-foreground">{suggestion.eyebrow}</p>
+      </div>
 
-      <CardContent className="space-y-5">
-        <div className="grid gap-6 md:grid-cols-[1.15fr_1fr]">
-          <div>
-            <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-              {suggestion.reasoningTitle}
-            </h3>
-            <ol className="mt-3 space-y-4">
-              {suggestion.reasoning.map((step, index) => (
-                <li key={step.source} className="flex gap-3">
-                  <span
-                    aria-hidden
-                    className="grid size-6 shrink-0 place-items-center rounded-full bg-secondary text-xs font-semibold tabular-nums"
-                  >
-                    {index + 1}
-                  </span>
-                  <div className="text-sm leading-relaxed">
-                    <p>{step.text}</p>
-                    <span className="mt-1.5 inline-flex rounded-md bg-secondary px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
-                      Source: {step.source}
-                    </span>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            <OrderBox />
-            <div className="flex items-start gap-3 rounded-xl bg-brand/[0.08] p-4 text-sm">
-              <ReceiptIcon
-                className="mt-0.5 size-4 shrink-0 text-brand"
-                aria-hidden
-              />
-              <div>
-                <p className="font-medium">
-                  {taxSmart.label}: {taxSmart.account}
-                </p>
-                <p className="mt-0.5 text-muted-foreground">
-                  <span className="font-semibold text-brand">
-                    {taxSmart.estimate}
-                  </span>{" "}
-                  {taxSmart.comparison}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* The decision: big, unmistakable, and nothing runs until you choose. */}
-        <DecisionBar />
-
-        <div>
-          <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-            {next.title}
-          </h3>
-          <ol className="mt-3 grid gap-3 sm:grid-cols-3">
-            {next.steps.map((step, index) => (
-              <li key={step} className="flex items-start gap-2.5 text-sm">
-                <span
-                  aria-hidden
-                  className="grid size-6 shrink-0 place-items-center rounded-full border border-brand/40 text-xs font-semibold text-brand tabular-nums"
-                >
-                  {index + 1}
-                </span>
-                <span className="leading-snug text-pretty">{step}</span>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </CardContent>
-
-      <CardFooter
-        className={cn(
-          "flex-wrap justify-between gap-2",
-          toneClasses.learn.soft,
-        )}
+      <h2
+        id="suggestion-title"
+        className="mt-4 text-lg leading-snug font-semibold tracking-tight text-balance"
       >
-        <ComingSoonButton
-          variant="link"
-          className={cn(
-            "h-auto justify-start p-0 text-left text-sm font-medium whitespace-normal",
-            toneClasses.learn.text,
-          )}
-        >
-          <GraduationCapIcon aria-hidden />
-          {suggestion.lesson}
-        </ComingSoonButton>
-        <ComingSoonButton
-          variant="ghost"
-          size="sm"
-          className="rounded-full text-muted-foreground"
-        >
-          <MessageCircleQuestionIcon aria-hidden />
-          {suggestion.askWhy}
-        </ComingSoonButton>
-      </CardFooter>
-    </Card>
+        {suggestion.title}
+      </h2>
+      <p className="mt-1 text-[13px] leading-relaxed text-pretty text-muted-foreground">
+        {suggestion.summary}
+      </p>
+
+      <div className="mt-4">
+        <p className="text-xs font-medium text-muted-foreground">
+          {order.title}
+        </p>
+        <OrderLines lines={order.lines} className="mt-1" />
+      </div>
+
+      <div className="mt-2">
+        <Impact />
+      </div>
+
+      <div className="mt-auto pt-5">
+        <DecisionBar />
+        <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-3">
+          <SidePanelTrigger handle={reasoningPanel} className={panelLinkClass}>
+            {suggestion.review}
+            <ArrowRightIcon className="size-3.5" aria-hidden />
+          </SidePanelTrigger>
+          <SidePanelTrigger
+            handle={askPanel}
+            className={cn(
+              panelLinkClass,
+              "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <MessageCircleQuestionIcon className="size-3.5" aria-hidden />
+            {suggestion.askWhy}
+          </SidePanelTrigger>
+        </div>
+      </div>
+
+      <SidePanel
+        handle={reasoningPanel}
+        title={suggestion.reviewTitle}
+        description={suggestion.title}
+      >
+        <SuggestionDetails />
+      </SidePanel>
+    </section>
   )
 }

@@ -44,7 +44,7 @@ function Donut() {
   return (
     <svg
       viewBox="0 0 42 42"
-      className="size-40 shrink-0 -rotate-90"
+      className="size-36 shrink-0 -rotate-90"
       aria-hidden
     >
       {segments.map(({ assetClass, length, start }) => (
@@ -104,9 +104,9 @@ export function AllocationWidget({ className }: { className?: string }) {
           <Donut />
         </div>
 
-        <ul className="space-y-4">
+        <ul className="divide-y divide-border">
           {allocation.map(({ assetClass, share, target }) => (
-            <li key={assetClass}>
+            <li key={assetClass} className="py-3 first:pt-0 last:pb-0">
               <div className="flex items-center justify-between gap-3 text-sm">
                 <span className="flex items-center gap-2 font-medium">
                   <span
