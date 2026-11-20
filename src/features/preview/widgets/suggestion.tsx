@@ -11,7 +11,7 @@ import {
   reasoningPanel,
 } from "../components/side-panel"
 import { accountAccess, suggestion } from "../data"
-import { DecisionBar } from "./suggestion-actions"
+import { DecisionBar, TrimPreview } from "./suggestion-actions"
 import { SuggestionDetails } from "./suggestion-details"
 
 /** What the order costs, which rule it serves, where it runs. */
@@ -47,7 +47,8 @@ function Impact() {
 
 /**
  * The one decision waiting for you, beside the portfolio: what Rocca
- * proposes, what it costs and the Approve / Not now choice. The reasoning
+ * proposes, what it changes (NVDA 18% → 12%), what it costs and the
+ * Approve / Not now choice. The reasoning
  * (steps and sources) opens in a side panel, so the card stays scannable.
  * The amber count is the only "needs you" color on the page.
  */
@@ -84,7 +85,9 @@ export function SuggestionWidget({ className }: { className?: string }) {
         {suggestion.summary}
       </p>
 
-      <div className="mt-4">
+      <TrimPreview className="mt-4" />
+
+      <div className="mt-3">
         <p className="text-xs font-medium text-muted-foreground">
           {order.title}
         </p>

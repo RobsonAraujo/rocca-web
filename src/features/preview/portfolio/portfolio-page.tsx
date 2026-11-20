@@ -65,7 +65,7 @@ export function PortfolioPage() {
       <KpiStrip />
 
       <PortfolioViews>
-        {/* Desktop: allocation, exposure and accounts stacked beside the insights column (similar heights). */}
+        {/* Desktop: allocation, exposure and accounts stacked beside the insights. */}
         {/* Phones, Holdings view: everything in this grid is hidden, so drop the grid too (no stray gap). */}
         <div className="grid gap-4 max-md:in-data-[view=holdings]:hidden lg:grid-cols-12 lg:gap-5">
           <div className="flex flex-col gap-4 lg:col-span-8 lg:gap-5">
@@ -73,7 +73,13 @@ export function PortfolioPage() {
             <ExposureWidget className={viewClasses.overview} />
             <AccountsWidget className={viewClasses.accounts} />
           </div>
-          <InsightsWidget className={`lg:col-span-4 ${viewClasses.overview}`} />
+          {/* Sticky beside the taller column: the findings stay in view while you read the numbers. */}
+          <InsightsWidget
+            className={cn(
+              "lg:sticky lg:top-20 lg:col-span-4 lg:self-start",
+              viewClasses.overview,
+            )}
+          />
         </div>
 
         <HoldingsWidget className={viewClasses.holdings} />

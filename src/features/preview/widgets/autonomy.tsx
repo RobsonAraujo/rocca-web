@@ -1,15 +1,14 @@
 "use client"
 
 import {
-  CheckIcon,
   CircleAlertIcon,
   CircleCheckIcon,
   GaugeIcon,
   PlusIcon,
   ShieldCheckIcon,
 } from "lucide-react"
+import { Fragment } from "react"
 
-import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { toneClasses } from "@/components/product/tone"
 
@@ -19,7 +18,7 @@ import { autonomy, rules } from "../data"
 import type { SuggestionStatus } from "../demo-state"
 import { useDemo } from "../demo-state"
 
-/** The selected level and its position on the dial. */
+/** The selected level and its position in the switch. */
 function useCurrentLevel() {
   const { mode } = useDemo()
   const index = autonomy.levels.findIndex((level) => level.id === mode)
@@ -39,78 +38,49 @@ export function resolveRules(suggestion: SuggestionStatus) {
 }
 
 /**
- * A three-stop dial: the filled part of the track is how much Rocca handles
- * today. Tapping another stop switches the (simulated) mode.
+ * How much Rocca handles, as a segmented control: Explain, Suggest,
+ * Autopilot, left to right as Rocca takes on more. Every option stays a
+ * button (the current one pressed), so focus doesn't drop when it changes.
  */
-export function AutonomyDial() {
+export function ModeSwitch() {
   const { setMode } = useDemo()
   const { index: currentIndex } = useCurrentLevel()
-  const last = autonomy.levels.length - 1
-  const fill = (currentIndex / last) * 100
   return (
-    <div className="rounded-lg border border-border p-4">
-      <div className="relative mx-2.5 h-5">
-        <div className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-control/15" />
-        <div
-          className="absolute top-1/2 left-0 h-1.5 -translate-y-1/2 rounded-full bg-control transition-[width] duration-300 motion-reduce:transition-none"
-          style={{ width: `${fill}%` }}
-        />
-        {autonomy.levels.map((level, index) => {
-          const position = { left: `${(index / last) * 100}%` }
-          const current = index === currentIndex
-          // Every stop stays a button (the current one pressed), so focus
-          // doesn't drop when the mode changes.
-          return (
-            <Button
-              key={level.id}
-              type="button"
-              variant="ghost"
-              onClick={() => setMode(level.id)}
-              aria-pressed={current}
-              aria-label={
-                current ? level.label : `${autonomy.change} ${level.label}`
-              }
-              style={position}
-              className={cn(
-                // active:-translate-y-1/2 cancels the Button's press nudge, which would knock the stop off the track.
-                // The ::after pseudo widens the tap target past the small dot.
-                "absolute top-1/2 min-w-0 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 after:absolute after:-inset-3 after:content-[''] active:-translate-y-1/2",
-                current
-                  ? "size-5 border-4 border-card bg-control shadow-soft ring-4 ring-control/20 hover:bg-control"
-                  : cn(
-                      "size-4 border-2 hover:bg-card",
-                      index < currentIndex
-                        ? "border-control bg-control"
-                        : "border-control/40 bg-card",
-                    ),
-              )}
-            />
-          )
-        })}
-      </div>
-      <ul className="mt-3 grid grid-cols-3 text-xs">
-        {autonomy.levels.map((level, index) => (
-          <li
+    <div
+      role="group"
+      aria-label={autonomy.title}
+      className="grid grid-cols-3 gap-0.5 rounded-lg bg-secondary p-0.5"
+    >
+      {autonomy.levels.map((level, index) => {
+        const current = index === currentIndex
+        return (
+          <button
             key={level.id}
-            aria-current={index === currentIndex ? "true" : undefined}
+            type="button"
+            onClick={() => setMode(level.id)}
+            aria-pressed={current}
+            aria-label={
+              current ? level.label : `${autonomy.change} ${level.label}`
+            }
             className={cn(
-              "transition-colors",
-              index === 0 && "text-left",
-              index === 1 && "text-center",
-              index === 2 && "text-right",
-              index === currentIndex
-                ? "font-semibold text-control"
-                : "text-muted-foreground",
+              "flex h-8 items-center justify-center gap-1.5 rounded-md text-xs font-medium transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+              current
+                ? "bg-card text-foreground shadow-soft"
+                : "text-muted-foreground hover:text-foreground",
             )}
           >
+            {current && (
+              <span className="size-1.5 rounded-full bg-control" aria-hidden />
+            )}
             {level.short}
-          </li>
-        ))}
-      </ul>
+          </button>
+        )
+      })}
     </div>
   )
 }
 
+/** What the current mode means, then who does what, one line each. */
 export function InThisMode() {
   const { inThisMode } = autonomy
   const { level: currentLevel } = useCurrentLevel()
@@ -122,50 +92,43 @@ export function InThisMode() {
   const later = "later" in currentLevel && currentLevel.later
   return (
     <div aria-live="polite">
-      <p className="flex items-center gap-2 text-sm font-semibold">
-        {currentLevel.label}
-        {later && (
+      <p className="text-[13px] text-pretty text-muted-foreground">
+        {currentLevel.description}
+      </p>
+      {later && (
+        <p className="mt-1.5 flex items-start gap-1.5 text-xs text-pretty text-muted-foreground">
           <span
             className={cn(
-              "rounded-full px-2 py-0.5 text-[11px] font-semibold",
+              "shrink-0 rounded-md px-1.5 py-px text-[11px] font-semibold",
               toneClasses.control.tile,
             )}
           >
             {autonomy.later.tag}
           </span>
-        )}
-      </p>
-      <p className="mt-0.5 text-sm text-pretty text-muted-foreground">
-        {currentLevel.description}
-      </p>
-      {later && (
-        <p className="mt-1 text-xs text-pretty text-muted-foreground">
           {autonomy.later.note}
         </p>
       )}
-      <div className="mt-3 grid grid-cols-2 gap-2">
+      <dl className="mt-3 space-y-1.5 text-[13px] leading-snug">
         {sides.map((side) => (
-          <div key={side.label} className="rounded-lg bg-secondary/60 p-3">
-            <p className="text-xs font-medium text-muted-foreground">
+          <div key={side.label} className="flex gap-3">
+            <dt className="w-12 shrink-0 text-muted-foreground">
               {side.label}
-            </p>
-            <ul className="mt-1.5 space-y-1.5">
-              {side.items.map((item) => (
-                <li
-                  key={item}
-                  className="flex items-start gap-1.5 text-xs leading-snug"
-                >
-                  <CheckIcon
-                    className="mt-px size-3.5 shrink-0 text-control"
-                    aria-hidden
-                  />
-                  {item}
-                </li>
+            </dt>
+            <dd className="min-w-0">
+              {side.items.map((item, index) => (
+                <Fragment key={item}>
+                  {index > 0 && (
+                    <span aria-hidden className="text-muted-foreground">
+                      {" · "}
+                    </span>
+                  )}
+                  <span>{item}</span>
+                </Fragment>
               ))}
-            </ul>
+            </dd>
           </div>
         ))}
-      </div>
+      </dl>
     </div>
   )
 }
@@ -239,7 +202,8 @@ export function Rules() {
 
 /**
  * The control differentiator: how much Rocca handles today, what each side
- * does in this mode, and the rules Rocca must follow. Violet = control.
+ * does in this mode, and the rules Rocca must follow. Violet marks control,
+ * in small doses (the selected mode's dot, the rule icons).
  */
 export function AutonomyWidget({ className }: { className?: string }) {
   return (
@@ -252,7 +216,7 @@ export function AutonomyWidget({ className }: { className?: string }) {
       className={className}
     >
       <div className="space-y-5">
-        <AutonomyDial />
+        <ModeSwitch />
         <InThisMode />
         <Rules />
       </div>

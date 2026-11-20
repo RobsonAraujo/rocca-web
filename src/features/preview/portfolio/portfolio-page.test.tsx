@@ -15,6 +15,7 @@ import {
   holdingGain,
   holdingValue,
   holdings,
+  insights,
   insightsCopy,
   page,
   portfolioTotal,
@@ -75,7 +76,7 @@ describe("PortfolioPage", () => {
   })
 
   it("renders every section and one row per holding", () => {
-    render(<PortfolioPage />)
+    const { container } = render(<PortfolioPage />)
 
     expect(
       screen.getByRole("heading", { level: 1, name: page.title }),
@@ -90,9 +91,49 @@ describe("PortfolioPage", () => {
       expect(screen.getByRole("heading", { name: title })).toBeInTheDocument()
     }
 
-    const table = screen.getByRole("table")
+    const table = within(
+      container.querySelector<HTMLElement>("#holdings")!,
+    ).getByRole("table")
     // +1 for the header row.
     expect(within(table).getAllByRole("row")).toHaveLength(holdings.length + 1)
+  })
+
+  it("compares each asset class with its target", () => {
+    const { container } = render(<PortfolioPage />)
+    const panel = within(container.querySelector<HTMLElement>("#allocation")!)
+
+    // The two bars: what you hold now, and the mix you set.
+    expect(
+      panel.getByRole("img", { name: /^Now: US stocks/ }),
+    ).toBeInTheDocument()
+    expect(
+      panel.getByRole("img", { name: /^Target: US stocks 60\.0%/ }),
+    ).toBeInTheDocument()
+    const table = panel.getByRole("table")
+    expect(within(table).getAllByRole("row")).toHaveLength(
+      allocation.length + 1,
+    )
+    expect(
+      within(
+        panel.getByRole("rowheader", { name: "US stocks" }).closest("tr")!,
+      ).getByText("10 pts over"),
+    ).toBeInTheDocument()
+  })
+
+  it("shows the first insights and the rest on demand", async () => {
+    const user = userEvent.setup()
+    const { container } = render(<PortfolioPage />)
+    const panel = within(container.querySelector<HTMLElement>("#insights")!)
+    const visible = () => panel.getAllByRole("heading", { level: 3 })
+
+    expect(visible()).toHaveLength(insightsCopy.initial)
+    const toggle = panel.getByRole("button", { name: /^Show all/ })
+    expect(toggle).toHaveAttribute("aria-expanded", "false")
+
+    await user.click(toggle)
+
+    expect(visible()).toHaveLength(insights.length)
+    expect(toggle).toHaveAttribute("aria-expanded", "true")
   })
 
   it("links the concentration insight to the suggestion on the overview", () => {

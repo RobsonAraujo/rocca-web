@@ -57,7 +57,7 @@ describe("PreviewShell", () => {
       within(sidebar).getByRole("link", { name: "Portfolio" }),
     ).toHaveAttribute("href", PORTFOLIO_PATH)
     expect(
-      within(sidebar).getByRole("button", { name: "Agent" }),
+      within(sidebar).getByRole("button", { name: "Agent, coming soon" }),
     ).toBeInTheDocument()
     expect(
       within(sidebar).getByRole("link", { name: shell.backToSite }),
@@ -120,7 +120,7 @@ describe("PreviewShell", () => {
     const user = userEvent.setup()
     render(<PreviewShell>page</PreviewShell>)
 
-    const [agent] = screen.getAllByRole("button", { name: "Agent" })
+    const [agent] = screen.getAllByRole("button", { name: /^Agent/ })
     await user.click(agent!)
 
     expect(toast).toHaveBeenCalledWith(

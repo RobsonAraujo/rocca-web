@@ -190,17 +190,38 @@ function StoryRow({
   )
 }
 
+/** Editorial (a lead story with its photo) or compact (rows only). */
+export type NewsLayout = "editorial" | "compact"
+
 /**
- * The newest story with a photo leads (or the newest, if none has one); the
- * rest run down a column beside it on large screens, below it on phones.
+ * Editorial: the newest story with a photo leads (or the newest, if none has
+ * one); the rest run down a column beside it on large screens, below it on
+ * phones. Compact (inside a dashboard): every story as a row with a small
+ * photo, in two columns from md up, so the card stays short.
  */
 export function NewsFeed({
   items,
   audience = "portfolio",
+  layout = "editorial",
 }: {
   items: RankedNewsItem[]
   audience?: NewsAudience
+  layout?: NewsLayout
 }) {
+  if (layout === "compact") {
+    return (
+      <ul className="grid gap-x-8 md:grid-cols-2">
+        {items.map((item) => (
+          <li
+            key={item.id}
+            className="border-t border-border py-4 first:border-t-0 first:pt-0 md:[&:nth-child(2)]:border-t-0 md:[&:nth-child(2)]:pt-0"
+          >
+            <StoryRow item={item} audience={audience} />
+          </li>
+        ))}
+      </ul>
+    )
+  }
   const lead = items.find((item) => item.image) ?? items[0]
   if (!lead) return null
   const rest = items.filter((item) => item !== lead)

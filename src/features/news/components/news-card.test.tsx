@@ -118,6 +118,20 @@ describe("NewsCard", () => {
     ).toBeInTheDocument()
   })
 
+  it("drops the lead story in the compact (dashboard) layout", () => {
+    const { container } = render(
+      <NewsCard id="news" layout="compact" news={liveNews} />,
+    )
+
+    // Every story is a row: no standfirst under a big lead.
+    expect(
+      screen.queryByText("Data center sales beat estimates again."),
+    ).not.toBeInTheDocument()
+    expect(container.querySelectorAll("article")).toHaveLength(
+      liveNews.items.length,
+    )
+  })
+
   it("features the newest story that has a photo", () => {
     const news: PortfolioNews = {
       live: true,

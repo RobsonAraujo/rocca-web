@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 import { ComingSoonButton } from "../components/coming-soon"
+import { SoonBadge } from "../components/nav-items"
 import { mobile, shell } from "../data"
 import { SheetFrame, menuSheet } from "./sheet"
 
@@ -36,6 +37,7 @@ export function MenuSheet() {
                   aria-hidden
                 />
                 <span className="flex-1">{label}</span>
+                {!href && <SoonBadge />}
                 <ChevronRightIcon
                   className="size-4 text-muted-foreground"
                   aria-hidden

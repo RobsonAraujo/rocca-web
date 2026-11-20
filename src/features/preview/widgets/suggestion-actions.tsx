@@ -18,6 +18,64 @@ import { cn } from "@/lib/utils"
 import { demo, suggestion } from "../data"
 import { WaitlistNote } from "../components/waitlist-note"
 import { useDemo } from "../demo-state"
+import { formatPercent } from "../format"
+
+const percent = (fraction: number) => formatPercent(fraction, { digits: 0 })
+
+/**
+ * What the trade does, at a glance: NVDA's share now and after, against
+ * your limit. The striped end is what gets sold; once the (simulated)
+ * trade is done, the bar settles at the target.
+ */
+export function TrimPreview({ className }: { className?: string }) {
+  const { suggestion: status } = useDemo()
+  const { effect } = suggestion
+  const done = status === "done"
+  const width = (fraction: number) => `${(fraction / effect.scale) * 100}%`
+  const label = done
+    ? `${effect.label}: ${percent(effect.to)}, within ${effect.limitLabel.toLowerCase()} of ${percent(effect.limit)}.`
+    : `${effect.label}: from ${percent(effect.from)} to ${percent(effect.to)}. ${effect.limitLabel}: ${percent(effect.limit)}.`
+  return (
+    <div role="img" aria-label={label} className={className}>
+      <div className="flex items-baseline justify-between gap-3 text-[13px]">
+        <span className="text-muted-foreground">{effect.label}</span>
+        <span className="font-medium tabular-nums">
+          {done
+            ? percent(effect.to)
+            : `${percent(effect.from)} → ${percent(effect.to)}`}
+        </span>
+      </div>
+      <div className="relative mt-2 h-2 rounded-full bg-secondary">
+        <span
+          className="absolute inset-y-0 left-0 rounded-l-full bg-brand/70 transition-[border-radius] duration-300 data-[done=true]:rounded-r-full"
+          data-done={done}
+          style={{ width: width(effect.to) }}
+        />
+        {!done && (
+          <span
+            className="absolute inset-y-0 rounded-r-full bg-[repeating-linear-gradient(-45deg,var(--color-attention)_0_2px,transparent_2px_5px)] opacity-60"
+            style={{
+              left: width(effect.to),
+              width: width(effect.from - effect.to),
+            }}
+          />
+        )}
+        <span
+          className="absolute -top-1 h-4 w-0.5 -translate-x-1/2 rounded-full bg-foreground/60"
+          style={{ left: width(effect.limit) }}
+        />
+      </div>
+      <div className="relative mt-1.5 h-4 text-[11px] text-muted-foreground">
+        <span
+          className="absolute -translate-x-1/2 whitespace-nowrap"
+          style={{ left: width(effect.limit) }}
+        >
+          {effect.limitLabel} {percent(effect.limit)}
+        </span>
+      </div>
+    </div>
+  )
+}
 
 /** "Nothing happens until you approve", or the Autopilot version of it. */
 export function DecisionNote({ className }: { className?: string }) {

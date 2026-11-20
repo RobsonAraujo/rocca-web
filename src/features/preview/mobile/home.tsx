@@ -26,7 +26,7 @@ import {
   suggestion,
   trackRecord,
 } from "../data"
-import { AutonomyDial, InThisMode, Rules } from "../widgets/autonomy"
+import { ModeSwitch, InThisMode, Rules } from "../widgets/autonomy"
 import { HeroChart } from "../widgets/chart-ranges"
 import { MobileDecision } from "../widgets/suggestion-actions"
 import { SuggestionDetails } from "../widgets/suggestion-details"
@@ -332,7 +332,7 @@ export function MobileHome({ news }: { news?: React.ReactNode } = {}) {
           description={autonomy.description}
         >
           <div className="space-y-5">
-            <AutonomyDial />
+            <ModeSwitch />
             <InThisMode />
             <Rules />
           </div>

@@ -14,6 +14,7 @@ import {
   portfolio,
   rules,
   savings,
+  status,
   suggestion,
   trackRecord,
 } from "./data"
@@ -139,6 +140,10 @@ describe("Overview", () => {
     const user = userEvent.setup()
     renderWithDemo(<Overview />)
     expect(screen.getByText(rules.attentionCount)).toBeInTheDocument()
+    expect(screen.getByText(status.waiting)).toBeInTheDocument()
+    expect(
+      screen.getByRole("img", { name: /from 18% to 12%/ }),
+    ).toBeInTheDocument()
 
     await user.click(screen.getByRole("button", { name: "Approve" }))
     expect(screen.getByText(suggestion.placing)).toBeInTheDocument()
@@ -147,8 +152,12 @@ describe("Overview", () => {
       await screen.findByText(suggestion.receipt.title, {}, { timeout: 3000 }),
     ).toBeInTheDocument()
     expect(screen.getByText(demo.waitlistNote)).toBeInTheDocument()
-    // The 12% rule is back on track.
+    // The 12% rule is back on track, and nothing waits on you.
     expect(screen.getByText(rules.allClear)).toBeInTheDocument()
+    expect(screen.getByText(status.clear)).toBeInTheDocument()
+    expect(
+      screen.getByRole("img", { name: /: 12%, within/ }),
+    ).toBeInTheDocument()
     expect(screen.getByText(/NVDA is back at 12%/)).toBeInTheDocument()
     expect(toast).not.toHaveBeenCalled()
 

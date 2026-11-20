@@ -4,7 +4,8 @@ import { SimulatedBadge } from "./navigation"
 
 type PageHeaderProps = {
   title: string
-  subtitle: string
+  /** A line of text, or a status line (spans only: it renders in a <p>). */
+  subtitle: React.ReactNode
   /** Optional controls on the right (desktop) or below the text (phones). */
   actions?: React.ReactNode
   className?: string

@@ -247,7 +247,15 @@ export const kpis = {
 export const allocationCopy = {
   title: "Allocation",
   description: "What you own vs. the targets you set.",
+  now: "Now",
   target: "Target",
+  columns: {
+    assetClass: "Asset class",
+    value: "Value",
+    now: "Now",
+    target: "Target",
+    gap: "Gap",
+  },
   /** Gap (in share of the portfolio) that counts as off target. */
   tolerance: 0.03,
   points: "pts",
@@ -312,6 +320,10 @@ export type Insight = {
 export const insightsCopy = {
   title: "What Rocca sees",
   description: "Found by looking across all your accounts at once.",
+  /** How many insights show before "Show all". */
+  initial: 3,
+  showAll: "Show all",
+  showLess: "Show less",
 }
 
 export const insights: Insight[] = [

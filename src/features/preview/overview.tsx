@@ -1,4 +1,5 @@
 import { ModePill } from "./components/mode-pill"
+import { OverviewStatus } from "./components/overview-status"
 import { PageHeader } from "./components/page-header"
 import { shell } from "./data"
 import { AutonomyWidget } from "./widgets/autonomy"
@@ -28,7 +29,7 @@ export function Overview({ news }: { news?: React.ReactNode } = {}) {
     <>
       <PageHeader
         title={shell.greeting}
-        subtitle={shell.subtitle}
+        subtitle={<OverviewStatus />}
         actions={<ModePill />}
       />
 

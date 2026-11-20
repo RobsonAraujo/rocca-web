@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 
 import { ComingSoonButton } from "../components/coming-soon"
 import { Panel } from "../components/panel"
+import { ShowMoreList } from "../components/show-more"
 import type { InsightTone } from "./data"
 import { insights, insightsCopy } from "./data"
 
@@ -15,6 +16,7 @@ const toneStyle: Record<InsightTone, { chip: string; icon: string }> = {
   good: { chip: "bg-secondary text-foreground", icon: "text-brand" },
 }
 
+/** Rocca's findings, most important first; the first three show up front. */
 export function InsightsWidget({ className }: { className?: string }) {
   return (
     <Panel
@@ -24,7 +26,12 @@ export function InsightsWidget({ className }: { className?: string }) {
       icon={SparklesIcon}
       className={className}
     >
-      <ul className="-my-3 divide-y divide-border">
+      <ShowMoreList
+        initial={insightsCopy.initial}
+        showAll={insightsCopy.showAll}
+        showLess={insightsCopy.showLess}
+        className="-mt-3 divide-y divide-border"
+      >
         {insights.map(({ id, tone, tag, icon: Icon, title, body, action }) => (
           <li key={id} className="py-4">
             <div className="flex items-start gap-3">
@@ -68,7 +75,7 @@ export function InsightsWidget({ className }: { className?: string }) {
             </div>
           </li>
         ))}
-      </ul>
+      </ShowMoreList>
     </Panel>
   )
 }

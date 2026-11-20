@@ -39,9 +39,39 @@ export function RailTooltip({
 }
 
 /**
+ * "Soon" on a nav item that isn't built yet, so nobody clicks expecting a
+ * page. Screen readers hear ", coming soon" after the item's name. Pass
+ * `hidden` to keep only the spoken part (the collapsed sidebar).
+ */
+export function SoonBadge({
+  hidden = false,
+  className,
+}: {
+  hidden?: boolean
+  className?: string
+}) {
+  return (
+    <>
+      <span
+        aria-hidden
+        className={cn(
+          "rounded-md border border-border px-1.5 py-0.5 text-[10px] leading-none font-medium text-muted-foreground",
+          hidden && "hidden",
+          className,
+        )}
+      >
+        {shell.soon}
+      </span>
+      <span className="sr-only">, {shell.comingSoon}</span>
+    </>
+  )
+}
+
+/**
  * Dashboard nav. Built pages are real links (the current one is marked with
- * aria-current); the rest aren't built yet, so they show the coming-soon
- * notice. usePathname needs no Suspense here: every preview route is static.
+ * aria-current); the rest aren't built yet: they carry a "Soon" tag and show
+ * the coming-soon notice. usePathname needs no Suspense here: every preview
+ * route is static.
  *
  * `collapsed` (vertical only) shows icons alone: labels stay for screen
  * readers and come back as tooltips.
@@ -71,6 +101,7 @@ export function NavItems({
               aria-hidden
             />
             <span className={cn(collapsed && "sr-only")}>{label}</span>
+            {!href && <SoonBadge hidden={collapsed} className="ml-auto" />}
           </>
         )
         const item = href ? (
@@ -98,7 +129,10 @@ export function NavItems({
         return (
           <li key={label} className="shrink-0">
             {vertical ? (
-              <RailTooltip label={label} enabled={collapsed}>
+              <RailTooltip
+                label={href ? label : `${label} · ${shell.soon}`}
+                enabled={collapsed}
+              >
                 {item}
               </RailTooltip>
             ) : (

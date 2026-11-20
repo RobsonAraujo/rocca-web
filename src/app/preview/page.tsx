@@ -7,7 +7,10 @@ import { OverviewScreen } from "@/features/preview/overview-screen"
 
 export const metadata: Metadata = { title: "Dashboard preview" }
 
-/** Desktop news card in the dashboard's surface: hairline, no shadow. */
+/**
+ * Desktop news card in the dashboard's surface (hairline, no shadow) and its
+ * compact layout: headlines in two columns, no big lead photo.
+ */
 const dashboardSurface = "rounded-xl shadow-none ring-border sm:p-6"
 
 export default function PreviewPage() {
@@ -15,9 +18,15 @@ export default function PreviewPage() {
     <OverviewScreen
       news={
         <Suspense
-          fallback={<NewsSkeleton id="news" className={dashboardSurface} />}
+          fallback={
+            <NewsSkeleton
+              id="news"
+              layout="compact"
+              className={dashboardSurface}
+            />
+          }
         >
-          <NewsWidget id="news" className={dashboardSurface} />
+          <NewsWidget id="news" layout="compact" className={dashboardSurface} />
         </Suspense>
       }
       mobileNews={

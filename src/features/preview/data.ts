@@ -58,9 +58,11 @@ export const shell = {
   collapseMenu: "Collapse menu",
   expandMenu: "Expand menu",
   greeting: "Good morning",
-  subtitle: "Here's what your agent is watching today.",
   user: { name: "You", initials: "Y", plan: "Waitlist preview" },
   notifications: "Notifications",
+  /** Tag on nav items that aren't built yet; screen readers hear `comingSoon`. */
+  soon: "Soon",
+  comingSoon: "coming soon",
   /** The search-like field in the top bar that opens the Ask panel. */
   askTrigger: {
     label: "Ask Rocca",
@@ -80,6 +82,11 @@ export const shell = {
 /** At-a-glance status in the page header. */
 export const status = {
   mode: "Mode",
+  /** The overview's subtitle: how fresh the data is, and what's waiting. */
+  data: "Simulated data",
+  updated: "Updated just now",
+  waiting: "1 decision waiting",
+  clear: "Nothing waiting on you",
 } as const
 
 export const ask = {
@@ -261,6 +268,16 @@ export const suggestion = {
   order: preview.order,
   taxSmart: { label: "Tax-smart placement", ...preview.order.taxSmart },
   askWhy: "Ask why",
+  /** The before/after bar in the decision card. */
+  effect: {
+    label: "NVDA in your portfolio",
+    from: 0.18,
+    to: 0.12,
+    limit: 0.12,
+    limitLabel: "Your limit",
+    /** Full width of the bar, so 18% leaves room on the right. */
+    scale: 0.25,
+  },
   review: "Review reasoning",
   reviewTitle: "Why Rocca suggests this",
   /** Rows under the order: what it costs, which rule, where it runs. */
