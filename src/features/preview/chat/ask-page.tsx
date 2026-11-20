@@ -122,9 +122,21 @@ export function AskPage() {
           <>
             <h1 className="sr-only">{ask.label}</h1>
             <ChatThread className="pt-2 pb-6" />
-            <div className="sticky bottom-0 bg-linear-to-t from-canvas from-75% to-transparent pt-6 pb-4 max-md:bottom-[calc(4rem+env(safe-area-inset-bottom))]">
-              <ChatComposer id={ASK_INPUT_ID} autoFocus />
-              <ComposerNote className="mt-2" />
+            {/*
+             * Docked composer. Its block is solid canvas down to the screen
+             * edge (above the tab bar on phones), so the conversation never
+             * shows through under the field or the note; only the short
+             * strip above it fades the messages out.
+             */}
+            <div className="sticky bottom-0 max-md:bottom-[calc(4rem+env(safe-area-inset-bottom))]">
+              <div
+                aria-hidden
+                className="pointer-events-none h-8 bg-linear-to-t from-canvas to-transparent"
+              />
+              <div className="bg-canvas pb-4">
+                <ChatComposer id={ASK_INPUT_ID} autoFocus />
+                <ComposerNote className="mt-2" />
+              </div>
             </div>
           </>
         )}
