@@ -62,7 +62,7 @@ src/
    │  ├─ content.ts        # TODA a copy da landing
    │  ├─ landing.tsx       # monta a página: header, sections/, footer
    │  ├─ primitives.tsx    # Container e Section (alinhamento e espaçamento)
-   │  └─ sections/         # hero, features (bento), how it works, FAQ, CTA
+   │  └─ sections/         # hero, notícias ao vivo, features (bento), how it works, FAQ, CTA
    ├─ preview/            # dashboard de demonstração (dados simulados)
    │  ├─ shell.tsx       # sidebar, barra superior e aviso legal (usado pelo layout)
    │  ├─ overview.tsx    # página inicial do preview
@@ -134,7 +134,10 @@ O card "News about what you own" mostra manchetes sobre as ações que a carteir
 - **Layout:** a notícia mais recente fica em destaque, com imagem de capa e resumo. As demais aparecem em linhas com miniatura. As imagens usam `<img>` comum, e não `next/image`, porque vêm do domínio de cada publisher.
 - **Imagens:** a Massive manda a foto real da matéria. Na Finnhub, as matérias do Yahoo trazem o logo do Yahoo Finance no lugar da foto. Logos conhecidos e imagens repetidas em várias matérias são descartados. Sem foto, ou se ela falhar, aparece um bloco com o ticker.
 - **Cache:** `getPortfolioNews()` usa `"use cache"` com revalidação a cada 10 min, ou seja, 5 chamadas (uma por ação) a cada ciclo. O plano grátis da Massive limita a cerca de 5 chamadas por minuto e atualiza as notícias de hora em hora. O cache é por instância. Se o tráfego crescer, avalie `"use cache: remote"`.
-- **Onde entra:** a página (`app/preview/page.tsx`) passa o card como slot para o `OverviewScreen`, um para o desktop e outro para o celular, com ids diferentes. Overview, Home e os testes delas não buscam nada.
+- **Onde entra:**
+  - **Landing (`/`):** numa seção própria logo depois do hero ("We're watching what's happening around the world"), com um link para a waitlist. O `app/page.tsx` passa o card como slot para a `Landing`, com `audience="public"`. Ninguém conectou conta na landing, então o card mostra só o ticker de cada empresa e nunca fala em "your money" nem na carteira simulada.
+  - **Preview:** em destaque, logo depois de "Needs your OK". No desktop é a segunda zona do Overview; no celular fica logo abaixo do card de decisão. O `app/preview/page.tsx` passa o card como slot para o `OverviewScreen`, um para o desktop e outro para o celular, com ids diferentes.
+  - Landing, Overview, Home e os testes delas não buscam nada. Todas as páginas compartilham o mesmo cache.
 - **Licença:** os planos individuais da Massive são para uso "personal, non-commercial"; mostrar para usuários exige o plano Business. Os planos grátis da Finnhub são "strictly for personal use", e redistribuir exige aprovação por escrito. Para o site público, contrate um plano ou consiga aprovação por escrito.
 
 ### Cores e tema

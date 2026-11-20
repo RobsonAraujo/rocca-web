@@ -48,11 +48,11 @@ function Zone({
  * Overview page of the preview, shown right after a waitlist signup. All
  * data is simulated; every action shows a "coming soon" notice.
  *
- * Three zones, most important first:
+ * Zones, most important first:
  * 1. Needs your OK: the decision to make, beside how much Rocca handles.
- * 2. Learn & ask: lessons picked from your portfolio, and the chat.
- * 3. Your money: portfolio, what moved, savings, track record.
- * 4. In the news: headlines about what you own (a slot the page fills).
+ * 2. In the news: live headlines about what you own (a slot the page fills).
+ * 3. Learn & ask: lessons picked from your portfolio, and the chat.
+ * 4. Your money: portfolio, what moved, savings, track record.
  */
 export function Overview({ news }: { news?: React.ReactNode } = {}) {
   return (
@@ -70,6 +70,12 @@ export function Overview({ news }: { news?: React.ReactNode } = {}) {
         </div>
       </Zone>
 
+      {news && (
+        <Zone label={sections.news} tone="brand">
+          {news}
+        </Zone>
+      )}
+
       <Zone label={sections.learn} tone="learn">
         <div className="grid gap-4 lg:grid-cols-12 lg:gap-6">
           <LearnWidget className="lg:col-span-5" />
@@ -85,12 +91,6 @@ export function Overview({ news }: { news?: React.ReactNode } = {}) {
           <TrackRecordWidget className="md:col-span-2 lg:col-span-6" />
         </div>
       </Zone>
-
-      {news && (
-        <Zone label={sections.news} tone="brand">
-          {news}
-        </Zone>
-      )}
     </>
   )
 }

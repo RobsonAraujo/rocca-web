@@ -152,6 +152,28 @@ describe("NewsCard", () => {
         news={{ live: true, provider: "Finnhub", items: [], hiddenOpinion: [] }}
       />,
     )
-    expect(screen.getByText(newsCopy.empty)).toBeInTheDocument()
+    expect(
+      screen.getByText(newsCopy.byAudience.portfolio.empty),
+    ).toBeInTheDocument()
+  })
+
+  it("never mentions your money on the public card (no account connected)", () => {
+    const { container } = render(
+      <NewsCard id="news" audience="public" news={liveNews} />,
+    )
+
+    expect(
+      screen.getByRole("heading", {
+        name: newsCopy.byAudience.public.title,
+      }),
+    ).toBeInTheDocument()
+    expect(container).not.toHaveTextContent(/your money|your funds/)
+    expect(container).not.toHaveTextContent(/portfolio is simulated/)
+
+    const companies = screen.getAllByRole("list", {
+      name: newsCopy.impact.companiesLabel,
+    })
+    expect(companies.map((list) => list.textContent)).toEqual(["NVDA", "AMZN"])
+    expect(screen.getByText("Headlines via Finnhub.")).toBeInTheDocument()
   })
 })

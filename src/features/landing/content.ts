@@ -65,6 +65,19 @@ export const preview = {
   },
 } as const
 
+/**
+ * The news section right under the hero. Visitors haven't connected an
+ * account, so it's about the market, not "your money". The card itself says
+ * whether its headlines are live or simulated.
+ */
+export const liveNews = {
+  eyebrow: "In the news",
+  title: "We're watching what's happening around the world.",
+  description:
+    "Headlines on the companies that move the market, with the hot takes filtered out. Connect your accounts and Rocca shows how each story touches your money.",
+  cta: "See what it means for your portfolio",
+} as const
+
 /** Stable key per feature, so a layout can attach visuals without relying on order. */
 export type FeatureId = "accounts" | "moves" | "approval" | "learn"
 

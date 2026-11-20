@@ -5,6 +5,7 @@ import { useId, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 
+import type { NewsAudience } from "../content"
 import { newsCopy } from "../content"
 import type { RankedNewsItem } from "../relevance"
 import { NewsList } from "./news-list"
@@ -16,15 +17,18 @@ import { NewsList } from "./news-list"
 export function HiddenOpinion({
   items,
   count,
+  audience = "portfolio",
 }: {
   items: RankedNewsItem[]
   count: number
+  audience?: NewsAudience
 }) {
   const [open, setOpen] = useState(false)
   const listId = useId()
   if (count === 0) return null
 
   const { hidden } = newsCopy
+  const { why } = newsCopy.byAudience[audience]
   return (
     <div className="mt-4 border-t border-border pt-3">
       <div className="flex items-center justify-between gap-3">
@@ -47,8 +51,8 @@ export function HiddenOpinion({
       <div id={listId} hidden={!open} className="mt-3 space-y-3">
         {open && (
           <>
-            <p className="text-xs text-muted-foreground">{hidden.why}</p>
-            <NewsList items={items} muted />
+            <p className="text-xs text-muted-foreground">{why}</p>
+            <NewsList items={items} muted audience={audience} />
           </>
         )}
       </div>

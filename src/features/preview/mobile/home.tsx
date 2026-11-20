@@ -372,8 +372,8 @@ function MovesList() {
 
 /**
  * Home screen for phones, in the shape of a native investing app: balance
- * first, then the one decision that needs you, your controls, cards for
- * you, what moved and the news. Details live in bottom sheets.
+ * first, then the one decision that needs you, the news about what you own,
+ * your controls, cards for you and what moved. Details live in bottom sheets.
  */
 export function MobileHome({ news }: { news?: React.ReactNode } = {}) {
   return (
@@ -385,6 +385,13 @@ export function MobileHome({ news }: { news?: React.ReactNode } = {}) {
         <SectionLabel tone="attention">{mobile.sections.decision}</SectionLabel>
         <DecisionCard />
       </section>
+
+      {news && (
+        <section aria-label={mobile.sections.news} className="space-y-3">
+          <SectionLabel tone="brand">{mobile.sections.news}</SectionLabel>
+          {news}
+        </section>
+      )}
 
       <section aria-label={mobile.sections.controls} className="space-y-3">
         <SectionLabel tone="control">{mobile.sections.controls}</SectionLabel>
@@ -413,13 +420,6 @@ export function MobileHome({ news }: { news?: React.ReactNode } = {}) {
         <SectionLabel tone="brand">{mobile.sections.moves}</SectionLabel>
         <MovesList />
       </section>
-
-      {news && (
-        <section aria-label={mobile.sections.news} className="space-y-3">
-          <SectionLabel tone="brand">{mobile.sections.news}</SectionLabel>
-          {news}
-        </section>
-      )}
     </>
   )
 }

@@ -3,6 +3,7 @@ import { NewspaperIcon } from "lucide-react"
 import { Panel } from "@/features/preview/components/panel"
 import { cn } from "@/lib/utils"
 
+import type { NewsAudience } from "../content"
 import { newsCopy } from "../content"
 import type { PortfolioNews } from "../get-portfolio-news"
 import { HiddenOpinion } from "./hidden-opinion"
@@ -11,7 +12,12 @@ import { NewsFeed } from "./news-list"
 /** At most this many hidden opinion pieces are sent to the browser. */
 const HIDDEN_SHOWN = 5
 
-type CardProps = { id: string; className?: string }
+type CardProps = {
+  id: string
+  className?: string
+  /** `public` (the landing) never mentions "your money"; see NewsAudience. */
+  audience?: NewsAudience
+}
 
 function SourceBadge({ news }: { news: PortfolioNews }) {
   return (
@@ -35,42 +41,50 @@ function SourceBadge({ news }: { news: PortfolioNews }) {
 export function NewsCard({
   id,
   className,
+  audience = "portfolio",
   news,
 }: CardProps & { news: PortfolioNews }) {
+  const copy = newsCopy.byAudience[audience]
   return (
     <Panel
       id={id}
-      title={newsCopy.title}
-      description={newsCopy.description}
+      title={copy.title}
+      description={copy.description}
       icon={NewspaperIcon}
       action={<SourceBadge news={news} />}
       className={className}
     >
       {news.items.length > 0 ? (
-        <NewsFeed items={news.items} />
+        <NewsFeed items={news.items} audience={audience} />
       ) : (
-        <p className="text-sm text-muted-foreground">{newsCopy.empty}</p>
+        <p className="text-sm text-muted-foreground">{copy.empty}</p>
       )}
       <HiddenOpinion
         items={news.hiddenOpinion.slice(0, HIDDEN_SHOWN)}
         count={news.hiddenOpinion.length}
+        audience={audience}
       />
       <p className="mt-auto pt-4 text-[11px] text-muted-foreground">
         {news.live
-          ? `${newsCopy.attribution} ${news.provider}. ${newsCopy.liveNote}`
-          : newsCopy.simulatedNote}
+          ? `${newsCopy.attribution} ${news.provider}. ${copy.liveNote}`.trim()
+          : copy.simulatedNote}
       </p>
     </Panel>
   )
 }
 
 /** Suspense fallback with the card's frame, so the layout doesn't jump. */
-export function NewsSkeleton({ id, className }: CardProps) {
+export function NewsSkeleton({
+  id,
+  className,
+  audience = "portfolio",
+}: CardProps) {
+  const copy = newsCopy.byAudience[audience]
   return (
     <Panel
       id={id}
-      title={newsCopy.title}
-      description={newsCopy.description}
+      title={copy.title}
+      description={copy.description}
       icon={NewspaperIcon}
       className={className}
     >

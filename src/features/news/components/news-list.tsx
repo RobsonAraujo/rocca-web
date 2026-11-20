@@ -3,6 +3,7 @@ import { ArrowUpRightIcon } from "lucide-react"
 import { formatPercent } from "@/features/preview/format"
 import { cn } from "@/lib/utils"
 
+import type { NewsAudience } from "../content"
 import { newsCopy } from "../content"
 import { formatNewsTime } from "../format"
 import type { Exposure, RankedNewsItem } from "../relevance"
@@ -70,21 +71,36 @@ function StoryHeadline({
   )
 }
 
-/** How much of the portfolio the story touches, one chip per ticker. */
-function ImpactChips({ item }: { item: RankedNewsItem }) {
+/**
+ * One chip per ticker. For a portfolio, how much of it the story touches;
+ * on the public card, just the company's ticker (there's no "your money").
+ */
+function ImpactChips({
+  item,
+  audience,
+}: {
+  item: RankedNewsItem
+  audience: NewsAudience
+}) {
+  const isPortfolio = audience === "portfolio"
   return (
-    <ul aria-label={newsCopy.impact.label} className="flex flex-wrap gap-1.5">
+    <ul
+      aria-label={
+        isPortfolio ? newsCopy.impact.label : newsCopy.impact.companiesLabel
+      }
+      className="flex flex-wrap gap-1.5"
+    >
       {item.impact.map((exposure) => (
         <li
           key={exposure.symbol}
           className={cn(
             "rounded-md px-1.5 py-0.5 text-[11px] font-medium whitespace-nowrap tabular-nums",
-            exposure.direct > 0
+            isPortfolio && exposure.direct > 0
               ? "bg-brand/10 text-brand"
               : "bg-secondary text-muted-foreground",
           )}
         >
-          {impactLabel(exposure)}
+          {isPortfolio ? impactLabel(exposure) : exposure.symbol}
         </li>
       ))}
     </ul>
@@ -95,7 +111,13 @@ function ImpactChips({ item }: { item: RankedNewsItem }) {
 const leadSymbol = (item: RankedNewsItem) => item.impact[0]?.symbol ?? ""
 
 /** The newest story, big: cover image, headline, summary. */
-function FeaturedStory({ item }: { item: RankedNewsItem }) {
+function FeaturedStory({
+  item,
+  audience,
+}: {
+  item: RankedNewsItem
+  audience: NewsAudience
+}) {
   return (
     <article className="flex flex-col gap-3">
       <NewsImage
@@ -112,7 +134,7 @@ function FeaturedStory({ item }: { item: RankedNewsItem }) {
           {item.summary}
         </p>
       )}
-      <ImpactChips item={item} />
+      <ImpactChips item={item} audience={audience} />
     </article>
   )
 }
@@ -121,14 +143,20 @@ function FeaturedStory({ item }: { item: RankedNewsItem }) {
  * Blog-style feed: the newest story with a photo featured big, the rest as
  * rows with a thumbnail. Side by side on large screens, stacked below.
  */
-export function NewsFeed({ items }: { items: RankedNewsItem[] }) {
+export function NewsFeed({
+  items,
+  audience = "portfolio",
+}: {
+  items: RankedNewsItem[]
+  audience?: NewsAudience
+}) {
   // The newest story with a real photo leads; without any, the newest does.
   const featured = items.find((item) => item.image) ?? items[0]
   if (!featured) return null
   const rest = items.filter((item) => item !== featured)
   return (
     <div className="grid gap-5 lg:grid-cols-[1.1fr_1fr] lg:gap-8">
-      <FeaturedStory item={featured} />
+      <FeaturedStory item={featured} audience={audience} />
       {rest.length > 0 && (
         <ul className="divide-y divide-border max-lg:border-t max-lg:border-border max-lg:pt-1">
           {rest.map((item) => (
@@ -136,7 +164,7 @@ export function NewsFeed({ items }: { items: RankedNewsItem[] }) {
               <div className="min-w-0 flex-1 space-y-1.5">
                 <StoryMeta item={item} />
                 <StoryHeadline item={item} className="text-sm font-medium" />
-                <ImpactChips item={item} />
+                <ImpactChips item={item} audience={audience} />
               </div>
               <NewsImage
                 src={item.image}
@@ -159,9 +187,11 @@ export function NewsFeed({ items }: { items: RankedNewsItem[] }) {
 export function NewsList({
   items,
   muted = false,
+  audience = "portfolio",
 }: {
   items: RankedNewsItem[]
   muted?: boolean
+  audience?: NewsAudience
 }) {
   return (
     <ul className="divide-y divide-border">
@@ -175,7 +205,7 @@ export function NewsList({
               muted && "text-muted-foreground",
             )}
           />
-          <ImpactChips item={item} />
+          <ImpactChips item={item} audience={audience} />
         </li>
       ))}
     </ul>
