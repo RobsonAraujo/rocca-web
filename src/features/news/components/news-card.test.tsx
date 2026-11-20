@@ -45,41 +45,81 @@ const liveNews: PortfolioNews = {
   ...rankNews(raw),
 }
 
-/** Tickers shown on image fallback tiles, in page order. */
-const fallbackTiles = (container: HTMLElement) =>
-  [...container.querySelectorAll('[data-slot="news-image-fallback"]')].map(
-    (tile) => tile.textContent,
-  )
+/** The story <article> whose headline matches. */
+const story = (headline: RegExp) =>
+  screen.getByRole("heading", { name: headline }).closest("article")!
 
 describe("NewsCard", () => {
-  it("links each headline to its source and shows the exposure it touches", () => {
+  it("links each headline to its source, in a new tab", () => {
     render(<NewsCard id="news" news={liveNews} />)
 
     const link = screen.getByRole("link", { name: /Nvidia reports record/ })
     expect(link).toHaveAttribute("href", "https://example.com/nvda")
     expect(link).toHaveAttribute("target", "_blank")
     expect(link).toHaveAttribute("rel", "noopener noreferrer")
-
-    expect(screen.getByText("NVDA · 22.1% of your money")).toBeInTheDocument()
-    expect(screen.getByText("AMZN · 2.1% via your funds")).toBeInTheDocument()
-    expect(screen.getByText("Nov 19, 3:42 PM ET")).toBeInTheDocument()
   })
 
-  it("features the newest story with its cover, and a ticker tile when there's none", () => {
+  it("names the companies above each headline and shows the portfolio it touches", () => {
+    render(<NewsCard id="news" news={liveNews} />)
+
+    const nvda = story(/Nvidia reports record/)
+    expect(within(nvda).getByText("Nvidia")).toBeInTheDocument()
+    expect(
+      within(nvda).getByText("22.1% of your portfolio"),
+    ).toBeInTheDocument()
+
+    const amzn = story(/Amazon Urges/)
+    expect(within(amzn).getByText("Amazon")).toBeInTheDocument()
+    expect(
+      within(amzn).getByText("2.1% of your portfolio, via your funds"),
+    ).toBeInTheDocument()
+  })
+
+  it("names at most two companies in a kicker", () => {
+    const news: PortfolioNews = {
+      live: true,
+      provider: "Massive",
+      ...rankNews([
+        {
+          id: "trio",
+          headline: "Nvidia, Microsoft and Amazon team up on AI chips",
+          source: "Reuters",
+          url: "https://example.com/trio",
+          publishedAt: "2026-11-19T20:00:00Z",
+          tickers: ["NVDA", "MSFT", "AMZN"],
+        },
+      ]),
+    }
+    render(<NewsCard id="news" news={news} />)
+
+    expect(
+      within(story(/team up/)).getByText("Nvidia · Microsoft +1"),
+    ).toBeInTheDocument()
+  })
+
+  it("dates each story, keeping the exact time as a tooltip", () => {
+    render(<NewsCard id="news" news={liveNews} />)
+
+    const time = story(/Nvidia reports record/).querySelector("time")!
+    expect(time).toHaveAttribute("datetime", "2026-11-19T20:42:00Z")
+    expect(time).toHaveAttribute("title", "Nov 19, 3:42 PM ET")
+  })
+
+  it("leads with the cover photo and shows no placeholder for stories without one", () => {
     const { container } = render(<NewsCard id="news" news={liveNews} />)
 
-    const cover = container.querySelector("img")
-    expect(cover).toHaveAttribute("src", "https://cdn.example.com/nvda.jpg")
-    expect(cover).toHaveAttribute("referrerpolicy", "no-referrer")
-    expect(cover).toHaveAttribute("alt", "")
+    const images = container.querySelectorAll("img")
+    expect(images).toHaveLength(1)
+    expect(images[0]).toHaveAttribute("src", "https://cdn.example.com/nvda.jpg")
+    expect(images[0]).toHaveAttribute("referrerpolicy", "no-referrer")
+    expect(images[0]).toHaveAttribute("alt", "")
     expect(
       screen.getByText("Data center sales beat estimates again."),
     ).toBeInTheDocument()
-    expect(fallbackTiles(container)).toEqual(["AMZN"])
   })
 
   it("features the newest story that has a photo", () => {
-    const withPhotoOlder: PortfolioNews = {
+    const news: PortfolioNews = {
       live: true,
       provider: "Massive",
       ...rankNews([
@@ -87,28 +127,29 @@ describe("NewsCard", () => {
         raw[0]!, // older, with photo
       ]),
     }
-    const { container } = render(<NewsCard id="news" news={withPhotoOlder} />)
+    const { container } = render(<NewsCard id="news" news={news} />)
 
-    const featured = container.querySelector("article")!
-    expect(within(featured).getByRole("heading")).toHaveTextContent(
+    const lead = container.querySelector("article")!
+    expect(within(lead).getByRole("heading")).toHaveTextContent(
       /Nvidia reports record/,
     )
   })
 
-  it("swaps a cover that fails to load for the ticker tile", () => {
+  it("drops a cover photo that fails to load", () => {
     const { container } = render(<NewsCard id="news" news={liveNews} />)
 
     fireEvent.error(container.querySelector("img")!)
 
     expect(container.querySelector("img")).toBeNull()
-    expect(fallbackTiles(container)).toEqual(["NVDA", "AMZN"])
   })
 
-  it("labels live headlines with their provider", () => {
+  it("marks live headlines and credits the provider", () => {
     render(<NewsCard id="news" news={liveNews} />)
 
-    expect(screen.getByText("Live · Finnhub")).toBeInTheDocument()
-    expect(screen.getByText(/Headlines via Finnhub/)).toBeInTheDocument()
+    expect(screen.getByText(newsCopy.live)).toBeInTheDocument()
+    expect(
+      screen.getByText("Headlines via Finnhub. The portfolio is simulated."),
+    ).toBeInTheDocument()
   })
 
   it("hides opinion pieces until asked", async () => {
@@ -116,16 +157,14 @@ describe("NewsCard", () => {
     render(<NewsCard id="news" news={liveNews} />)
 
     expect(screen.queryByText(/Unstoppable Stock/)).not.toBeInTheDocument()
-    expect(screen.getByText("Rocca hid 1 opinion piece")).toBeInTheDocument()
+    expect(screen.getByText(/Rocca hid 1 opinion piece\./)).toBeInTheDocument()
 
     const toggle = screen.getByRole("button", { name: newsCopy.hidden.show })
     await user.click(toggle)
 
     expect(toggle).toHaveAttribute("aria-expanded", "true")
-    const opinion = screen.getByRole("link", { name: /Unstoppable Stock/ })
-    expect(
-      within(opinion.closest("li")!).getByText(newsCopy.hidden.tag),
-    ).toBeInTheDocument()
+    const opinion = story(/Unstoppable Stock/)
+    expect(within(opinion).getByText(newsCopy.hidden.tag)).toBeInTheDocument()
 
     await user.click(screen.getByRole("button", { name: newsCopy.hidden.hide }))
     expect(screen.queryByText(/Unstoppable Stock/)).not.toBeInTheDocument()
@@ -157,7 +196,7 @@ describe("NewsCard", () => {
     ).toBeInTheDocument()
   })
 
-  it("never mentions your money on the public card (no account connected)", () => {
+  it("never mentions your portfolio on the public card (no account connected)", () => {
     const { container } = render(
       <NewsCard id="news" audience="public" news={liveNews} />,
     )
@@ -167,13 +206,11 @@ describe("NewsCard", () => {
         name: newsCopy.byAudience.public.title,
       }),
     ).toBeInTheDocument()
-    expect(container).not.toHaveTextContent(/your money|your funds/)
+    expect(container).not.toHaveTextContent(/your portfolio|your funds/)
     expect(container).not.toHaveTextContent(/portfolio is simulated/)
-
-    const companies = screen.getAllByRole("list", {
-      name: newsCopy.impact.companiesLabel,
-    })
-    expect(companies.map((list) => list.textContent)).toEqual(["NVDA", "AMZN"])
+    expect(
+      within(story(/Amazon Urges/)).getByText("Amazon"),
+    ).toBeInTheDocument()
     expect(screen.getByText("Headlines via Finnhub.")).toBeInTheDocument()
   })
 })

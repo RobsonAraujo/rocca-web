@@ -1,9 +1,6 @@
 "use client"
 
-import { FilterIcon } from "lucide-react"
 import { useId, useState } from "react"
-
-import { Button } from "@/components/ui/button"
 
 import type { NewsAudience } from "../content"
 import { newsCopy } from "../content"
@@ -11,51 +8,57 @@ import type { RankedNewsItem } from "../relevance"
 import { NewsList } from "./news-list"
 
 /**
- * "Rocca hid 3 opinion pieces", with a toggle to see them. `count` can be
- * larger than `items` when only the newest few are sent to the client.
+ * The card's footer: "Rocca hid 3 opinion pieces. Show" on the left,
+ * `trailing` (the attribution) on the right, and the hidden pieces below
+ * once shown. `count` can exceed `items` when only the newest few are sent.
  */
 export function HiddenOpinion({
   items,
   count,
   audience = "portfolio",
+  trailing,
 }: {
   items: RankedNewsItem[]
   count: number
   audience?: NewsAudience
+  trailing?: React.ReactNode
 }) {
   const [open, setOpen] = useState(false)
   const listId = useId()
-  if (count === 0) return null
-
   const { hidden } = newsCopy
   const { why } = newsCopy.byAudience[audience]
+
   return (
-    <div className="mt-4 border-t border-border pt-3">
-      <div className="flex items-center justify-between gap-3">
-        <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <FilterIcon className="size-3.5 shrink-0" aria-hidden />
-          {hidden.prefix} {count} {count === 1 ? hidden.one : hidden.many}
-        </p>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          aria-expanded={open}
-          aria-controls={listId}
-          onClick={() => setOpen((value) => !value)}
-          className="rounded-full"
-        >
-          {open ? hidden.hide : hidden.show}
-        </Button>
-      </div>
-      <div id={listId} hidden={!open} className="mt-3 space-y-3">
-        {open && (
-          <>
-            <p className="text-xs text-muted-foreground">{why}</p>
-            <NewsList items={items} muted audience={audience} />
-          </>
+    <div>
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 text-xs text-muted-foreground">
+        {count > 0 ? (
+          <p>
+            {hidden.prefix} {count} {count === 1 ? hidden.one : hidden.many}.{" "}
+            <button
+              type="button"
+              aria-expanded={open}
+              aria-controls={listId}
+              onClick={() => setOpen((value) => !value)}
+              className="rounded-sm font-medium text-foreground underline decoration-border underline-offset-[3px] outline-none hover:decoration-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
+            >
+              {open ? hidden.hide : hidden.show}
+            </button>
+          </p>
+        ) : (
+          <span />
         )}
+        {trailing}
       </div>
+      {count > 0 && (
+        <div id={listId} hidden={!open} className="mt-5 space-y-4">
+          {open && (
+            <>
+              <p className="text-xs text-muted-foreground">{why}</p>
+              <NewsList items={items} muted audience={audience} />
+            </>
+          )}
+        </div>
+      )}
     </div>
   )
 }

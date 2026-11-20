@@ -107,6 +107,26 @@ describe("rankNews", () => {
     expect(items[0]!.impact.map((e) => e.symbol)).toEqual(["NVDA"])
   })
 
+  it("counts a press release only when the company issued it", () => {
+    const { items } = rankNews([
+      item({
+        id: "pixalate",
+        url: "u1",
+        source: "GlobeNewswire Inc.",
+        headline: "Pixalate Launches IVT Blocking on Amazon Web Services (AWS)",
+        tickers: ["AMZN"],
+      }),
+      item({
+        id: "nvidia",
+        url: "u2",
+        source: "GlobeNewswire Inc.",
+        headline: "NVIDIA Announces Upcoming Event for Financial Community",
+        tickers: ["NVDA"],
+      }),
+    ])
+    expect(items.map((i) => i.id)).toEqual(["nvidia"])
+  })
+
   it("skips headlines that aren't in English", () => {
     expect(
       looksEnglish(

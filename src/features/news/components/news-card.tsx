@@ -1,6 +1,3 @@
-import { NewspaperIcon } from "lucide-react"
-
-import { Panel } from "@/features/preview/components/panel"
 import { cn } from "@/lib/utils"
 
 import type { NewsAudience } from "../content"
@@ -15,25 +12,46 @@ const HIDDEN_SHOWN = 5
 type CardProps = {
   id: string
   className?: string
-  /** `public` (the landing) never mentions "your money"; see NewsAudience. */
+  /** `public` (the landing) never mentions "your portfolio"; see NewsAudience. */
   audience?: NewsAudience
 }
 
-function SourceBadge({ news }: { news: PortfolioNews }) {
+/** Same surface as the dashboard's other widgets; editorial inside. */
+const surface =
+  "scroll-mt-24 rounded-2xl bg-card p-5 text-card-foreground shadow-soft ring-1 ring-foreground/10 sm:p-7"
+
+/** Title on the left, a quiet status on the right, a hairline below. */
+function Header({
+  id,
+  title,
+  status,
+}: {
+  id: string
+  title: string
+  status?: React.ReactNode
+}) {
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap",
-        news.live
-          ? "bg-brand/10 text-brand"
-          : "bg-secondary text-muted-foreground",
-      )}
-    >
-      {news.live && (
-        <span className="size-1.5 rounded-full bg-brand" aria-hidden />
-      )}
-      {news.live ? `${newsCopy.live} · ${news.provider}` : newsCopy.simulated}
-    </span>
+    <header className="flex items-center justify-between gap-4 border-b border-border pb-4">
+      <h2
+        id={`${id}-title`}
+        className="text-base font-semibold tracking-tight sm:text-lg"
+      >
+        {title}
+      </h2>
+      {status}
+    </header>
+  )
+}
+
+/** "● LIVE" in the brand color, or a muted "Sample headlines". */
+function Status({ live }: { live: boolean }) {
+  return live ? (
+    <p className="flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.08em] text-brand uppercase">
+      <span className="size-1.5 rounded-full bg-brand" aria-hidden />
+      {newsCopy.live}
+    </p>
+  ) : (
+    <p className="text-xs text-muted-foreground">{newsCopy.simulated}</p>
   )
 }
 
@@ -45,35 +63,39 @@ export function NewsCard({
   news,
 }: CardProps & { news: PortfolioNews }) {
   const copy = newsCopy.byAudience[audience]
+  const attribution = news.live
+    ? `${newsCopy.attribution} ${news.provider}. ${copy.liveNote}`.trim()
+    : copy.simulatedNote
+
   return (
-    <Panel
+    <section
       id={id}
-      title={copy.title}
-      description={copy.description}
-      icon={NewspaperIcon}
-      action={<SourceBadge news={news} />}
-      className={className}
+      aria-labelledby={`${id}-title`}
+      className={cn(surface, className)}
     >
-      {news.items.length > 0 ? (
-        <NewsFeed items={news.items} audience={audience} />
-      ) : (
-        <p className="text-sm text-muted-foreground">{copy.empty}</p>
-      )}
-      <HiddenOpinion
-        items={news.hiddenOpinion.slice(0, HIDDEN_SHOWN)}
-        count={news.hiddenOpinion.length}
-        audience={audience}
-      />
-      <p className="mt-auto pt-4 text-[11px] text-muted-foreground">
-        {news.live
-          ? `${newsCopy.attribution} ${news.provider}. ${copy.liveNote}`.trim()
-          : copy.simulatedNote}
-      </p>
-    </Panel>
+      <Header id={id} title={copy.title} status={<Status live={news.live} />} />
+
+      <div className="py-6">
+        {news.items.length > 0 ? (
+          <NewsFeed items={news.items} audience={audience} />
+        ) : (
+          <p className="text-sm text-muted-foreground">{copy.empty}</p>
+        )}
+      </div>
+
+      <footer className="border-t border-border pt-4">
+        <HiddenOpinion
+          items={news.hiddenOpinion.slice(0, HIDDEN_SHOWN)}
+          count={news.hiddenOpinion.length}
+          audience={audience}
+          trailing={<p>{attribution}</p>}
+        />
+      </footer>
+    </section>
   )
 }
 
-/** Suspense fallback with the card's frame, so the layout doesn't jump. */
+/** Suspense fallback in the card's shape, so the layout doesn't jump. */
 export function NewsSkeleton({
   id,
   className,
@@ -81,38 +103,37 @@ export function NewsSkeleton({
 }: CardProps) {
   const copy = newsCopy.byAudience[audience]
   return (
-    <Panel
+    <section
       id={id}
-      title={copy.title}
-      description={copy.description}
-      icon={NewspaperIcon}
-      className={className}
+      aria-labelledby={`${id}-title`}
+      aria-busy
+      className={cn(surface, className)}
     >
+      <Header id={id} title={copy.title} />
       <p className="sr-only">{newsCopy.loading}</p>
-      {/* Same shape as the feed: featured cover, then rows with thumbnails. */}
       <div
         aria-hidden
-        className="grid animate-pulse gap-5 lg:grid-cols-[1.1fr_1fr] lg:gap-8"
+        className="grid animate-pulse gap-6 py-6 lg:grid-cols-12 lg:gap-0"
       >
-        <div className="space-y-3">
-          <div className="aspect-video w-full rounded-xl bg-secondary" />
-          <div className="h-3 w-32 rounded bg-secondary" />
-          <div className="h-5 w-full rounded bg-secondary" />
-          <div className="h-5 w-2/3 rounded bg-secondary" />
+        <div className="space-y-3 lg:col-span-7 lg:pr-8">
+          <div className="aspect-[16/9] w-full rounded-md bg-secondary" />
+          <div className="h-2.5 w-24 rounded bg-secondary" />
+          <div className="h-6 w-full rounded bg-secondary" />
+          <div className="h-6 w-2/3 rounded bg-secondary" />
         </div>
-        <div className="space-y-5">
-          {[0, 1, 2].map((row) => (
-            <div key={row} className="flex gap-3">
+        <div className="space-y-6 lg:col-span-5 lg:border-l lg:border-border lg:pl-8">
+          {[0, 1, 2, 3].map((row) => (
+            <div key={row} className="flex gap-4">
               <div className="flex-1 space-y-2">
-                <div className="h-3 w-28 rounded bg-secondary" />
+                <div className="h-2.5 w-20 rounded bg-secondary" />
                 <div className="h-4 w-full rounded bg-secondary" />
-                <div className="h-4 w-20 rounded bg-secondary" />
+                <div className="h-3 w-32 rounded bg-secondary" />
               </div>
-              <div className="size-16 shrink-0 rounded-lg bg-secondary sm:size-20" />
+              <div className="aspect-[3/2] w-24 shrink-0 rounded-sm bg-secondary sm:w-28" />
             </div>
           ))}
         </div>
       </div>
-    </Panel>
+    </section>
   )
 }

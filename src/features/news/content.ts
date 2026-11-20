@@ -3,21 +3,21 @@
  * - `portfolio`: the dashboard preview, where each story shows how much of
  *   the (simulated) portfolio it touches.
  * - `public`: the landing, where nobody has connected an account yet, so
- *   stories only name the companies, never "your money".
+ *   stories only name the companies, never "your portfolio".
  */
 export type NewsAudience = "portfolio" | "public"
 
 /** Copy for the news card. */
 export const newsCopy = {
-  /** Badge: `${live} · Massive`. */
+  /** Header status when the headlines are live. */
   live: "Live",
-  simulated: "Simulated headlines",
+  /** Header status for the simulated fallback. */
+  simulated: "Sample headlines",
   /** Footer when live: `${attribution} Massive.` */
   attribution: "Headlines via",
   byAudience: {
     portfolio: {
       title: "News about what you own",
-      description: "Only what touches your money.",
       /** Appended to the attribution when live. */
       liveNote: "The portfolio is simulated.",
       simulatedNote: "Sample headlines for the simulated portfolio.",
@@ -26,7 +26,6 @@ export const newsCopy = {
     },
     public: {
       title: "Today's headlines",
-      description: "The companies that move the market, minus the hot takes.",
       liveNote: "",
       simulatedNote: "Sample headlines.",
       empty: "No headlines right now. Check back soon.",
@@ -34,13 +33,10 @@ export const newsCopy = {
     },
   } satisfies Record<NewsAudience, Record<string, string>>,
   impact: {
-    /** "NVDA · 22.1% of your money" */
-    total: "of your money",
-    /** "AMZN · 2.1% via your funds" (owned only through funds) */
+    /** "23.9% of your portfolio" */
+    total: "of your portfolio",
+    /** "2.1% of your portfolio, via your funds" (owned only through funds) */
     viaFunds: "via your funds",
-    label: "How much of your money this touches",
-    /** Public cards list the companies only. */
-    companiesLabel: "Companies in this story",
   },
   hidden: {
     /** "Rocca hid 3 opinion pieces" */

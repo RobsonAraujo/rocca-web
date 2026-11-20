@@ -65,6 +65,41 @@ const COMPANY_NAMES: Record<string, RegExp> = {
   GOOGL: /\b(alphabet|google|googl|goog|youtube)\b/i,
 }
 
+/** How the companies are named in the card's kicker ("NVIDIA · ALPHABET"). */
+const DISPLAY_NAMES: Record<string, string> = {
+  NVDA: "Nvidia",
+  AAPL: "Apple",
+  MSFT: "Microsoft",
+  AMZN: "Amazon",
+  GOOGL: "Alphabet",
+}
+
+export function companyName(symbol: string) {
+  return DISPLAY_NAMES[symbol.toUpperCase()] ?? symbol.toUpperCase()
+}
+
+/**
+ * Press-release wires. Their stories are written by whoever issues them, so
+ * "Pixalate Launches … on Amazon Web Services" is Pixalate's news, not
+ * Amazon's. A release counts only when it's the company's own.
+ */
+const PRESS_WIRES =
+  /globenewswire|pr\s*newswire|business\s*wire|accesswire|newsfile/i
+
+/** True when the headline starts with the company's name ("NVIDIA Announces…"). */
+function issuedBy(item: Pick<NewsItem, "headline">, symbol: string) {
+  const name = COMPANY_NAMES[symbol.toUpperCase()]
+  if (!name) return false
+  return new RegExp(`^\\W*${name.source}`, "i").test(item.headline)
+}
+
+/** True when the story is really about the company behind `symbol`. */
+function isAbout(item: NewsItem, symbol: string) {
+  return PRESS_WIRES.test(item.source)
+    ? issuedBy(item, symbol)
+    : mentions(item, symbol)
+}
+
 /** True when the story names the company behind `symbol`. */
 export function mentions(
   item: Pick<NewsItem, "headline" | "summary">,
@@ -216,7 +251,7 @@ export function rankNews(items: readonly NewsItem[], limit = 5): RankedNews {
       impact: item.tickers
         .map(exposureFor)
         .filter((e): e is Exposure => e !== undefined)
-        .filter((e) => mentions(item, e.symbol))
+        .filter((e) => isAbout(item, e.symbol))
         .sort((a, b) => b.total - a.total),
     }))
     .filter((item) => item.impact.length > 0)
