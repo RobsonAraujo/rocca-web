@@ -55,6 +55,8 @@ export type NavItem = { label: string; icon: LucideIcon; href?: string }
 export const shell = {
   badge: "Simulated preview · Not investment advice",
   backToSite: "Back to site",
+  collapseMenu: "Collapse menu",
+  expandMenu: "Expand menu",
   greeting: "Good morning",
   subtitle: "Here's what your agent is watching today.",
   user: { name: "You", initials: "Y" },

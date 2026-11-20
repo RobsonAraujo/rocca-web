@@ -1,7 +1,8 @@
 import { Toaster } from "@/components/ui/sonner"
 import { footer } from "@/features/landing/content"
 
-import { Sidebar, TopBar } from "./components/navigation"
+import { TopBar } from "./components/navigation"
+import { Sidebar } from "./components/sidebar"
 import { DemoStateProvider } from "./demo-state"
 import { MobileAppBar } from "./mobile/app-bar"
 import { AskSheet } from "./mobile/ask-sheet"
@@ -10,7 +11,7 @@ import { MobileTabBar } from "./mobile/tab-bar"
 
 /**
  * Chrome shared by every preview page (rendered by app/preview/layout.tsx):
- * sidebar, top bar, the legal disclaimer and the toaster for coming-soon
+ * collapsible sidebar, top bar, the legal disclaimer and the toaster for coming-soon
  * notices. It stays mounted while moving between preview pages, and so
  * does the simulated demo state (DemoStateProvider).
  *
@@ -23,7 +24,8 @@ export function PreviewShell({ children }: { children: React.ReactNode }) {
     <DemoStateProvider>
       <div className="min-h-svh touch-manipulation bg-secondary/50 text-foreground [-webkit-tap-highlight-color:transparent] selection:bg-brand/15">
         <Sidebar />
-        <div className="lg:pl-64">
+        {/* Next sibling of the sidebar: follows its width as it collapses. */}
+        <div className="transition-[padding] duration-200 ease-out motion-reduce:transition-none lg:pl-64 lg:peer-data-[state=collapsed]/sidebar:pl-18">
           <TopBar className="max-md:hidden" />
           <MobileAppBar />
           {/* Phones: bottom padding clears the tab bar and the home indicator. */}

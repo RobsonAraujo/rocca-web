@@ -123,39 +123,42 @@ export function GuidedTour() {
     primaryRef.current?.focus({ preventScroll: true })
   }, [current])
 
-  // Follow the target while the page scrolls or resizes.
+  // Follow the target every frame: scrolling and resizing move it, and so
+  // do layout changes no event reports (the sidebar collapsing). Only real
+  // changes reach state, so a still page doesn't re-render.
   useLayoutEffect(() => {
     if (!current) return
     let frame = 0
+    let last = ""
     const update = () => {
-      cancelAnimationFrame(frame)
-      frame = requestAnimationFrame(() => {
-        const target = findTarget(current.targets)
-        const popover = popoverRef.current
-        if (!target || !popover) return
-        const rect = target.getBoundingClientRect()
-        setSpot({
-          top: rect.top,
-          left: rect.left,
-          width: rect.width,
-          height: rect.height,
-        })
-        setPosition(
-          placePopover(rect, {
-            width: popover.offsetWidth,
-            height: popover.offsetHeight,
-          }),
-        )
+      frame = requestAnimationFrame(update)
+      const target = findTarget(current.targets)
+      const popover = popoverRef.current
+      if (!target || !popover) return
+      const rect = target.getBoundingClientRect()
+      const size = { width: popover.offsetWidth, height: popover.offsetHeight }
+      const key = [
+        rect.top,
+        rect.left,
+        rect.width,
+        rect.height,
+        size.width,
+        size.height,
+        window.innerWidth,
+        window.innerHeight,
+      ].join()
+      if (key === last) return
+      last = key
+      setSpot({
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height,
       })
+      setPosition(placePopover(rect, size))
     }
-    update()
-    window.addEventListener("scroll", update, { passive: true, capture: true })
-    window.addEventListener("resize", update)
-    return () => {
-      cancelAnimationFrame(frame)
-      window.removeEventListener("scroll", update, { capture: true })
-      window.removeEventListener("resize", update)
-    }
+    frame = requestAnimationFrame(update)
+    return () => cancelAnimationFrame(frame)
   }, [current])
 
   useEffect(() => {
