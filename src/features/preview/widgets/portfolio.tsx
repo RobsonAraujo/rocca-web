@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 
 import { PORTFOLIO_PATH } from "../constants"
 import { Panel } from "../components/panel"
-import { portfolio } from "../data"
+import { accountAccess, portfolio } from "../data"
 import { PanelChart } from "./chart-ranges"
 
 /** One brand hue at decreasing strength, largest account first. */
@@ -57,6 +57,9 @@ export function PortfolioWidget({ className }: { className?: string }) {
             <p className="mt-1 font-semibold tabular-nums">{account.value}</p>
             <p className="text-xs text-muted-foreground tabular-nums">
               {account.share}% of total
+            </p>
+            <p className="mt-1.5 text-[11px] text-muted-foreground">
+              {account.institution} · {accountAccess[account.access]}
             </p>
           </li>
         ))}

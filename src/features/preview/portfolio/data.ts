@@ -190,8 +190,47 @@ export const allocation = (Object.keys(allocationTargets) as AssetClass[]).map(
 export const page = {
   title: "Portfolio",
   subtitle: "Everything you own, across all your accounts.",
-  export: "Export",
   connect: "Connect account",
+} as const
+
+/**
+ * The simulated "Connect account" sheet: which brokers let Rocca place
+ * trades and which only share data. Picking one shows the coming-soon notice.
+ */
+export const connectCopy = {
+  title: "Connect an account",
+  description:
+    "Rocca links through established brokerage-data providers and never sees your password.",
+  groups: [
+    {
+      access: "trade",
+      title: "View and trade",
+      description: "Rocca can place the trades you approve.",
+      institutions: [
+        "E*TRADE",
+        "Webull",
+        "Public",
+        "tastytrade",
+        "Coinbase",
+        "Kraken",
+      ],
+    },
+    {
+      access: "view",
+      title: "View only",
+      description:
+        "Rocca prepares the order. You place it in your broker's app.",
+      institutions: [
+        "Fidelity",
+        "Charles Schwab",
+        "Vanguard",
+        "Robinhood",
+        "Interactive Brokers",
+        "Empower",
+      ],
+    },
+  ],
+  note: "Support depends on each broker and can change. Names are for illustration only; Rocca isn't affiliated with these companies.",
 } as const
 
 export const kpis = {

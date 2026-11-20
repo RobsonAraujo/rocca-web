@@ -3,7 +3,6 @@
 import {
   ArrowUpIcon,
   GraduationCapIcon,
-  MicIcon,
   PlusIcon,
   SparklesIcon,
 } from "lucide-react"
@@ -203,14 +202,6 @@ export function AskComposer({ className }: { className?: string }) {
             <span className="hidden text-xs text-muted-foreground xl:inline">
               {ask.hint}
             </span>
-            <ComingSoonButton
-              variant="ghost"
-              size="icon-sm"
-              aria-label={ask.voice}
-              className="rounded-full text-muted-foreground"
-            >
-              <MicIcon aria-hidden />
-            </ComingSoonButton>
             <Button
               type="submit"
               size="icon"

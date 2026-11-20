@@ -119,12 +119,30 @@ export function InThisMode() {
     { label: inThisMode.labels.rocca, items: split.rocca },
     { label: inThisMode.labels.you, items: split.you },
   ]
+  const later = "later" in currentLevel && currentLevel.later
   return (
     <div aria-live="polite">
-      <p className="text-sm font-semibold">{currentLevel.label}</p>
+      <p className="flex items-center gap-2 text-sm font-semibold">
+        {currentLevel.label}
+        {later && (
+          <span
+            className={cn(
+              "rounded-full px-2 py-0.5 text-[11px] font-semibold",
+              toneClasses.control.tile,
+            )}
+          >
+            {autonomy.later.tag}
+          </span>
+        )}
+      </p>
       <p className="mt-0.5 text-sm text-pretty text-muted-foreground">
         {currentLevel.description}
       </p>
+      {later && (
+        <p className="mt-1 text-xs text-pretty text-muted-foreground">
+          {autonomy.later.note}
+        </p>
+      )}
       <div className="mt-3 grid grid-cols-2 gap-2">
         {sides.map((side) => (
           <div key={side.label} className="rounded-xl border border-border p-3">

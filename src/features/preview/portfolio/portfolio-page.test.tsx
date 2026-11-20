@@ -6,10 +6,11 @@ import { describe, expect, it, vi } from "vitest"
 import { illustrations, preview } from "@/features/landing/content"
 
 import { PREVIEW_PATH } from "../constants"
-import { comingSoon, mobile } from "../data"
+import { accountAccess, comingSoon, mobile, suggestion } from "../data"
 import {
   accountTotal,
   allocation,
+  connectCopy,
   exposure,
   holdingGain,
   holdingValue,
@@ -102,15 +103,55 @@ describe("PortfolioPage", () => {
     ).toHaveAttribute("href", `${PREVIEW_PATH}#suggestion`)
   })
 
-  it("answers actions with the coming-soon notice", async () => {
+  it("shows each account's broker and what Rocca can do there", () => {
+    const { container } = render(<PortfolioPage />)
+    const accounts = within(container.querySelector<HTMLElement>("#accounts")!)
+
+    for (const { institution, access } of illustrations.accounts) {
+      expect(accounts.getByText(institution)).toBeInTheDocument()
+      expect(
+        accounts.getAllByText(accountAccess[access]).length,
+      ).toBeGreaterThan(0)
+    }
+  })
+
+  it("opens the connect sheet, split by what each broker allows", async () => {
     const user = userEvent.setup()
     render(<PortfolioPage />)
 
-    await user.click(screen.getByRole("button", { name: page.connect }))
+    // Header (desktop) and Accounts (phones) both open the same sheet.
+    await user.click(screen.getAllByRole("button", { name: page.connect })[0]!)
+
+    const sheet = await screen.findByRole("dialog")
+    for (const group of connectCopy.groups) {
+      expect(
+        within(sheet).getByRole("heading", { name: group.title }),
+      ).toBeInTheDocument()
+    }
+
+    await user.click(within(sheet).getByRole("button", { name: /Fidelity/ }))
 
     expect(toast).toHaveBeenCalledWith(
       comingSoon.title,
       expect.objectContaining({ description: comingSoon.description }),
     )
+  })
+})
+
+describe("broker access in the demo", () => {
+  it("places the suggested trade in an account whose broker allows trading", () => {
+    const account = illustrations.accounts.find(
+      (a) => a.name === preview.order.taxSmart.account,
+    )
+
+    expect(account?.access).toBe("trade")
+    expect(suggestion.placing).toContain(account!.institution)
+  })
+
+  it("lists every demo account's broker in the matching connect group", () => {
+    for (const { institution, access } of illustrations.accounts) {
+      const group = connectCopy.groups.find((g) => g.access === access)!
+      expect(group.institutions).toContain(institution)
+    }
   })
 })

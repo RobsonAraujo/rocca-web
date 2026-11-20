@@ -1,11 +1,13 @@
-import { DownloadIcon, PlusIcon, TrendingUpIcon } from "lucide-react"
+import { PlusIcon, TrendingUpIcon } from "lucide-react"
 
+import { buttonVariants } from "@/components/ui/button"
 import { preview } from "@/features/landing/content"
+import { cn } from "@/lib/utils"
 
-import { ComingSoonButton } from "../components/coming-soon"
 import { PageHeader } from "../components/page-header"
 import { AccountsWidget } from "./accounts"
 import { AllocationWidget } from "./allocation"
+import { ConnectSheet, ConnectTrigger } from "./connect-sheet"
 import { kpis, page } from "./data"
 import { ExposureWidget } from "./exposure"
 import { HoldingsWidget } from "./holdings"
@@ -47,20 +49,12 @@ export function PortfolioPage() {
         title={page.title}
         subtitle={page.subtitle}
         actions={
-          <>
-            <ComingSoonButton
-              variant="outline"
-              size="sm"
-              className="rounded-full bg-card px-3"
-            >
-              <DownloadIcon aria-hidden />
-              {page.export}
-            </ComingSoonButton>
-            <ComingSoonButton size="sm" className="rounded-full px-3">
-              <PlusIcon aria-hidden />
-              {page.connect}
-            </ComingSoonButton>
-          </>
+          <ConnectTrigger
+            className={cn(buttonVariants({ size: "sm" }), "rounded-full px-3")}
+          >
+            <PlusIcon aria-hidden />
+            {page.connect}
+          </ConnectTrigger>
         }
       />
 
@@ -80,6 +74,9 @@ export function PortfolioPage() {
 
         <HoldingsWidget className={viewClasses.holdings} />
       </PortfolioViews>
+
+      {/* One sheet, two triggers: the header (desktop) and Accounts (phones). */}
+      <ConnectSheet />
     </>
   )
 }

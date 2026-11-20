@@ -97,7 +97,6 @@ export const ask = {
   placeholder: "Ask Rocca anything about your money…",
   submit: "Send",
   attach: "Attach a statement",
-  voice: "Ask by voice",
   /** Beginner mode: answers without jargon. */
   explainSimply: "Explain simply",
   hint: "Enter to send · Shift + Enter for a new line",
@@ -120,6 +119,12 @@ export const ask = {
   fallback:
     "Good question. In the beta, Rocca answers anything about your accounts, using your real holdings. In this preview it only knows the three suggested questions.",
   thinking: "Rocca is typing…",
+} as const
+
+/** What Rocca can do at each account's broker (`illustrations.accounts[].access`). */
+export const accountAccess = {
+  trade: "Can trade",
+  view: "View only",
 } as const
 
 export const portfolio = {
@@ -193,6 +198,10 @@ export const suggestion = {
       text: "Selling inside your Roth IRA owes no tax. The same sale in your brokerage would cost about $765.",
       source: "Tax lots",
     },
+    {
+      text: "Your Roth IRA is at E*TRADE, so Rocca can place this for you. Your Fidelity brokerage is view-only.",
+      source: "Broker access",
+    },
   ],
   order: preview.order,
   taxSmart: { label: "Tax-smart placement", ...preview.order.taxSmart },
@@ -202,7 +211,7 @@ export const suggestion = {
   /** Shown instead of `decisionNote` while the mode is Autopilot. */
   autopilotNote:
     "On Autopilot, Rocca would do this within your rules and tell you right after.",
-  placing: "Placing both orders in your Roth IRA…",
+  placing: "Placing both orders in your E*TRADE Roth IRA…",
   receipt: {
     eyebrow: "Simulated receipt",
     title: "Done. NVDA is back to 12%.",
@@ -216,7 +225,7 @@ export const suggestion = {
   next: {
     title: "If you approve",
     steps: [
-      "Rocca places both orders in your Roth IRA",
+      "Rocca places both orders in your E*TRADE Roth IRA",
       "You get a receipt with every detail",
       "Your plan and rules update right away",
     ],
@@ -244,8 +253,15 @@ export const autonomy = {
       short: "Autopilot",
       label: "Autopilot",
       description: "Rocca acts within your rules and tells you right after.",
+      /** Not at launch: shown with `autonomy.later`. */
+      later: true,
     },
   ],
+  /** Tag and note for levels that arrive after launch. */
+  later: {
+    tag: "Later",
+    note: "Comes after launch, at brokers that allow it.",
+  },
   current: "approve",
   /** What each side does, per level (keyed by level id). */
   inThisMode: {
@@ -368,7 +384,11 @@ export const trackRecord = {
   stats: [
     { label: "Suggestions", value: "14" },
     { label: "You approved", value: "9" },
-    { label: "Net impact", value: "+$1,840", hint: "vs. doing nothing" },
+    {
+      label: "Net impact",
+      value: "+$1,840",
+      hint: "vs. doing nothing, after taxes and fees",
+    },
   ],
   missesTitle: "Calls that didn't work",
   misses: [
@@ -410,7 +430,7 @@ export const mobile = {
   },
   forYou: {
     savingsCta: "Review savings",
-    trackSummary: "vs. doing nothing",
+    trackSummary: "vs. doing nothing, after taxes and fees",
     trackCta: "See full history",
     approvedOf: "approved of",
     misses: "misses shown",
