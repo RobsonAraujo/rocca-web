@@ -7,7 +7,8 @@
       "Bash(supabase db reset)",
       "Bash(supabase migration up --local)",
       "Bash(supabase migration new *)",
-      "Bash(supabase db diff *)"
+      "Bash(supabase db diff *)",
+      "WebFetch(domain:massive.com)"
     ],
     "deny": [
       "Bash(supabase link*)",

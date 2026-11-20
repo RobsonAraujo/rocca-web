@@ -373,9 +373,9 @@ function MovesList() {
 /**
  * Home screen for phones, in the shape of a native investing app: balance
  * first, then the one decision that needs you, your controls, cards for
- * you, and what moved. Details live in bottom sheets.
+ * you, what moved and the news. Details live in bottom sheets.
  */
-export function MobileHome() {
+export function MobileHome({ news }: { news?: React.ReactNode } = {}) {
   return (
     <>
       <BalanceHero />
@@ -413,6 +413,13 @@ export function MobileHome() {
         <SectionLabel tone="brand">{mobile.sections.moves}</SectionLabel>
         <MovesList />
       </section>
+
+      {news && (
+        <section aria-label={mobile.sections.news} className="space-y-3">
+          <SectionLabel tone="brand">{mobile.sections.news}</SectionLabel>
+          {news}
+        </section>
+      )}
     </>
   )
 }

@@ -73,6 +73,7 @@ export const sections = {
   attention: "Needs your OK",
   learn: "Learn & ask",
   money: "Your money",
+  news: "In the news",
 } as const
 
 /** At-a-glance status in the page header. */
@@ -421,6 +422,7 @@ export const mobile = {
     controls: "Your controls",
     forYou: "For you",
     moves: "What moved this week",
+    news: "In the news",
   },
   decision: { why: "Why?", whyTitle: "Why Rocca suggests this" },
   controls: {

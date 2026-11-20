@@ -25,6 +25,15 @@ describe("getServerEnv", () => {
     })
   })
 
+  it("reads the optional news keys, treating empty ones as unset", () => {
+    expect(getServerEnv({ MASSIVE_API_KEY: "", FINNHUB_API_KEY: "" })).toEqual(
+      {},
+    )
+    expect(
+      getServerEnv({ MASSIVE_API_KEY: "m1", FINNHUB_API_KEY: "abc123" }),
+    ).toEqual({ MASSIVE_API_KEY: "m1", FINNHUB_API_KEY: "abc123" })
+  })
+
   it("ignores the publishable key (the server never uses it)", () => {
     expect(
       getServerEnv({

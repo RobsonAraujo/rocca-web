@@ -71,6 +71,11 @@ src/
    │  ├─ components/     # painel, gráfico SVG, navegação, chat, "em breve", banner, tour
    │  ├─ widgets/        # um arquivo por módulo da página inicial
    │  └─ portfolio/      # página de portfolio: dados, gráficos, insights, posições
+   ├─ news/              # notícias sobre o que a carteira tem (Massive, Finnhub ou simuladas)
+   │  ├─ providers/      # interface + Massive, Finnhub e simulado; ordem pela env
+   │  ├─ relevance.ts    # impacto na carteira, filtro de opinião, ranking (puro)
+   │  ├─ get-portfolio-news.ts # busca com "use cache" e fallback
+   │  └─ components/     # card, lista e "Rocca hid N opinion pieces"
    └─ waitlist/
       ├─ schema.ts         # validação (zod), compartilhada entre client e server
       ├─ service.ts        # regra de negócio, recebe o repositório por parâmetro
@@ -111,6 +116,26 @@ Quem entra na lista é levado na hora para `/preview`, uma versão navegável do
 - Tour guiado (`components/guided-tour.tsx`): 3 passos (decisão, autonomia, chat) na primeira visita com `?welcome=new`. O anel de destaque não bloqueia cliques, então dá para aprovar no meio do tour. Pular ou terminar fica salvo no `localStorage` (`rocca-tour-done`). Cada passo aponta para um id do desktop e um do mobile, e o tour usa o que estiver visível.
 - O banner de boas-vindas lê o `?welcome=` no client, dentro de um `<Suspense>`, então a página continua estática.
 - Os módulos mostram os diferenciais contra Astor e Volaren: o raciocínio com a fonte de cada passo, a escolha da conta que paga menos imposto, a trilha de aprendizado para iniciantes, o nível de autonomia com regras próprias, o placar com os erros à mostra e o dinheiro que dá para economizar.
+
+### Notícias
+
+O card "News about what you own" mostra manchetes sobre as ações que a carteira simulada tem, direto ou via fundos (NVDA, AAPL, MSFT, AMZN, GOOGL, os mesmos do card "What you really own").
+
+- **Provedores:** `getNewsProviders()` (`features/news/providers/`) devolve as fontes em ordem:
+  1. Massive (ex-Polygon), quando `MASSIVE_API_KEY` existe. É a principal e traz a foto real da matéria.
+  2. Finnhub, quando `FINNHUB_API_KEY` existe. É a reserva.
+  3. Manchetes simuladas, sem fonte real e sem link. Ficam sempre por último.
+
+  Se uma fonte falhar (limite, rede, resposta inesperada), o card tenta a próxima e o erro vai para o log. A página nunca quebra.
+
+- **Impacto:** cada manchete mostra quanto da carteira ela toca, por exemplo "NVDA · 22.1% of your money", ou "AMZN · 2.1% via your funds" quando a ação só está dentro dos fundos.
+- **Ruído:** opinião e clickbait ("stocks to buy", "should you buy", "unstoppable"…) ficam escondidos. O card mostra quantos foram escondidos ("Rocca hid N opinion pieces") e um botão para ver. As regras ficam em `isOpinion`, em `relevance.ts`, e foram calibradas com o feed real.
+- **Ticker certo:** os feeds marcam matérias de forma solta (uma matéria sobre a CrowdStrike pode vir na busca por NVDA). Por isso, um ticker só conta se a manchete ou o resumo citar a empresa (`mentions`). No topo do card entram no máximo 2 notícias por ação.
+- **Layout:** a notícia mais recente fica em destaque, com imagem de capa e resumo. As demais aparecem em linhas com miniatura. As imagens usam `<img>` comum, e não `next/image`, porque vêm do domínio de cada publisher.
+- **Imagens:** a Massive manda a foto real da matéria. Na Finnhub, as matérias do Yahoo trazem o logo do Yahoo Finance no lugar da foto. Logos conhecidos e imagens repetidas em várias matérias são descartados. Sem foto, ou se ela falhar, aparece um bloco com o ticker.
+- **Cache:** `getPortfolioNews()` usa `"use cache"` com revalidação a cada 10 min, ou seja, 5 chamadas (uma por ação) a cada ciclo. O plano grátis da Massive limita a cerca de 5 chamadas por minuto e atualiza as notícias de hora em hora. O cache é por instância. Se o tráfego crescer, avalie `"use cache: remote"`.
+- **Onde entra:** a página (`app/preview/page.tsx`) passa o card como slot para o `OverviewScreen`, um para o desktop e outro para o celular, com ids diferentes. Overview, Home e os testes delas não buscam nada.
+- **Licença:** os planos individuais da Massive são para uso "personal, non-commercial"; mostrar para usuários exige o plano Business. Os planos grátis da Finnhub são "strictly for personal use", e redistribuir exige aprovação por escrito. Para o site público, contrate um plano ou consiga aprovação por escrito.
 
 ### Cores e tema
 
@@ -221,6 +246,8 @@ O app em produção lê as credenciais só das Environment Variables da Vercel. 
 | `SUPABASE_SECRET_KEY`                  | secret key `sb_secret_…` do projeto        | vazio (usa o mock) |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | publishable key `sb_publishable_…`         | vazio              |
 | `NEXT_PUBLIC_SITE_URL`                 | domínio de produção                        | URL do preview     |
+| `MASSIVE_API_KEY`                      | chave da Massive (notícias ao vivo)        | opcional           |
+| `FINNHUB_API_KEY`                      | chave da Finnhub (reserva das notícias)    | opcional           |
 
 - As duas chaves ficam em Supabase → Project Settings → API Keys. Sem a **secret**, o app não grava: a publishable é barrada pela tabela.
 - Preview sem `NEXT_PUBLIC_SUPABASE_URL` e `SUPABASE_SECRET_KEY` usa o mock em memória, para que deploys de PR não gravem inscrições de teste em prod.

@@ -52,8 +52,9 @@ function Zone({
  * 1. Needs your OK: the decision to make, beside how much Rocca handles.
  * 2. Learn & ask: lessons picked from your portfolio, and the chat.
  * 3. Your money: portfolio, what moved, savings, track record.
+ * 4. In the news: headlines about what you own (a slot the page fills).
  */
-export function Overview() {
+export function Overview({ news }: { news?: React.ReactNode } = {}) {
   return (
     <>
       <PageHeader
@@ -84,6 +85,12 @@ export function Overview() {
           <TrackRecordWidget className="md:col-span-2 lg:col-span-6" />
         </div>
       </Zone>
+
+      {news && (
+        <Zone label={sections.news} tone="brand">
+          {news}
+        </Zone>
+      )}
     </>
   )
 }

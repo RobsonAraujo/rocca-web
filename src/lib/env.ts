@@ -12,6 +12,10 @@ const serverEnvSchema = z
     NEXT_PUBLIC_SUPABASE_URL: optional(z.url()),
     // The secret key (sb_secret_...). Server only: never prefix with NEXT_PUBLIC_.
     SUPABASE_SECRET_KEY: optional(z.string()),
+    // News providers, tried in this order: Massive, then Finnhub. With
+    // neither, the news card shows simulated headlines.
+    MASSIVE_API_KEY: optional(z.string()),
+    FINNHUB_API_KEY: optional(z.string()),
   })
   .refine(
     (env) =>
