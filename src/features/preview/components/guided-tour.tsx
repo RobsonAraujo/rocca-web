@@ -79,7 +79,8 @@ function placePopover(
 }
 
 /**
- * Three-step tour on the first visit after signing up (`?welcome=new`):
+ * Three-step tour on the first visit after signing up (`?welcome=new`) or
+ * from a "Try the demo" link (`?welcome=demo`):
  * the decision, the autonomy controls and the chat. A spotlight ring marks
  * each target without blocking it, so people can try Approve mid-tour.
  * Skipping or finishing is remembered in localStorage.
@@ -98,7 +99,8 @@ export function GuidedTour() {
   const bodyId = useId()
 
   useEffect(() => {
-    if (welcome !== "new" || readDone()) return
+    // First visits only: a fresh signup or someone trying the demo.
+    if ((welcome !== "new" && welcome !== "demo") || readDone()) return
     const timer = setTimeout(() => {
       // Only on a page that has every target (the overview).
       if (tour.steps.every((item) => findTarget(item.targets))) setStep(0)

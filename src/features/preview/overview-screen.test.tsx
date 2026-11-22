@@ -37,11 +37,35 @@ describe("OverviewScreen", () => {
     expect(screen.queryByText(welcome.new.title)).not.toBeInTheDocument()
   })
 
+  it("greets demo visitors and points them to the waitlist", () => {
+    search.params = new URLSearchParams("welcome=demo")
+    renderWithDemo(<OverviewScreen />)
+
+    expect(screen.getByText(welcome.demo.title)).toBeInTheDocument()
+    expect(
+      screen.getByRole("link", { name: welcome.demo.cta }),
+    ).toHaveAttribute("href", welcome.demo.ctaHref)
+  })
+
+  it("starts the tour for demo visitors too", async () => {
+    search.params = new URLSearchParams("welcome=demo")
+    renderWithDemo(<OverviewScreen />)
+
+    expect(
+      await screen.findByRole(
+        "dialog",
+        { name: tour.steps[0].title },
+        { timeout: 3000 },
+      ),
+    ).toBeInTheDocument()
+  })
+
   it("shows no greeting when opened directly", () => {
     renderWithDemo(<OverviewScreen />)
 
     expect(screen.queryByText(welcome.new.title)).not.toBeInTheDocument()
     expect(screen.queryByText(welcome.back.title)).not.toBeInTheDocument()
+    expect(screen.queryByText(welcome.demo.title)).not.toBeInTheDocument()
   })
 
   it("starts the tour after a signup, and remembers when it's skipped", async () => {

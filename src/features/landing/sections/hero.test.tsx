@@ -1,7 +1,8 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
-import { hero } from "@/features/landing/content"
+import { demoCta, hero } from "@/features/landing/content"
+import { DEMO_PATH } from "@/features/preview/constants"
 
 import { Hero } from "./hero"
 
@@ -31,5 +32,14 @@ describe("Hero", () => {
     expect(
       screen.getByRole("img", { name: /simulated preview/i }),
     ).toBeInTheDocument()
+  })
+
+  it("offers the demo to visitors who want to look before joining", () => {
+    render(<Hero />)
+
+    expect(screen.getByRole("link", { name: demoCta.label })).toHaveAttribute(
+      "href",
+      DEMO_PATH,
+    )
   })
 })

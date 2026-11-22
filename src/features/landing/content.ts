@@ -26,8 +26,17 @@ export const hero = {
   emphasis: "never sleeps.",
   description:
     "Rocca sees across your brokerage, retirement and crypto accounts, explains every move in plain English, and turns ideas into trades on your terms. New to investing? You'll learn as you go.",
-  /** Shown under both waitlist forms: the instant preview is the signup incentive. */
-  note: "No spam. Join and get instant access to a preview of your dashboard.",
+  /** Shown under both waitlist forms. */
+  note: "No spam. We'll email you when your spot is ready.",
+} as const
+
+/**
+ * Opens the preview without signing up, for visitors who want to look first
+ * (investors, the curious). Shown in the header and under the hero form.
+ */
+export const demoCta = {
+  label: "Try the demo",
+  note: "No signup needed. Simulated data.",
 } as const
 
 /** Short promises, restating what the FAQ answers in detail. */
@@ -259,7 +268,7 @@ export const faq = {
     {
       question: "When will I get access?",
       answer:
-        "Right after you join, you can explore a preview of the dashboard with simulated data. Full access opens in batches, and you'll get an email when your spot is ready.",
+        "You can try the demo with simulated data right now, no signup needed. Full access opens in batches, and people on the waitlist get an email when their spot is ready.",
     },
     {
       question: "How much will it cost?",

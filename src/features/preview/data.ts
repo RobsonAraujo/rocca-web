@@ -46,6 +46,14 @@ export const welcome = {
     description:
       "Here's a preview of your Rocca dashboard. Everything here uses simulated data.",
   },
+  /** Visitors from "Try the demo": they haven't joined, so point them there. */
+  demo: {
+    title: "You're exploring the Rocca demo.",
+    description:
+      "Everything here uses simulated data. Like what you see? Join the waitlist for early access.",
+    cta: "Join the waitlist",
+    ctaHref: "/#waitlist",
+  },
   dismiss: "Dismiss",
 } as const
 

@@ -1,8 +1,11 @@
-import { LockIcon } from "lucide-react"
+import { LockIcon, PlayIcon } from "lucide-react"
+import Link from "next/link"
 
-import { hero } from "@/features/landing/content"
-import { PREVIEW_PATH } from "@/features/preview/constants"
+import { buttonVariants } from "@/components/ui/button"
+import { demoCta, hero } from "@/features/landing/content"
+import { DEMO_PATH, PREVIEW_PATH } from "@/features/preview/constants"
 import { WaitlistForm } from "@/features/waitlist/components/waitlist-form"
+import { cn } from "@/lib/utils"
 
 import { Container } from "../primitives"
 import { ProductShowcase } from "./product-showcase"
@@ -53,6 +56,23 @@ export function Hero() {
               <LockIcon className="size-3.5 shrink-0" aria-hidden />
               {hero.note}
             </p>
+          </div>
+
+          {/* For visitors who want to look before they join (e.g. investors). */}
+          <div className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2">
+            <Link
+              href={DEMO_PATH}
+              className={cn(
+                buttonVariants({ variant: "outline", size: "lg" }),
+                "rounded-full px-4",
+              )}
+            >
+              <PlayIcon aria-hidden />
+              {demoCta.label}
+            </Link>
+            <span className="text-sm text-muted-foreground">
+              {demoCta.note}
+            </span>
           </div>
         </div>
 

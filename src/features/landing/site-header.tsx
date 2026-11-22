@@ -1,6 +1,9 @@
+import Link from "next/link"
+
 import { Logo } from "@/components/layout/logo"
 import { buttonVariants } from "@/components/ui/button"
-import { navLinks } from "@/features/landing/content"
+import { demoCta, navLinks } from "@/features/landing/content"
+import { DEMO_PATH } from "@/features/preview/constants"
 import { cn } from "@/lib/utils"
 
 import { Container, focusRing, navLinkClass } from "./primitives"
@@ -24,12 +27,24 @@ export function SiteHeader() {
               </a>
             ))}
           </nav>
-          <a
-            href="#waitlist"
-            className={cn(buttonVariants(), "h-9 rounded-full px-4")}
-          >
-            Join the waitlist
-          </a>
+          <div className="flex items-center gap-2">
+            {/* Phones don't fit both; the hero shows the demo link right there. */}
+            <Link
+              href={DEMO_PATH}
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "hidden h-9 rounded-full px-4 sm:inline-flex",
+              )}
+            >
+              {demoCta.label}
+            </Link>
+            <a
+              href="#waitlist"
+              className={cn(buttonVariants(), "h-9 rounded-full px-4")}
+            >
+              Join the waitlist
+            </a>
+          </div>
         </div>
       </Container>
     </header>
