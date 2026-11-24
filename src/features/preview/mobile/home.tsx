@@ -9,12 +9,13 @@ import {
 } from "lucide-react"
 
 import { OrderLines } from "@/components/product/order-lines"
-import { ProgressRing } from "@/components/product/progress-ring"
 import { toneClasses } from "@/components/product/tone"
 import { cn } from "@/lib/utils"
 
 import { ComingSoonButton } from "../components/coming-soon"
 import { Delta } from "../components/delta"
+import { Greeting } from "../components/greeting"
+import { VariantSwitch } from "../components/variant"
 import {
   autonomy,
   learn,
@@ -22,22 +23,24 @@ import {
   moves,
   portfolio,
   savings,
-  shell,
   suggestion,
   trackRecord,
 } from "../data"
+import { LearnRing, StartLessonButton } from "../learn/learn-progress"
+import { LessonPrompt } from "../learn/open-lesson"
 import { ModeSwitch, InThisMode, Rules } from "../widgets/autonomy"
 import { HeroChart } from "../widgets/chart-ranges"
 import { MobileDecision } from "../widgets/suggestion-actions"
 import { SuggestionDetails } from "../widgets/suggestion-details"
+import { TrackCardStart } from "../widgets/track-record-start"
 import { ControlsGroup } from "./controls-group"
 import { RevealOnHash } from "./reveal-on-hash"
 import {
   HandleSheet,
-  Sheet,
   SheetTrigger,
   askSheet,
   controlsSheet,
+  whySheet,
 } from "./sheet"
 
 /** Tappable surfaces get a small press feedback, like native buttons. */
@@ -55,7 +58,7 @@ function BalanceHero() {
   return (
     <section aria-labelledby="m-balance-label">
       <p id="m-balance-label" className="text-sm text-muted-foreground">
-        {shell.greeting} · {mobile.hero.label}
+        <Greeting /> · {mobile.hero.label}
       </p>
       <p className="mt-1 text-[2.5rem] leading-none font-semibold tracking-tight tabular-nums">
         {portfolio.value}
@@ -130,24 +133,25 @@ function DecisionCard() {
           </span>
         </p>
 
+        <LessonPrompt className="mt-4" />
         <MobileDecision
           why={
-            <Sheet
-              title={mobile.decision.whyTitle}
-              description={suggestion.title}
-              trigger={
-                <button
-                  type="button"
-                  className="inline-flex h-11 items-center justify-center gap-1.5 rounded-2xl border border-border bg-card text-sm font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.98]"
-                >
-                  {mobile.decision.why}
-                </button>
-              }
+            <SheetTrigger
+              handle={whySheet}
+              className="inline-flex h-11 items-center justify-center gap-1.5 rounded-2xl border border-border bg-card text-sm font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.98]"
             >
-              <SuggestionDetails />
-            </Sheet>
+              {mobile.decision.why}
+            </SheetTrigger>
           }
         />
+        {/* On a handle, so the lesson can close it before it opens. */}
+        <HandleSheet
+          handle={whySheet}
+          title={mobile.decision.whyTitle}
+          description={suggestion.title}
+        >
+          <SuggestionDetails />
+        </HandleSheet>
       </article>
     </RevealOnHash>
   )
@@ -171,11 +175,7 @@ function LearnCard() {
         {learn.title}
       </p>
       <div className="mt-3 flex items-center gap-3">
-        <ProgressRing
-          done={learn.progress.done}
-          total={learn.progress.total}
-          className="size-12"
-        />
+        <LearnRing className="size-12" />
         <div className="min-w-0">
           <p className="text-xs text-muted-foreground">{learn.next.meta}</p>
           <h3 className="text-sm leading-snug font-semibold text-balance">
@@ -183,16 +183,14 @@ function LearnCard() {
           </h3>
         </div>
       </div>
-      <ComingSoonButton
+      <StartLessonButton
         size="sm"
         className={cn(
           "mt-auto h-9 self-start rounded-full px-3.5",
           toneClasses.learn.solid,
         )}
-      >
-        <PlayIcon aria-hidden />
-        {learn.next.cta}
-      </ComingSoonButton>
+        icon={<PlayIcon aria-hidden />}
+      />
     </article>
   )
 }
@@ -266,7 +264,10 @@ function ForYou() {
     <div className="-mx-4 flex snap-x snap-mandatory scroll-px-4 [scrollbar-width:none] gap-3 overflow-x-auto px-4 pb-2 [&::-webkit-scrollbar]:hidden">
       <LearnCard />
       <SavingsCard />
-      <TrackCard />
+      <VariantSwitch
+        fallback={<TrackCard />}
+        firstRun={<TrackCardStart className={cardClass} />}
+      />
     </div>
   )
 }

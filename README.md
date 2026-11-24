@@ -50,7 +50,10 @@ O código é organizado por feature. Cada feature guarda os próprios componente
 
 ```
 src/
-├─ app/                    # rotas: /, /preview, /preview/portfolio, robots, sitemap
+├─ app/                    # rotas: /, robots, sitemap
+│  └─ (product)/           # route group: guarda a sessão da demo (DemoSessionProvider)
+│     ├─ demo/             # demo gravável: /demo, /demo/onboarding, /demo/connect, /demo/first-look
+│     └─ preview/          # /preview, /preview/portfolio, /preview/ask, /preview/learn
 ├─ components/
 │  ├─ ui/                  # gerado pelo shadcn (não editar à mão sem motivo)
 │  ├─ layout/              # logo e ano do copyright (compartilhados)
@@ -63,6 +66,10 @@ src/
    │  ├─ landing.tsx       # monta a página: header, sections/, footer
    │  ├─ primitives.tsx    # Container e Section (alinhamento e espaçamento)
    │  └─ sections/         # hero, notícias ao vivo, features (bento), how it works, FAQ, CTA
+   ├─ demo/               # demo gravável para o YC: login, onboarding, conexão, primeira visão
+   │  ├─ content.ts      # TODA a copy da demo e a persona fictícia (Maya)
+   │  ├─ session.tsx     # sessão da demo (nível, contas conectadas, finished)
+   │  └─ findings.ts     # os 3 achados da primeira visão, derivados da carteira simulada
    ├─ preview/            # dashboard de demonstração (dados simulados)
    │  ├─ shell.tsx       # sidebar, barra superior e aviso legal (usado pelo layout)
    │  ├─ overview.tsx    # página inicial do preview
@@ -70,6 +77,7 @@ src/
    │  ├─ demo-state.tsx  # estado simulado compartilhado: decisão da NVDA e modo de autonomia
    │  ├─ components/     # painel, gráfico SVG, navegação, chat, "em breve", banner, tour
    │  ├─ widgets/        # um arquivo por módulo da página inicial
+   │  ├─ learn/          # curso a partir da carteira, a lição de Concentration e a página Learn
    │  └─ portfolio/      # página de portfolio: dados, gráficos, insights, posições
    ├─ news/              # notícias sobre o que a carteira tem (Massive, Finnhub ou simuladas)
    │  ├─ providers/      # interface + Massive, Finnhub e simulado; ordem pela env
@@ -99,7 +107,7 @@ A UI não conhece o banco, e o service não conhece o Next.js.
 Quem entra na lista é levado na hora para `/preview`, uma versão navegável do dashboard, sem login, para ver como o produto vai ser. A ideia é que esse preview seja a recompensa da inscrição.
 
 - A rota não tem link na landing e tem `noindex`. Ela abre para qualquer pessoa com a URL, mas não é divulgada.
-- São duas páginas: a visão geral (`/preview`) e o portfolio (`/preview/portfolio`). O `app/preview/layout.tsx` mantém a sidebar e a barra superior entre elas. Os outros itens do menu mostram "em breve".
+- As páginas são a visão geral (`/preview`), o portfolio (`/preview/portfolio`), o chat (`/preview/ask`) e o curso (`/preview/learn`). O `app/(product)/preview/layout.tsx` mantém a sidebar e a barra superior entre elas. Rules e Settings mostram "em breve".
 - Todos os dados são simulados. A visão geral usa `features/preview/data.ts`, e o portfolio usa `features/preview/portfolio/data.ts`. O total da carteira, as contas e a ordem de NVDA/VTI vêm do `content.ts` da landing, para as páginas nunca mostrarem números diferentes.
 - No portfolio, as posições são guardadas por conta, e pesos, alocação e totais são calculados a partir delas. Um teste garante que cada conta soma o mesmo valor da landing.
 - Cada conta tem uma corretora (`institution`) e um nível de acesso (`access`: `trade` ou `view`) em `illustrations.accounts`, porque só algumas corretoras deixam um app de terceiros operar. A Roth IRA fica na E\*TRADE (pode operar) e a Brokerage na Fidelity (só leitura). Por isso a sugestão de NVDA executa na Roth IRA. Um teste garante que a conta onde a sugestão executa tem `access: "trade"`. Os nomes são ilustrativos, e o disclaimer diz que não há afiliação.
@@ -112,10 +120,58 @@ Quem entra na lista é levado na hora para `/preview`, uma versão navegável do
   - **Gráfico:** os ranges 1W/1M/1Y/All funcionam com séries simuladas (`portfolio.chart.series`). Todas terminam no total da landing, e um teste garante isso.
 - O estado da simulação fica no `DemoStateProvider` (`demo-state.tsx`), montado pelo `PreviewShell`. Ele se mantém entre Overview e Portfolio, e recarregar a página zera a demo.
 - O chat é um compositor no estilo ChatGPT: o campo cresce com o texto, Enter envia e Shift+Enter quebra a linha. As sugestões preenchem o campo.
-- O que precisaria do produto real (navegar para páginas que não existem, escolher uma corretora para conectar, lições, histórico, adicionar regra, anexar) continua mostrando o toast de "em breve". O Export do Portfolio e o botão de voz do chat foram tirados para a demo ter menos becos sem saída. Use `ComingSoonButton` ou `notifyComingSoon()` em `features/preview/components/coming-soon.tsx`.
+- O que precisaria do produto real (navegar para páginas que não existem, escolher uma corretora para conectar, as lições além de Concentration, histórico, adicionar regra, anexar) continua mostrando o toast de "em breve". O Export do Portfolio e o botão de voz do chat foram tirados para a demo ter menos becos sem saída. Use `ComingSoonButton` ou `notifyComingSoon()` em `features/preview/components/coming-soon.tsx`.
 - Tour guiado (`components/guided-tour.tsx`): 3 passos (decisão, autonomia, chat) na primeira visita com `?welcome=new`. O anel de destaque não bloqueia cliques, então dá para aprovar no meio do tour. Pular ou terminar fica salvo no `localStorage` (`rocca-tour-done`). Cada passo aponta para um id do desktop e um do mobile, e o tour usa o que estiver visível.
 - O banner de boas-vindas lê o `?welcome=` no client, dentro de um `<Suspense>`, então a página continua estática.
 - Os módulos mostram os diferenciais contra Astor e Volaren: o raciocínio com a fonte de cada passo, a escolha da conta que paga menos imposto, a trilha de aprendizado para iniciantes, o nível de autonomia com regras próprias, o placar com os erros à mostra e o dinheiro que dá para economizar.
+
+### Demo gravável (`/demo`)
+
+Fluxo roteirizado para gravar o vídeo de demo do YC, com dados simulados de uma investidora fictícia (Maya). Não tem link na landing e tem `noindex`. O "Try the demo" da landing continua indo direto para o `/preview`.
+
+**A mensagem é "autonomia conquistada".** Ensinar sozinho não diferencia, porque a Volaren já tem um curso. Aqui o ensino destrava o agente: a Rocca mostra o que você realmente tem somando todas as contas e ensina o conceito com os seus números na hora da decisão. Ela confere se você entendeu e só então deixa você passar aquela regra para o Autopilot.
+
+**Passos:**
+
+1. **`/demo`:** login simulado ("Continue with Google" ou o e-mail já preenchido).
+2. **`/demo/onboarding`:** uma pergunta, o quanto a pessoa já investiu. O nível define se a lição aparece em destaque (iniciante) ou como um link discreto (experiente). A tela também mostra o modo inicial, as regras iniciais e que o Autopilot destrava regra por regra.
+3. **`/demo/connect`:**
+   - A grade de corretoras de `connectCopy`.
+   - A primeira corretora passa pelo cartão de conexão segura, que nunca tem campo de senha (um teste garante isso).
+   - As outras conectam com um clique, ou com "Connect the other 3".
+   - "Read my accounts" mostra um checklist e avança sozinho.
+4. **`/demo/first-look`:** três achados que nenhuma corretora mostra sozinha. São NVDA em 22% (18% direto + 4,1% nos fundos), US$ 912 por ano e US$ 0 contra ~US$ 765 de imposto. "See your dashboard" encerra a sessão (`finish()`).
+
+**Sessão.** O `DemoSessionProvider` fica no layout do route group `(product)`, que envolve o `/demo` e o `/preview`. Por isso a sessão sobrevive à navegação da primeira visão para o dashboard. Recarregar volta ao padrão, como o resto da demo.
+
+**Cuidado do Next 16.** As páginas anteriores ficam escondidas num `<Activity>` em vez de desmontadas. A tela de conexão limpa os timers e volta à lista num cleanup de `useLayoutEffect`, então o Back não lê as contas de novo.
+
+**First run no `/preview`.** Com a sessão finalizada, o `DemoStateProvider` passa a `variant: "firstRun"`. O provider é keyed pela variante, então a chegada da demo sempre começa limpa.
+
+- Saudação com o nome ("Good morning, Maya"), avatar e nome na sidebar, banner "You're all set, Maya. 4 accounts connected." e nenhum tour.
+- O card de decisão ganha o `LessonPrompt` antes do Approve.
+- O placar começa hoje: "None yet. When a call doesn't work, it shows up here."
+- O Learn começa em 0/5.
+
+**Lição (`features/preview/learn/`).** Abre num painel lateral no desktop e num sheet no celular, ambos montados uma vez pelo `LessonLayer` no shell. `openLesson()` fecha o painel ou sheet aberto antes de abrir a lição. São 5 passos:
+
+1. A exposição real à NVDA.
+2. Um slider "what if NVDA drops", com perda de US$ 16.463 a 30% contra US$ 11.993 no limite de 12%.
+3. O rebalanceamento.
+4. Roth contra brokerage, com a hipótese de 15% à vista.
+5. Uma checagem rápida. Acertar marca o conceito como aprendido.
+
+Os números vêm de `learn/math.ts`, e os testes travam os valores.
+
+**Autopilot por regra.** A regra dos 12% passa por quatro estados (`ruleAutopilot`, em `widgets/rule-autopilot.tsx`): `locked` (falta a lição), `needsApproval` (aprendeu, falta aprovar um trim), `ready` (aparece o switch) e `on`. O selo "Later" e "Available after launch at brokers that allow it" ficam sempre à vista. O recibo diz "You approved this knowing why" quando a aprovação veio depois da lição. Se não veio, aponta para a lição.
+
+**No `/preview` normal** (sem sessão) nada disso muda: o placar continua com 14 sugestões e as falhas, e o Learn em 3/12. A diferença é que as entradas de lição abrem a lição de verdade e o Learn virou página.
+
+**Para gravar:**
+
+1. Rode `pnpm build && pnpm start` (não `pnpm dev`, que mostra o badge do overlay e compila cada rota no primeiro acesso).
+2. Abra uma aba nova em `/demo`, com a janela em 1440×900 ou maior.
+3. Siga o roteiro sem recarregar. Para refazer uma tomada, abra uma aba nova, ou comece de `/demo/first-look`, que funciona aberto direto.
 
 ### Notícias
 

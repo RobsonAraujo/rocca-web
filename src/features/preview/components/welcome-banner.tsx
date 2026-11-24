@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 
 import type { WelcomeKind } from "../constants"
 import { welcome } from "../data"
+import { useDemo } from "../demo-state"
 
 /** Only the values the waitlist form and the demo links set are honored. */
 export function parseWelcome(value: string | null): WelcomeKind | null {
@@ -17,18 +18,25 @@ export function parseWelcome(value: string | null): WelcomeKind | null {
 }
 
 /**
- * Greets visitors arriving from the waitlist form (`?welcome=new|back`) or
+ * Greets visitors arriving from the waitlist form (`?welcome=new|back`),
  * from a "Try the demo" link (`?welcome=demo`, which also offers the
- * waitlist). Reads search params on the client, so the page stays static;
- * render it inside <Suspense> as the Next docs require for useSearchParams.
+ * waitlist) or at the end of the recordable demo (the persona, by name).
+ * Reads search params on the client, so the page stays static; render it
+ * inside <Suspense> as the Next docs require for useSearchParams.
  */
 export function WelcomeBanner() {
   const kind = parseWelcome(useSearchParams().get("welcome"))
+  const { persona } = useDemo()
   const [dismissed, setDismissed] = useState(false)
-  if (!kind || dismissed) return null
+  if ((!kind && !persona) || dismissed) return null
 
-  const copy = welcome[kind]
-  const isDemo = kind === "demo"
+  const copy = persona
+    ? {
+        title: welcome.connected.title(persona.name, persona.accounts),
+        description: welcome.connected.description,
+      }
+    : welcome[kind!]
+  const isDemo = !persona && kind === "demo"
   const Icon = isDemo ? SparklesIcon : CircleCheckIcon
   return (
     <div

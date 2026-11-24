@@ -19,6 +19,8 @@ export const askSheet = Drawer.createHandle()
 export const controlsSheet = Drawer.createHandle()
 export const menuSheet = Drawer.createHandle()
 export const connectSheet = Drawer.createHandle()
+export const whySheet = Drawer.createHandle()
+export const lessonSheet = Drawer.createHandle()
 
 const backdropClass =
   "fixed inset-0 z-50 min-h-dvh bg-black [--backdrop-opacity:0.35] opacity-[calc(var(--backdrop-opacity)*(1-var(--drawer-swipe-progress)))] transition-opacity duration-[450ms] ease-[cubic-bezier(0.32,0.72,0,1)] data-swiping:duration-0 data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)] supports-[-webkit-touch-callout:none]:absolute"

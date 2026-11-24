@@ -10,7 +10,7 @@ import {
 
 import { illustrations, preview } from "@/features/landing/content"
 
-import { ASK_PATH, PORTFOLIO_PATH, PREVIEW_PATH } from "./constants"
+import { ASK_PATH, LEARN_PATH, PORTFOLIO_PATH, PREVIEW_PATH } from "./constants"
 
 /**
  * Copy and simulated data for the dashboard preview. Nothing here is real or
@@ -46,6 +46,13 @@ export const welcome = {
     description:
       "Here's a preview of your Rocca dashboard. Everything here uses simulated data.",
   },
+  /** Arriving from the recordable demo (/demo), with the persona's name. */
+  connected: {
+    title: (name: string, accounts: number) =>
+      `You're all set, ${name}. ${accounts} accounts connected.`,
+    description:
+      "Rocca read everything and found one decision worth your time. It explains it before you decide.",
+  },
   /** Visitors from "Try the demo": they haven't joined, so point them there. */
   demo: {
     title: "You're exploring the Rocca demo.",
@@ -66,7 +73,13 @@ export const shell = {
   collapseMenu: "Collapse menu",
   expandMenu: "Expand menu",
   greeting: "Good morning",
-  user: { name: "You", initials: "Y", plan: "Waitlist preview" },
+  user: {
+    name: "You",
+    initials: "Y",
+    plan: "Waitlist preview",
+    /** Under the persona's name, after the recordable demo. */
+    demoPlan: "Demo account",
+  },
   notifications: "Notifications",
   /** Tag on nav items that aren't built yet; screen readers hear `comingSoon`. */
   soon: "Soon",
@@ -81,7 +94,7 @@ export const shell = {
     { label: "Overview", icon: LayoutDashboardIcon, href: PREVIEW_PATH },
     { label: "Portfolio", icon: ChartPieIcon, href: PORTFOLIO_PATH },
     { label: "Ask Rocca", icon: SparklesIcon, href: ASK_PATH },
-    { label: "Learn", icon: GraduationCapIcon },
+    { label: "Learn", icon: GraduationCapIcon, href: LEARN_PATH },
     { label: "Rules", icon: ShieldCheckIcon },
     { label: "Settings", icon: SettingsIcon },
   ] satisfies NavItem[],
@@ -430,7 +443,13 @@ export const suggestion = {
     account: "Account",
     accountValue: "E*TRADE Roth IRA",
   },
-  lesson: "New to rebalancing? 2-min lesson",
+  /** Opens the Concentration lesson (the decision card, the reasoning). */
+  lesson: "New to this? Take the 2-min lesson first",
+  lessonHint: "Built from your own numbers. Approve once you know why.",
+  /** Compact version, for people who said they're experienced. */
+  lessonShort: "Learn why first (2 min)",
+  lessonDone: "Concentration learned",
+  lessonReview: "Review",
   decisionNote: "Nothing happens until you approve.",
   /** Shown instead of `decisionNote` while the mode is Autopilot. */
   autopilotNote:
@@ -440,6 +459,15 @@ export const suggestion = {
     eyebrow: "Simulated receipt",
     title: "Done. NVDA is back to 12%.",
     rule: "Your 12% rule is on track again.",
+    /** Approved after the lesson: autonomy is earned. */
+    informed:
+      "You approved this knowing why: you took the Concentration lesson first.",
+    unlockReady: "Autopilot for your 12% rule is unlocked.",
+    unlockCta: "Set it up",
+    /** Approved without the lesson. */
+    learnToUnlock:
+      "Take the 2-min Concentration lesson to let Rocca handle this rule next time.",
+    learnCta: "Start lesson",
   },
   skipped: {
     title: "Skipped for now",
@@ -521,31 +549,58 @@ export const rules = {
   allClear: "All on track",
   items: [
     {
+      id: "single-stock",
       label: "No single stock above 12%",
       detail: "NVDA is at 18%",
       status: "attention",
       /** Once the simulated rebalance is approved, the rule is back on track. */
       resolvedDetail: "NVDA is back at 12%",
     },
-    { label: "Crypto stays under 10%", detail: "7.1% today", status: "ok" },
     {
+      id: "crypto",
+      label: "Crypto stays under 10%",
+      detail: "7.1% today",
+      status: "ok",
+    },
+    {
+      id: "emergency-cash",
       label: "Keep $10,000 for emergencies",
       detail: "$18,400 in cash",
       status: "ok",
     },
     {
+      id: "earnings-week",
       label: "No trades during earnings week",
       detail: "Next: NVDA on Wednesday",
       status: "ok",
     },
   ] satisfies {
+    id: string
     label: string
     detail: string
     status: RuleStatus
     resolvedDetail?: string
   }[],
   add: "Add a rule",
+  /**
+   * Autopilot, one rule at a time: the 12% rule unlocks once you've learned
+   * the concept behind it and approved one trim yourself.
+   */
+  autopilot: {
+    ruleId: "single-stock",
+    unlockedBy: "concentration",
+    locked: "Autopilot unlocks when you learn Concentration.",
+    lockedCta: "2-min lesson",
+    almost: "Autopilot is almost unlocked:",
+    steps: { learn: "Learn Concentration", approve: "Approve one trim" },
+    toggle: "Let Rocca keep NVDA under 12%",
+    ready: "Unlocked. Turn it on when you're ready.",
+    on: "On Autopilot: Rocca trims back to 12% and tells you right after.",
+    note: "Available after launch at brokers that allow it.",
+  },
 } as const
+
+export type RuleId = (typeof rules.items)[number]["id"]
 
 export const learn = {
   title: "Learn as you go",
@@ -553,15 +608,11 @@ export const learn = {
   // Same lesson the landing's Learn card shows.
   progress: illustrations.learn.progress,
   next: { ...illustrations.learn.next, cta: "Start lesson" },
-  progressLabel: "lessons done",
+  progressLabel: (done: number) => `${done === 1 ? "lesson" : "lessons"} done`,
+  /** The concepts themselves live in learn/data.ts (the course). */
   conceptsLabel: "Concepts in your portfolio",
-  concepts: [
-    { label: "Rebalancing", done: true },
-    { label: "Roth IRA", done: true },
-    { label: "Expense ratio", done: true },
-    { label: "Tax-loss harvesting", done: false },
-  ],
   learned: "learned",
+  review: "Review lesson",
 } as const
 
 export const moves = {
@@ -620,6 +671,18 @@ export const trackRecord = {
     { label: "Held AAPL into earnings", impact: "−$145" },
   ],
   cta: "See full history",
+  /** A brand-new account (the recordable demo): nothing to show yet, honestly. */
+  firstRun: {
+    description: "Starts today. Every call is logged, including the misses.",
+    impact: "Starts today",
+    /** In the stat cell, where "Starts today" doesn't fit. */
+    impactValue: "—",
+    impactHint: "From today: measured vs. doing nothing, after taxes and fees",
+    noMisses:
+      "None yet. When a call doesn't work, it shows up here, next to the wins.",
+    summary: (suggestions: number, approved: number) =>
+      `${suggestions} suggestion · ${approved} approved`,
+  },
 } as const
 
 /** Copy for the phone layout (native-app style: tab bar, sheets, carousels). */

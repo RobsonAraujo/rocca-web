@@ -13,8 +13,9 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
 import { shell } from "../data"
+import { Avatar, useSignedInUser } from "./greeting"
 import { NavItems, RailTooltip } from "./nav-items"
-import { Avatar, focusRing } from "./navigation"
+import { focusRing } from "./navigation"
 
 /**
  * Fixed left rail on large screens. The icon at the top collapses it to
@@ -32,6 +33,7 @@ import { Avatar, focusRing } from "./navigation"
  */
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
+  const user = useSignedInUser()
   const toggleLabel = collapsed ? shell.expandMenu : shell.collapseMenu
   const ToggleIcon = collapsed ? PanelLeftOpenIcon : PanelLeftCloseIcon
 
@@ -73,9 +75,9 @@ export function Sidebar() {
         <div className="mb-2 flex items-center gap-2.5 border-t border-border px-1 pt-4">
           <Avatar className="size-8 text-xs" />
           <div className={cn("min-w-0 leading-tight", collapsed && "sr-only")}>
-            <p className="truncate text-sm font-medium">{shell.user.name}</p>
+            <p className="truncate text-sm font-medium">{user.name}</p>
             <p className="truncate text-xs text-muted-foreground">
-              {shell.user.plan}
+              {user.plan}
             </p>
           </div>
         </div>

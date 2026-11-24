@@ -3,8 +3,10 @@
 import {
   CheckIcon,
   CircleCheckIcon,
+  GraduationCapIcon,
   Loader2Icon,
   LockIcon,
+  LockOpenIcon,
   ReceiptIcon,
   RotateCcwIcon,
   XIcon,
@@ -19,6 +21,7 @@ import { demo, suggestion } from "../data"
 import { WaitlistNote } from "../components/waitlist-note"
 import { useDemo } from "../demo-state"
 import { formatPercent } from "../format"
+import { LessonButton, showAutopilot } from "../learn/open-lesson"
 
 const percent = (fraction: number) => formatPercent(fraction, { digits: 0 })
 
@@ -77,6 +80,17 @@ export function TrimPreview({ className }: { className?: string }) {
   )
 }
 
+/** The amber count beside "Needs your OK": shown while the decision waits. */
+export function PendingCount() {
+  const { suggestion: status } = useDemo()
+  if (status !== "pending") return null
+  return (
+    <span className="grid h-5 min-w-5 place-items-center rounded-full bg-attention px-1.5 text-[11px] font-semibold text-white tabular-nums">
+      1
+    </span>
+  )
+}
+
 /** "Nothing happens until you approve", or the Autopilot version of it. */
 export function DecisionNote({ className }: { className?: string }) {
   const { mode } = useDemo()
@@ -120,6 +134,52 @@ function Placing() {
   )
 }
 
+/**
+ * Under the receipt: earned autonomy. Approved after the lesson, the 12%
+ * rule can go on Autopilot; approved without it, the lesson is one tap away.
+ */
+function Autonomy() {
+  const { approvedInformed } = useDemo()
+  const { receipt } = suggestion
+  if (!approvedInformed) {
+    return (
+      <div className="flex flex-col items-start gap-2 rounded-lg bg-learn/[0.06] p-3">
+        <p className="text-xs text-pretty">{receipt.learnToUnlock}</p>
+        <LessonButton
+          variant="outline"
+          size="sm"
+          className="rounded-lg bg-card px-3"
+        >
+          <GraduationCapIcon className="text-learn" aria-hidden />
+          {receipt.learnCta}
+        </LessonButton>
+      </div>
+    )
+  }
+  return (
+    <div className="space-y-2 rounded-lg bg-control/[0.06] p-3">
+      <p className="flex items-start gap-1.5 text-xs text-pretty">
+        <GraduationCapIcon
+          className="mt-px size-3.5 shrink-0 text-learn"
+          aria-hidden
+        />
+        {receipt.informed}
+      </p>
+      <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium">
+        <LockOpenIcon className="size-3.5 shrink-0 text-control" aria-hidden />
+        {receipt.unlockReady}
+        <button
+          type="button"
+          onClick={showAutopilot}
+          className="rounded-sm text-control underline-offset-2 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
+        >
+          {receipt.unlockCta}
+        </button>
+      </p>
+    </div>
+  )
+}
+
 /** Simulated receipt: what Rocca would have done, and that it was fake. */
 function Receipt() {
   const { order, taxSmart, receipt } = suggestion
@@ -153,6 +213,7 @@ function Receipt() {
         <CircleCheckIcon className="size-3.5 shrink-0" aria-hidden />
         {receipt.rule}
       </p>
+      <Autonomy />
     </div>
   )
 }

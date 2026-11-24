@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { footer } from "@/features/landing/content"
 
-import { ASK_PATH, PORTFOLIO_PATH, PREVIEW_PATH } from "./constants"
+import { ASK_PATH, LEARN_PATH, PORTFOLIO_PATH, PREVIEW_PATH } from "./constants"
 import { ask, comingSoon, shell } from "./data"
 import { PreviewShell } from "./shell"
 
@@ -57,7 +57,7 @@ describe("PreviewShell", () => {
       within(sidebar).getByRole("link", { name: "Portfolio" }),
     ).toHaveAttribute("href", PORTFOLIO_PATH)
     expect(
-      within(sidebar).getByRole("button", { name: "Learn, coming soon" }),
+      within(sidebar).getByRole("button", { name: "Rules, coming soon" }),
     ).toBeInTheDocument()
     expect(
       within(sidebar).getByRole("link", { name: shell.backToSite }),
@@ -87,13 +87,16 @@ describe("PreviewShell", () => {
     ).toBeInTheDocument()
   })
 
-  it("links the full Ask Rocca chat from the nav", () => {
+  it("links the full Ask Rocca chat and the Learn course from the nav", () => {
     render(<PreviewShell>page</PreviewShell>)
 
     const sidebar = screen.getByRole("complementary")
     expect(
       within(sidebar).getByRole("link", { name: ask.label }),
     ).toHaveAttribute("href", ASK_PATH)
+    expect(
+      within(sidebar).getByRole("link", { name: "Learn" }),
+    ).toHaveAttribute("href", LEARN_PATH)
   })
 
   it("opens Ask Rocca in a side panel from the top bar", async () => {
@@ -129,8 +132,8 @@ describe("PreviewShell", () => {
     const user = userEvent.setup()
     render(<PreviewShell>page</PreviewShell>)
 
-    const [learn] = screen.getAllByRole("button", { name: /^Learn/ })
-    await user.click(learn!)
+    const [rules] = screen.getAllByRole("button", { name: /^Rules/ })
+    await user.click(rules!)
 
     expect(toast).toHaveBeenCalledWith(
       comingSoon.title,

@@ -1,7 +1,8 @@
+import { Greeting } from "./components/greeting"
 import { ModePill } from "./components/mode-pill"
 import { OverviewStatus } from "./components/overview-status"
 import { PageHeader } from "./components/page-header"
-import { shell } from "./data"
+import { VariantSwitch } from "./components/variant"
 import { AutonomyWidget } from "./widgets/autonomy"
 import {
   MovesWidget,
@@ -11,10 +12,11 @@ import {
 import { LearnWidget } from "./widgets/learn"
 import { PortfolioHero } from "./widgets/portfolio"
 import { SuggestionWidget } from "./widgets/suggestion"
+import { TrackRecordStart } from "./widgets/track-record-start"
 
 /**
- * Overview page of the preview, shown right after a waitlist signup. All
- * data is simulated; every action shows a "coming soon" notice.
+ * Overview page of the preview, shown right after a waitlist signup or at
+ * the end of the recordable demo (/demo). All data is simulated.
  *
  * Laid out the way investing dashboards are, most important first:
  * 1. The total and its chart, beside the one decision that needs you.
@@ -28,7 +30,7 @@ export function Overview({ news }: { news?: React.ReactNode } = {}) {
   return (
     <>
       <PageHeader
-        title={shell.greeting}
+        title={<Greeting />}
         subtitle={<OverviewStatus />}
         actions={<ModePill />}
       />
@@ -43,7 +45,11 @@ export function Overview({ news }: { news?: React.ReactNode } = {}) {
         <div className="grid gap-4 md:grid-cols-2 lg:col-span-8 lg:gap-5">
           <MovesWidget />
           <SavingsWidget />
-          <TrackRecordWidget className="md:col-span-2" />
+          {/* A brand-new account (the demo) has no history: it starts today. */}
+          <VariantSwitch
+            fallback={<TrackRecordWidget className="md:col-span-2" />}
+            firstRun={<TrackRecordStart className="md:col-span-2" />}
+          />
         </div>
       </div>
 

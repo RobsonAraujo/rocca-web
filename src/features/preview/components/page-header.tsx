@@ -3,7 +3,8 @@ import { cn } from "@/lib/utils"
 import { SimulatedBadge } from "./navigation"
 
 type PageHeaderProps = {
-  title: string
+  /** Text, or a small client island (the greeting with the persona's name). */
+  title: React.ReactNode
   /** A line of text, or a status line (spans only: it renders in a <p>). */
   subtitle: React.ReactNode
   /** Optional controls on the right (desktop) or below the text (phones). */

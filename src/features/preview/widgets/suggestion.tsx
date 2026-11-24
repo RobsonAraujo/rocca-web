@@ -11,7 +11,8 @@ import {
   reasoningPanel,
 } from "../components/side-panel"
 import { accountAccess, suggestion } from "../data"
-import { DecisionBar, TrimPreview } from "./suggestion-actions"
+import { LessonPrompt } from "../learn/open-lesson"
+import { DecisionBar, PendingCount, TrimPreview } from "./suggestion-actions"
 import { SuggestionDetails } from "./suggestion-details"
 
 /** What the order costs, which rule it serves, where it runs. */
@@ -48,7 +49,8 @@ function Impact() {
 /**
  * The one decision waiting for you, beside the portfolio: what Rocca
  * proposes, what it changes (NVDA 18% → 12%), what it costs and the
- * Approve / Not now choice. The reasoning
+ * Approve / Not now choice. On a first run, a lesson comes before Approve
+ * (learn why first). The reasoning
  * (steps and sources) opens in a side panel, so the card stays scannable.
  * The amber count is the only "needs you" color on the page.
  */
@@ -68,9 +70,7 @@ export function SuggestionWidget({ className }: { className?: string }) {
       <div className="flex items-center justify-between gap-3">
         <p className="flex items-center gap-2 text-sm font-semibold">
           {suggestion.needsOk}
-          <span className="grid h-5 min-w-5 place-items-center rounded-full bg-attention px-1.5 text-[11px] font-semibold text-white tabular-nums">
-            1
-          </span>
+          <PendingCount />
         </p>
         <p className="text-xs text-muted-foreground">{suggestion.eyebrow}</p>
       </div>
@@ -99,6 +99,7 @@ export function SuggestionWidget({ className }: { className?: string }) {
       </div>
 
       <div className="mt-auto pt-5">
+        <LessonPrompt className="mb-3" />
         <DecisionBar />
         <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-3">
           <SidePanelTrigger handle={reasoningPanel} className={panelLinkClass}>

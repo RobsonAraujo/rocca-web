@@ -15,6 +15,7 @@ import { shell } from "../data"
 
 export const askPanel = Drawer.createHandle()
 export const reasoningPanel = Drawer.createHandle()
+export const lessonPanel = Drawer.createHandle()
 
 type PanelHandle = typeof askPanel
 
@@ -28,10 +29,17 @@ const backdropClass =
 // The 3rem "bleed" past the right edge hides the gap while the panel springs
 // (Base UI's side-drawer recipe).
 const popupClass =
-  "-mr-12 flex h-full w-[calc(26rem+3rem)] max-w-[calc(100vw-2rem+3rem)] flex-col border-l border-border bg-card pr-12 text-foreground shadow-float outline-none [transform:translateX(var(--drawer-swipe-movement-x))] transition-transform duration-[450ms] ease-[cubic-bezier(0.32,0.72,0,1)] data-swiping:select-none data-starting-style:[transform:translateX(calc(100%-3rem+2px))] data-ending-style:[transform:translateX(calc(100%-3rem+2px))] data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)] motion-reduce:transition-none"
+  "-mr-12 flex h-full max-w-[calc(100vw-2rem+3rem)] flex-col border-l border-border bg-card pr-12 text-foreground shadow-float outline-none [transform:translateX(var(--drawer-swipe-movement-x))] transition-transform duration-[450ms] ease-[cubic-bezier(0.32,0.72,0,1)] data-swiping:select-none data-starting-style:[transform:translateX(calc(100%-3rem+2px))] data-ending-style:[transform:translateX(calc(100%-3rem+2px))] data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)] motion-reduce:transition-none"
+
+/** Panel widths (plus the 3rem bleed): the chat, or a roomier lesson. */
+const widths = {
+  default: "w-[calc(26rem+3rem)]",
+  wide: "w-[calc(30rem+3rem)]",
+} as const
 
 type SidePanelProps = {
   handle: PanelHandle
+  size?: keyof typeof widths
   title: string
   description?: string
   /** Buttons in the header, before Close (e.g. New chat, Open full chat). */
@@ -44,6 +52,7 @@ type SidePanelProps = {
 /** The panel itself: header with title and close, a scrolling body, an optional footer. */
 export function SidePanel({
   handle,
+  size = "default",
   title,
   description,
   actions,
@@ -55,7 +64,7 @@ export function SidePanel({
       <Drawer.Portal>
         <Drawer.Backdrop className={backdropClass} />
         <Drawer.Viewport className="fixed inset-0 z-50 flex items-stretch justify-end">
-          <Drawer.Popup className={popupClass}>
+          <Drawer.Popup className={cn(popupClass, widths[size])}>
             <header className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
               <div className="min-w-0">
                 <Drawer.Title className="text-base font-semibold tracking-tight">

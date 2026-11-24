@@ -14,7 +14,7 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 import { ComingSoonButton } from "../components/coming-soon"
-import { PORTFOLIO_PATH, PREVIEW_PATH } from "../constants"
+import { LEARN_PATH, PORTFOLIO_PATH, PREVIEW_PATH } from "../constants"
 import { mobile } from "../data"
 import { SheetTrigger, askSheet, menuSheet } from "./sheet"
 
@@ -24,7 +24,9 @@ const left: Tab[] = [
   { label: mobile.tabs.home, icon: HouseIcon, href: PREVIEW_PATH },
   { label: mobile.tabs.portfolio, icon: ChartPieIcon, href: PORTFOLIO_PATH },
 ]
-const right: Tab[] = [{ label: mobile.tabs.learn, icon: GraduationCapIcon }]
+const right: Tab[] = [
+  { label: mobile.tabs.learn, icon: GraduationCapIcon, href: LEARN_PATH },
+]
 
 const itemClass =
   "flex h-full w-full flex-col items-center justify-center gap-1 text-[11px] font-medium outline-none select-none focus-visible:bg-secondary active:scale-95 transition-transform"

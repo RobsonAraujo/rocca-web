@@ -7,6 +7,9 @@ export const PORTFOLIO_PATH = "/preview/portfolio"
 /** The full Ask Rocca chat (the side panel and the phone sheet open from anywhere). */
 export const ASK_PATH = "/preview/ask"
 
+/** The course built from the portfolio, and its one playable lesson. */
+export const LEARN_PATH = "/preview/learn"
+
 /**
  * Value of `?welcome=`. The waitlist form sets `new` or `back` after a
  * signup; `demo` comes from the landing's "Try the demo" links, for people

@@ -1,10 +1,9 @@
 import { render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { toast } from "sonner"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-import { PORTFOLIO_PATH, PREVIEW_PATH } from "../constants"
-import { ask, comingSoon, mobile } from "../data"
+import { LEARN_PATH, PORTFOLIO_PATH, PREVIEW_PATH } from "../constants"
+import { ask, mobile } from "../data"
 import { renderWithDemo } from "../test-utils"
 import { AskSheet } from "./ask-sheet"
 import { MobileTabBar } from "./tab-bar"
@@ -51,16 +50,14 @@ describe("MobileTabBar", () => {
     expect(within(sheet).getByLabelText(ask.inputLabel)).toBeInTheDocument()
   })
 
-  it("shows the coming-soon notice for screens that aren't built", async () => {
-    const user = userEvent.setup()
+  it("links the Learn course", () => {
+    nav.pathname = LEARN_PATH
     renderTabBar()
 
-    await user.click(screen.getByRole("button", { name: mobile.tabs.learn }))
-
-    expect(toast).toHaveBeenCalledWith(
-      comingSoon.title,
-      expect.objectContaining({ description: comingSoon.description }),
-    )
+    const bar = screen.getByRole("navigation", { name: mobile.tabs.label })
+    const learn = within(bar).getByRole("link", { name: mobile.tabs.learn })
+    expect(learn).toHaveAttribute("href", LEARN_PATH)
+    expect(learn).toHaveAttribute("aria-current", "page")
   })
 })
 

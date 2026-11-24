@@ -192,7 +192,7 @@ export const illustrations = {
   learn: {
     progress: { done: 3, total: 12 },
     next: {
-      meta: "Next lesson · 3 min",
+      meta: "Next lesson · 2 min",
       title: "Why one stock shouldn't run your portfolio",
       reason: "Picked for you: NVDA is 18% of your holdings.",
     },

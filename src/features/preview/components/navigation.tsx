@@ -7,13 +7,22 @@ import { cn } from "@/lib/utils"
 import { shell } from "../data"
 import { AskTrigger } from "./ask-panel"
 import { ComingSoonButton } from "./coming-soon"
+import { Avatar } from "./greeting"
 import { NavItems } from "./nav-items"
+
+export { Avatar }
 
 export const focusRing =
   "rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
 
 /** Always on screen somewhere: the top bar on wide screens, else the page header. */
-export function SimulatedBadge({ className }: { className?: string }) {
+export function SimulatedBadge({
+  label = shell.badge,
+  className,
+}: {
+  label?: string
+  className?: string
+}) {
   return (
     <span
       className={cn(
@@ -22,22 +31,7 @@ export function SimulatedBadge({ className }: { className?: string }) {
       )}
     >
       <span className="size-1.5 rounded-full bg-brand" aria-hidden />
-      {shell.badge}
-    </span>
-  )
-}
-
-export function Avatar({ className }: { className?: string }) {
-  return (
-    <span
-      aria-label={shell.user.name}
-      role="img"
-      className={cn(
-        "grid size-9 shrink-0 place-items-center rounded-full bg-primary text-sm font-semibold text-primary-foreground",
-        className,
-      )}
-    >
-      {shell.user.initials}
+      {label}
     </span>
   )
 }

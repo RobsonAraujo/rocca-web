@@ -17,6 +17,7 @@ import { Panel } from "../components/panel"
 import { autonomy, rules } from "../data"
 import type { SuggestionStatus } from "../demo-state"
 import { useDemo } from "../demo-state"
+import { RuleAutopilotLine } from "./rule-autopilot"
 
 /** The selected level and its position in the switch. */
 function useCurrentLevel() {
@@ -160,7 +161,7 @@ export function Rules() {
           const attention = rule.status === "attention"
           const Icon = attention ? CircleAlertIcon : CircleCheckIcon
           return (
-            <li key={rule.label} className="flex items-start gap-2.5 text-sm">
+            <li key={rule.id} className="flex items-start gap-2.5 text-sm">
               <Icon
                 className={cn(
                   "mt-0.5 size-4 shrink-0",
@@ -168,7 +169,8 @@ export function Rules() {
                 )}
                 aria-hidden
               />
-              <span className="min-w-0">
+              {/* A div: the Autopilot line below the rule is block content. */}
+              <div className="min-w-0">
                 <span className="sr-only">
                   {attention ? "Needs attention: " : "On track: "}
                 </span>
@@ -183,7 +185,10 @@ export function Rules() {
                 >
                   · {rule.detail}
                 </span>
-              </span>
+                {rule.id === rules.autopilot.ruleId && (
+                  <RuleAutopilotLine ruleId={rule.id} />
+                )}
+              </div>
             </li>
           )
         })}

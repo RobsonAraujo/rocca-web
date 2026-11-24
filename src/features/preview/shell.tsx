@@ -6,15 +6,17 @@ import { AskPanel } from "./components/ask-panel"
 import { TopBar } from "./components/navigation"
 import { Sidebar } from "./components/sidebar"
 import { DemoStateProvider } from "./demo-state"
+import { LessonLayer } from "./learn/lesson-layer"
 import { MobileAppBar } from "./mobile/app-bar"
 import { AskSheet } from "./mobile/ask-sheet"
 import { MenuSheet } from "./mobile/menu-sheet"
 import { MobileTabBar } from "./mobile/tab-bar"
 
 /**
- * Chrome shared by every preview page (rendered by app/preview/layout.tsx):
- * collapsible sidebar, top bar with Ask Rocca, the Ask side panel (also on
- * ⌘K), the legal disclaimer and the toaster for coming-soon notices. It
+ * Chrome shared by every preview page (rendered by
+ * app/(product)/preview/layout.tsx): collapsible sidebar, top bar with Ask
+ * Rocca, the Ask side panel (also on ⌘K), the lesson (panel or sheet), the
+ * legal disclaimer and the toaster for coming-soon notices. It
  * stays mounted while moving between preview pages, and so do the
  * simulated demo state (DemoStateProvider) and the Ask Rocca conversation
  * (ChatProvider), shared by the panel, the full chat and the phone sheet.
@@ -45,6 +47,7 @@ export function PreviewShell({ children }: { children: React.ReactNode }) {
           <AskSheet />
           <AskPanel />
           <MenuSheet />
+          <LessonLayer />
           <Toaster theme="light" position="top-center" />
         </div>
       </ChatProvider>

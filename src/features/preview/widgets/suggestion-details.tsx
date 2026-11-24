@@ -2,12 +2,12 @@ import { GraduationCapIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-import { ComingSoonButton } from "../components/coming-soon"
 import { suggestion } from "../data"
+import { LessonButton } from "../learn/open-lesson"
 
 /**
  * The full reasoning behind the suggestion: each step with its source,
- * then what happens if you approve and a lesson. Shown on demand (the
+ * then what happens if you approve and the lesson. Shown on demand (the
  * desktop side panel, the phone "Why?" sheet), so the card stays short.
  */
 export function SuggestionDetails({ className }: { className?: string }) {
@@ -54,13 +54,13 @@ export function SuggestionDetails({ className }: { className?: string }) {
         </ol>
       </section>
 
-      <ComingSoonButton
+      <LessonButton
         variant="outline"
         className="h-10 w-full justify-start rounded-lg px-3 text-sm font-medium"
       >
         <GraduationCapIcon className="text-learn" aria-hidden />
         {suggestion.lesson}
-      </ComingSoonButton>
+      </LessonButton>
     </div>
   )
 }
