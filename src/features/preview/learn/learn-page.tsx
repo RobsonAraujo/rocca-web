@@ -35,6 +35,7 @@ import { achievements, earnedAchievements, unitTrophies } from "./achievements"
 import type { Concept, ConceptId } from "./data"
 import { LESSON_ID, concepts, learnPage, units } from "./data"
 import { openLesson } from "./open-lesson"
+import { PortfolioLink } from "./portfolio-link"
 import {
   XP_PER_LESSON,
   learnSummary,
@@ -50,8 +51,11 @@ import {
 type NodeState = "learned" | "current" | "locked"
 type UnitTone = (typeof units)[number]["tone"]
 
-/** Where each lesson sits on the path: a gentle wave, like Duolingo's. */
-const WAVE = [0, 64, 96, 64, 0, -64, -96, -64]
+/**
+ * Stops alternate left and right of the center line, so each one has room
+ * for its portfolio card on the other side.
+ */
+const SWING = 72
 
 const position = (id: ConceptId) => concepts.findIndex((c) => c.id === id)
 
@@ -336,7 +340,7 @@ function LessonNode({
   onOpenChange: (open: boolean) => void
 }) {
   const Icon = concept.icon
-  const offset = WAVE[position(concept.id) % WAVE.length]!
+  const offset = position(concept.id) % 2 === 0 ? -SWING : SWING
   const current = state === "current"
   const statusLabel =
     learnPage.status[
@@ -367,7 +371,7 @@ function LessonNode({
         <Popover.Root open={open} onOpenChange={onOpenChange}>
           <span
             className={cn(
-              "rounded-full",
+              "relative rounded-full",
               current &&
                 cn(
                   "p-2 ring-4",
@@ -404,6 +408,14 @@ function LessonNode({
                 </span>
               )}
             </Popover.Trigger>
+            {/* Tablets and desktop: the data this lesson comes from, wired to the stop. */}
+            <PortfolioLink
+              id={concept.id}
+              side={offset < 0 ? "right" : "left"}
+              state={state}
+              tone={tone}
+              className="hidden sm:block"
+            />
           </span>
           <Popover.Portal>
             <Popover.Positioner side="bottom" sideOffset={14}>
@@ -430,8 +442,8 @@ function LessonNode({
         >
           {concept.label}
         </p>
-        {/* Where this lesson comes from: the heart of a course built from your money. */}
-        <p className="mt-1.5 inline-flex max-w-64 items-center gap-1.5 rounded-full bg-card px-2.5 py-1 text-xs whitespace-nowrap shadow-soft ring-1 ring-border">
+        {/* Phones: where this lesson comes from, in short (wider screens get the card). */}
+        <p className="mt-1.5 inline-flex max-w-64 items-center gap-1.5 rounded-full bg-card px-2.5 py-1 text-xs whitespace-nowrap shadow-soft ring-1 ring-border sm:hidden">
           <span className="font-semibold">{concept.source.label}</span>
           <span aria-hidden className="text-muted-foreground">
             ·
@@ -519,7 +531,8 @@ function CoursePath() {
                 {done}/{unit.concepts.length}
               </span>
             </div>
-            <ol className="space-y-9">
+            {/* Wider gaps from tablets up: the portfolio cards are taller than the stops. */}
+            <ol className="space-y-9 sm:space-y-24">
               {unit.concepts.map((id) => (
                 <LessonNode
                   key={id}
@@ -808,7 +821,7 @@ export function LearnPage() {
     <>
       <CourseHero />
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-8">
-        <div className="mx-auto w-full max-w-xl py-2">
+        <div className="mx-auto w-full max-w-2xl py-2">
           <CoursePath />
         </div>
         <aside className="space-y-4">

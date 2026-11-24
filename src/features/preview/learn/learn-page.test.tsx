@@ -61,9 +61,50 @@ describe("LearnPage", () => {
     for (const concept of concepts) {
       const item = stop(concept.id)
       expect(within(item).getByText(concept.label)).toBeInTheDocument()
-      expect(within(item).getByText(concept.source.label)).toBeInTheDocument()
+      // The phone chip says where it comes from, in short.
       expect(within(item).getByText(concept.source.detail)).toBeInTheDocument()
+      expect(
+        within(item).getAllByText(concept.source.label).length,
+      ).toBeGreaterThan(0)
     }
+  })
+
+  it("wires each stop to the portfolio data it comes from", () => {
+    renderCourse()
+    const { links } = learnPage
+
+    for (const concept of concepts) {
+      expect(
+        within(stop(concept.id)).getByText(links.eyebrow),
+      ).toBeInTheDocument()
+    }
+    const nvda = stop("concentration")
+    expect(
+      within(nvda).getByText(links.concentration.title),
+    ).toBeInTheDocument()
+    expect(within(nvda).getByText("$28,690")).toBeInTheDocument()
+    expect(within(nvda).getByText("$16,006")).toBeInTheDocument()
+    expect(
+      within(nvda).getByText(links.concentration.total("22%")),
+    ).toBeInTheDocument()
+    expect(within(nvda).getByText(links.next)).toBeInTheDocument()
+
+    const harvest = stop("tax-loss-harvesting")
+    expect(within(harvest).getByText("−9.8%")).toBeInTheDocument()
+    expect(within(harvest).getByText("−7.5%")).toBeInTheDocument()
+  })
+
+  it("marks the data behind a learned lesson as understood", () => {
+    renderWithDemo(<LearnPage />)
+
+    for (const id of ["rebalancing", "expense-ratio", "roth-ira"]) {
+      expect(
+        within(stop(id)).getByText(learnPage.links.understood),
+      ).toBeInTheDocument()
+    }
+    expect(
+      within(stop("concentration")).queryByText(learnPage.links.understood),
+    ).not.toBeInTheDocument()
   })
 
   it("shows the game: level, XP, streak and badges", () => {

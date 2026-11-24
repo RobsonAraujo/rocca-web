@@ -296,6 +296,36 @@ export const learnPage = {
     hint: (badge: string) => `Finish the unit to earn "${badge}"`,
     earned: (badge: string) => `Earned "${badge}"`,
   },
+  /**
+   * The cards beside each stop on the path: the real data the lesson was
+   * built from, wired to the stop.
+   */
+  links: {
+    eyebrow: "From your portfolio",
+    understood: "Understood",
+    next: "Up next",
+    concentration: {
+      title: "NVDA across your money",
+      funds: "Inside your funds",
+      total: (share: string) => `${share} of everything you own`,
+    },
+    rebalancing: {
+      title: "Your mix vs. your targets",
+      target: (target: string) => `target ${target}`,
+    },
+    expense: {
+      title: "Funds charging 0.85%",
+      total: (amount: string) => `${amount} a year in fees`,
+    },
+    harvest: {
+      title: "Down since you bought",
+      total: (amount: string) => `About ${amount} off this year's taxes`,
+    },
+    roth: {
+      title: "Inside your Roth IRA",
+      total: (value: string) => `${value} growing tax-free`,
+    },
+  },
   /** On the lesson's last step, when the quick check is right. */
   celebrate: {
     xp: (xp: number) => `+${xp} XP`,

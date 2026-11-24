@@ -170,7 +170,16 @@ Os números vêm de `learn/math.ts`, e os testes travam os valores. A lição en
 **Página Learn (`/preview/learn`).** É o destaque do produto: um curso montado a partir da carteira, no formato de caminho do Duolingo.
 
 - **Hero "Built from your portfolio":** o título usa o nome da pessoa ("Maya's course"). Ao lado, o caminho em números (4 contas lidas → 12 posições → 5 lições), mais o tempo total e o streak.
-- **Caminho:** duas unidades com banner colorido ("What you really own" e "What it costs you"). As lições ficam numa onda, como botões redondos com "relevo". Cada uma mostra de onde veio na carteira, num chip como "NVDA · 22% of your money". A próxima lição tem o balão "Start" flutuando, as aprendidas têm check e as outras, cadeado.
+- **Caminho:** duas unidades com banner colorido ("What you really own" e "What it costs you"). As lições alternam entre esquerda e direita, como botões redondos com "relevo". A próxima lição tem o balão "Start" flutuando, as aprendidas têm check e as outras, cadeado.
+- **Conexões com a carteira (`learn/portfolio-link.tsx`):** do tablet para cima, cada lição tem ao lado um cartão "From your portfolio" ligado a ela por um fio tracejado. O cartão mostra os dados reais que deram origem à lição, todos derivados da carteira simulada:
+  - NVDA em cada conta e dentro dos fundos;
+  - a mistura contra as metas;
+  - os dois fundos de 0,85%;
+  - as posições no prejuízo;
+  - o que tem dentro da Roth.
+
+  A próxima lição diz "Up next", e as concluídas dizem "Understood". No celular, o cartão vira um chip curto embaixo da lição ("NVDA · 22% of your money").
+
 - **Cartão da lição:** clicar numa lição abre um popover com o título, a origem na carteira, o que ela destrava e "Start lesson". Só Concentration abre a lição; as outras mostram "em breve".
 - **Nível e XP (no hero):** 20 XP por lição e quatro níveis com nomes sobre entender o próprio dinheiro: Curious (0), Informed (40), Confident (80), In control (100, o curso inteiro). Uma barra mostra quanto falta para o próximo.
 - **Streak:**
