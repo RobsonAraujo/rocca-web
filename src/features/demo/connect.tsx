@@ -20,12 +20,7 @@ import type { AccountName } from "@/features/preview/portfolio/data"
 import { accountTotal, connectCopy } from "@/features/preview/portfolio/data"
 import { cn } from "@/lib/utils"
 
-import {
-  BROKER_MS,
-  QUICK_CONNECT_MS,
-  READ_STEP_MS,
-  demoRoutes,
-} from "./constants"
+import { BROKER_MS, READ_STEP_MS, SYNC_MS, demoRoutes } from "./constants"
 import { connect as copy } from "./content"
 import { useDemoSession } from "./session"
 import { prefersReducedMotion } from "./timing"
@@ -36,13 +31,17 @@ type Account = (typeof illustrations.accounts)[number]
 const accountAt = (institution: string) =>
   illustrations.accounts.find((a) => a.institution === institution)
 
+/**
+ * Connecting one account, the way a real brokerage link goes: what Rocca
+ * can do there, a hop to the broker's own page, picking what to share,
+ * then syncing it.
+ */
+type SecureStage = "intro" | "opening" | "choose" | "syncing"
+
 type Phase =
   | { kind: "pick" }
-  | { kind: "secure"; account: Account; stage: "intro" | "opening" | "choose" }
+  | { kind: "secure"; account: Account; stage: SecureStage }
   | { kind: "reading"; done: number }
-
-/** Gap between the staggered quick connects of "Connect the other 3". */
-const STAGGER_MS = 250
 
 function AccessBadge({ access }: { access: Account["access"] }) {
   return (
@@ -65,6 +64,9 @@ function YourAccounts({ connected }: { connected: readonly AccountName[] }) {
     illustrations.accounts.find((a) => a.name === name)!,
   )
   const total = connected.reduce((sum, name) => sum + accountTotal(name), 0)
+  const missing = illustrations.accounts
+    .filter((a) => !connected.includes(a.name))
+    .map((a) => a.institution)
   return (
     <section
       aria-labelledby="your-accounts"
@@ -103,15 +105,34 @@ function YourAccounts({ connected }: { connected: readonly AccountName[] }) {
       ) : (
         <p className="mt-3 text-sm text-muted-foreground">{copy.needAll}</p>
       )}
+      {missing.length > 0 && (
+        <p className="mt-3 border-t border-border pt-3 text-xs text-pretty text-muted-foreground">
+          {copy.remaining(missing)}
+        </p>
+      )}
     </section>
   )
 }
 
+/** A spinner with what's happening, for the two waits of a connection. */
+function Waiting({ title, detail }: { title: string; detail?: string }) {
+  return (
+    <div
+      role="status"
+      className="mt-5 flex animate-in flex-col items-center gap-3 rounded-xl bg-secondary/60 px-4 py-8 text-center duration-200 fade-in"
+    >
+      <Loader2Icon className="size-6 animate-spin text-brand" aria-hidden />
+      <p className="text-sm font-medium">{title}</p>
+      {detail && <p className="text-xs text-muted-foreground">{detail}</p>}
+    </div>
+  )
+}
+
 /**
- * The secure-connection step for the first broker: what Rocca can and
- * can't do there, a simulated hop to the broker's own page, then picking
- * the account to share. There is never a password field: you'd sign in on
- * the broker's site, and Rocca never sees it.
+ * Connecting one broker: what Rocca can and can't do there, a simulated hop
+ * to the broker's own page, picking the account to share, then syncing it.
+ * Every account goes through it. There is never a password field: you'd
+ * sign in on the broker's site, and Rocca never sees it.
  */
 function SecureConnect({
   phase,
@@ -146,7 +167,35 @@ function SecureConnect({
         </h2>
       </div>
 
-      {stage === "choose" ? (
+      {stage === "intro" && (
+        <>
+          <ul className="mt-5 space-y-2.5 text-sm">
+            {secure.points.map((point) => (
+              <li key={point(broker)} className="flex items-start gap-2.5">
+                <LockIcon
+                  className="mt-0.5 size-4 shrink-0 text-brand"
+                  aria-hidden
+                />
+                {point(broker)}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-4 rounded-xl bg-secondary/60 px-3 py-2.5 text-[13px] text-pretty">
+            {secure.access[account.access]}
+          </p>
+          <Button
+            type="button"
+            onClick={onOpen}
+            className="mt-5 h-10 w-full rounded-xl text-sm"
+          >
+            {secure.open(broker)}
+          </Button>
+        </>
+      )}
+
+      {stage === "opening" && <Waiting title={secure.opening(broker)} />}
+
+      {stage === "choose" && (
         <div className="mt-5 animate-in duration-200 fade-in">
           <p className="text-sm font-medium">{secure.choose}</p>
           <label className="mt-3 flex items-center gap-3 rounded-xl p-3 ring-1 ring-border">
@@ -171,46 +220,24 @@ function SecureConnect({
             {secure.share}
           </Button>
         </div>
-      ) : (
-        <>
-          <ul className="mt-5 space-y-2.5 text-sm">
-            {secure.points.map((point) => (
-              <li key={point(broker)} className="flex items-start gap-2.5">
-                <LockIcon
-                  className="mt-0.5 size-4 shrink-0 text-brand"
-                  aria-hidden
-                />
-                {point(broker)}
-              </li>
-            ))}
-          </ul>
-          <p className="mt-4 rounded-xl bg-secondary/60 px-3 py-2.5 text-[13px] text-pretty">
-            {secure.access[account.access]}
-          </p>
-          <Button
-            type="button"
-            onClick={onOpen}
-            disabled={stage === "opening"}
-            className="mt-5 h-10 w-full rounded-xl text-sm"
-          >
-            {stage === "opening" ? (
-              <>
-                <Loader2Icon className="animate-spin" aria-hidden />
-                {secure.opening(broker)}
-              </>
-            ) : (
-              secure.open(broker)
-            )}
-          </Button>
-        </>
       )}
-      <button
-        type="button"
-        onClick={onCancel}
-        className="mt-3 w-full rounded-lg py-1.5 text-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
-      >
-        {secure.cancel}
-      </button>
+
+      {stage === "syncing" && (
+        <Waiting
+          title={secure.syncing(account.name)}
+          detail={secure.syncDetail}
+        />
+      )}
+
+      {(stage === "intro" || stage === "choose") && (
+        <button
+          type="button"
+          onClick={onCancel}
+          className="mt-3 w-full rounded-lg py-1.5 text-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
+        >
+          {secure.cancel}
+        </button>
+      )}
     </section>
   )
 }
@@ -262,9 +289,9 @@ function Reading({ done }: { done: number }) {
 }
 
 /**
- * Step 3: connect the persona's four accounts. The first broker goes
- * through the secure-connection step; the rest connect in one click (or
- * all at once). Then Rocca "reads" them and moves on to the first look.
+ * Step 3: connect the persona's four accounts, each through the same
+ * secure connection (with its waits), the way it works for real. Then
+ * Rocca "reads" them and moves on to the first look.
  *
  * Next keeps this page in an <Activity> when the demo moves on, so the
  * timers are cleared and the phase reset as it hides (useLayoutEffect
@@ -275,7 +302,6 @@ export function Connect() {
   const router = useRouter()
   const { connected, connect } = useDemoSession()
   const [phase, setPhase] = useState<Phase>({ kind: "pick" })
-  const [pending, setPending] = useState<readonly AccountName[]>([])
   const [hint, setHint] = useState(false)
   const timers = useRef(new Set<ReturnType<typeof setTimeout>>())
 
@@ -293,21 +319,12 @@ export function Connect() {
       for (const timer of pendingTimers) clearTimeout(timer)
       pendingTimers.clear()
       setPhase({ kind: "pick" })
-      setPending([])
     }
   }, [])
 
-  const all = illustrations.accounts.map((a) => a.name)
-  const remaining = all.filter((name) => !connected.includes(name))
-  const allConnected = remaining.length === 0
-
-  const quickConnect = (name: AccountName, delay = 0) => {
-    setPending((current) => [...current, name])
-    later(delay + QUICK_CONNECT_MS, () => {
-      connect(name)
-      setPending((current) => current.filter((n) => n !== name))
-    })
-  }
+  const allConnected = illustrations.accounts.every((a) =>
+    connected.includes(a.name),
+  )
 
   const pick = (institution: string) => {
     const account = accountAt(institution)
@@ -316,20 +333,9 @@ export function Connect() {
       return
     }
     setHint(false)
-    if (connected.includes(account.name) || pending.includes(account.name)) {
-      return
-    }
-    if (connected.length === 0) {
-      setPhase({ kind: "secure", account, stage: "intro" })
-    } else {
-      quickConnect(account.name)
-    }
+    if (connected.includes(account.name)) return
+    setPhase({ kind: "secure", account, stage: "intro" })
   }
-
-  const connectRest = () =>
-    remaining
-      .filter((name) => !pending.includes(name))
-      .forEach((name, index) => quickConnect(name, index * STAGGER_MS))
 
   const read = () => {
     const steps = copy.reading.steps.length
@@ -361,28 +367,15 @@ export function Connect() {
         <div className="lg:sticky lg:top-20 lg:order-2">
           <YourAccounts connected={connected} />
           {connected.length > 0 && (
-            <div className="mt-4 space-y-2">
-              {!allConnected && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={connectRest}
-                  disabled={remaining.every((n) => pending.includes(n))}
-                  className="h-10 w-full rounded-xl bg-card text-sm"
-                >
-                  {copy.connectRest(remaining.length)}
-                </Button>
-              )}
-              <Button
-                type="button"
-                onClick={read}
-                disabled={!allConnected}
-                className="h-11 w-full rounded-xl text-sm"
-              >
-                {copy.continue}
-                <ArrowRightIcon aria-hidden />
-              </Button>
-            </div>
+            <Button
+              type="button"
+              onClick={read}
+              disabled={!allConnected}
+              className="mt-4 h-11 w-full rounded-xl text-sm"
+            >
+              {copy.continue}
+              <ArrowRightIcon aria-hidden />
+            </Button>
           )}
         </div>
 
@@ -395,8 +388,11 @@ export function Connect() {
                 later(BROKER_MS, () => setPhase({ ...phase, stage: "choose" }))
               }}
               onShare={() => {
-                connect(phase.account.name)
-                setPhase({ kind: "pick" })
+                setPhase({ ...phase, stage: "syncing" })
+                later(SYNC_MS, () => {
+                  connect(phase.account.name)
+                  setPhase({ kind: "pick" })
+                })
               }}
               onCancel={() => setPhase({ kind: "pick" })}
             />
@@ -429,8 +425,6 @@ export function Connect() {
                         const account = accountAt(name)
                         const isConnected =
                           !!account && connected.includes(account.name)
-                        const isPending =
-                          !!account && pending.includes(account.name)
                         return (
                           <li key={name}>
                             <button
@@ -439,9 +433,7 @@ export function Connect() {
                               aria-label={
                                 isConnected
                                   ? `${name}, ${copy.connected}`
-                                  : isPending
-                                    ? `${name}, ${copy.connecting}`
-                                    : name
+                                  : name
                               }
                               className={cn(
                                 "flex h-12 w-full items-center justify-between gap-2 rounded-xl bg-card px-3 text-left text-sm font-medium ring-1 transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
@@ -454,11 +446,6 @@ export function Connect() {
                               {isConnected ? (
                                 <CheckIcon
                                   className="size-4 shrink-0 text-brand"
-                                  aria-hidden
-                                />
-                              ) : isPending ? (
-                                <Loader2Icon
-                                  className="size-4 shrink-0 animate-spin text-muted-foreground"
                                   aria-hidden
                                 />
                               ) : (

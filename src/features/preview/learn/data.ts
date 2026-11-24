@@ -1,9 +1,9 @@
 import { illustrations } from "@/features/landing/content"
 
 import { savings } from "../data"
-import { formatPercent } from "../format"
-import { allocation, holdings } from "../portfolio/data"
-import { nvdaShare } from "./math"
+import { formatPercent, formatUsd } from "../format"
+import { allocation, holdings, portfolioTotal } from "../portfolio/data"
+import { lossIfDrop, nvdaShare } from "./math"
 
 /**
  * The course Rocca builds from what you own, and the one lesson the preview
@@ -41,6 +41,12 @@ const percent = (fraction: number) => formatPercent(fraction, { digits: 0 })
 
 /** "22%": NVDA held directly plus inside your funds. */
 export const nvdaTotalLabel = percent(nvdaShare.total)
+
+/** The quick check's numbers: a 30% drop in NVDA, on the whole portfolio. */
+const checkDrop = 0.3
+const checkLoss = lossIfDrop(checkDrop)
+/** "6.6%". */
+export const checkLossShare = formatPercent(checkLoss / portfolioTotal)
 
 /** In the order the course suggests them; the first is "up next". */
 export const concepts = [
@@ -115,10 +121,12 @@ export const lesson = {
     exposure: {
       title: `One company, ${nvdaTotalLabel} of your money`,
       body: `You own NVIDIA directly in two accounts, and your index funds hold more of it. Together, about ${nvdaTotalLabel.replace("%", "")} cents of every dollar you have rides on one company.`,
+      definition:
+        "Concentration means a big share of your money depends on one company. The bigger that share, the more one company's bad year becomes your bad year.",
       direct: "You own directly",
       viaFunds: "Inside your funds",
       brokers:
-        "Each broker shows only its piece. Neither shows what's inside your funds.",
+        "Concentration can hide: each account looks fine on its own, and index funds own some of the same companies you do.",
     },
     whatIf: {
       title: "What if NVDA drops?",
@@ -144,38 +152,37 @@ export const lesson = {
       rothNote: "Growth in a Roth is never taxed",
       brokerage: "Your brokerage",
       brokerageNote: (gain: string) => `About ${gain} of gain, taxed`,
-      takeaway: "Rocca picks the cheaper account, and tells you why.",
+      takeaway:
+        "Before you sell, check which account it's in. The same trade can cost very different amounts in tax.",
       assumption:
         "Estimate, assuming a 15% long-term capital gains rate. Your rate may differ.",
     },
     check: {
       title: "Quick check",
-      question:
-        "Say you turn on Autopilot for this rule. Next month, NVDA climbs back to 15% of your money. What does Rocca do?",
+      /** Tests the concept, with your own numbers. */
+      question: `NVDA is about ${nvdaTotalLabel} of your money. If NVDA fell ${percent(checkDrop)} tomorrow, about how much would your whole portfolio fall?`,
       options: [
         {
-          id: "wait",
-          label: "Nothing. It waits for me to notice.",
-          feedback:
-            "Not quite. With Autopilot on for this rule, Rocca acts on it, then tells you right after.",
+          id: "same",
+          label: `${percent(checkDrop)}, the same as NVDA`,
+          feedback: `Not quite. Only the money you have in NVDA falls ${percent(checkDrop)}. The rest of your portfolio doesn't move with it.`,
         },
         {
-          id: "sell-all",
-          label: "Sells all my NVDA.",
-          feedback:
-            "Not quite. Your rule is a limit, not an exit: Rocca only trims back to 12%.",
-        },
-        {
-          id: "trim",
-          label:
-            "Trims it back to 12%, in the cheapest account, and tells me right after.",
-          feedback: "Exactly. That's what your 12% rule asks for.",
+          id: "share",
+          label: `About ${checkLossShare}: ${percent(checkDrop)} of the ${nvdaTotalLabel} you have in NVDA`,
+          feedback: `Exactly. That's about ${formatUsd(checkLoss)}. The bigger one company's share, the bigger that number gets.`,
           correct: true,
+        },
+        {
+          id: "nothing",
+          label: "Nothing, because my index funds protect me",
+          feedback:
+            "Not quite. Your index funds own NVDA too, so they'd drop a little with it.",
         },
       ],
       learned: "Concept learned: Concentration",
       unlock:
-        "Approve this trim once, and you can let Rocca handle your 12% rule on Autopilot.",
+        "Next: approve this trim once to unlock Autopilot for your 12% rule.",
     },
   },
 } as const

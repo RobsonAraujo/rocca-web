@@ -83,11 +83,12 @@ export const connect = {
     `${count} ${count === 1 ? "account" : "accounts"} · ${total}`,
   /** Clicking a broker Maya doesn't use. */
   notHers: `In this demo, ${persona.name}'s accounts are at ${illustrations.accounts.map((a) => a.institution).join(", ")}.`,
-  connectRest: (count: number) => `Connect the other ${count}`,
-  connecting: "Connecting…",
   connected: "Connected",
   continue: "Read my accounts",
   needAll: `Connect all ${accountCount} to see the full picture.`,
+  /** Under the list while some are missing: which brokers to pick next. */
+  remaining: (brokers: readonly string[]) =>
+    `Still to connect: ${brokers.join(", ")}`,
   secure: {
     title: (broker: string) => `Connect ${broker}`,
     points: [
@@ -103,6 +104,8 @@ export const connect = {
     opening: (broker: string) => `Opening ${broker}…`,
     choose: "Choose what to share",
     share: "Share 1 account",
+    syncing: (account: string) => `Connecting your ${account}…`,
+    syncDetail: "Syncing holdings, tax lots and history",
     cancel: "Cancel",
   },
   reading: {

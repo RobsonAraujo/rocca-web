@@ -24,7 +24,7 @@ export const demoSteps = [
 export const SIGN_IN_MS = 700
 /** Opening the broker's own sign-in page, in the secure-connection step. */
 export const BROKER_MS = 1000
-/** A one-click connection, once the first account is linked. */
-export const QUICK_CONNECT_MS = 600
+/** Syncing the shared account (holdings, tax lots, history) before it lands. */
+export const SYNC_MS = 1200
 /** Each line of the "reading your accounts" checklist. */
 export const READ_STEP_MS = 550

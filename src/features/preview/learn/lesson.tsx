@@ -56,6 +56,10 @@ function Exposure() {
   return (
     <div className="space-y-4">
       <StepTitle>{copy.title}</StepTitle>
+      {/* The term first, then what it means for your money. */}
+      <p className="rounded-r-lg border-l-2 border-learn bg-learn/[0.06] px-3 py-2.5 text-[13px] leading-relaxed text-pretty">
+        {copy.definition}
+      </p>
       <Body>{copy.body}</Body>
       <NvdaExposureBar labels={copy} className="pt-1" />
       <div className="rounded-lg bg-secondary/60 p-3 text-[13px]">

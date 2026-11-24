@@ -107,6 +107,9 @@ describe("Connect", () => {
         name: connectCopy.secure.open("Fidelity"),
       }),
     )
+    expect(
+      screen.getByText(connectCopy.secure.opening("Fidelity")),
+    ).toBeInTheDocument()
     await user.click(
       await screen.findByRole(
         "button",
@@ -114,29 +117,62 @@ describe("Connect", () => {
         { timeout: 2000 },
       ),
     )
+    expect(
+      screen.getByText(connectCopy.secure.syncing("Brokerage")),
+    ).toBeInTheDocument()
 
+    const yours = screen.getByRole("region", { name: connectCopy.yours })
+    expect(
+      await within(yours).findByText(
+        "Fidelity · Brokerage",
+        {},
+        { timeout: 2500 },
+      ),
+    ).toBeInTheDocument()
     expect(container.querySelector("input[type=password]")).toBeNull()
     expect(session().connected).toEqual(["Brokerage"])
-    const yours = screen.getByRole("region", { name: connectCopy.yours })
-    expect(within(yours).getByText("Fidelity · Brokerage")).toBeInTheDocument()
     expect(within(yours).getByText(accountAccess.view)).toBeInTheDocument()
+    expect(
+      within(yours).getByText(
+        connectCopy.remaining(["E*TRADE", "Empower", "Coinbase"]),
+      ),
+    ).toBeInTheDocument()
   })
 
-  it("connects the rest in one click and totals the portfolio", async () => {
+  it("connects every account through the same flow, waits included", async () => {
     const user = userEvent.setup()
-    renderStep(<Connect />, { connected: ["Brokerage"] })
+    renderStep(<Connect />, {
+      connected: ["Brokerage", "Roth IRA", "401(k)"],
+    })
     const read = screen.getByRole("button", { name: connectCopy.continue })
     expect(read).toBeDisabled()
 
+    await user.click(screen.getByRole("button", { name: "Coinbase" }))
+    const secure = screen.getByRole("region", { name: "Connect Coinbase" })
+    expect(
+      within(secure).getByText(connectCopy.secure.access.trade),
+    ).toBeInTheDocument()
     await user.click(
-      screen.getByRole("button", { name: connectCopy.connectRest(3) }),
+      within(secure).getByRole("button", {
+        name: connectCopy.secure.open("Coinbase"),
+      }),
     )
+    await user.click(
+      await screen.findByRole(
+        "button",
+        { name: connectCopy.secure.share },
+        { timeout: 2000 },
+      ),
+    )
+    expect(
+      screen.getByText(connectCopy.secure.syncing("Crypto")),
+    ).toBeInTheDocument()
 
     expect(
       await screen.findByText(
         connectCopy.summary(4, preview.portfolio.value.replace(/\.\d+$/, "")),
         {},
-        { timeout: 3000 },
+        { timeout: 2500 },
       ),
     ).toBeInTheDocument()
     for (const account of illustrations.accounts) {

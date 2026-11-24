@@ -137,8 +137,8 @@ Fluxo roteirizado para gravar o vídeo de demo do YC, com dados simulados de uma
 2. **`/demo/onboarding`:** uma pergunta, o quanto a pessoa já investiu. O nível define se a lição aparece em destaque (iniciante) ou como um link discreto (experiente). A tela também mostra o modo inicial, as regras iniciais e que o Autopilot destrava regra por regra.
 3. **`/demo/connect`:**
    - A grade de corretoras de `connectCopy`.
-   - A primeira corretora passa pelo cartão de conexão segura, que nunca tem campo de senha (um teste garante isso).
-   - As outras conectam com um clique, ou com "Connect the other 3".
+   - Cada corretora passa pelo cartão de conexão segura, que nunca tem campo de senha (um teste garante isso).
+   - As outras passam pelo mesmo fluxo: "Opening …" com loader, a escolha da conta e "Connecting your …" enquanto sincroniza. Não tem atalho para conectar todas de uma vez, porque na vida real cada conta espera.
    - "Read my accounts" mostra um checklist e avança sozinho.
 4. **`/demo/first-look`:** três achados que nenhuma corretora mostra sozinha. São NVDA em 22% (18% direto + 4,1% nos fundos), US$ 912 por ano e US$ 0 contra ~US$ 765 de imposto. "See your dashboard" encerra a sessão (`finish()`).
 
@@ -155,13 +155,13 @@ Fluxo roteirizado para gravar o vídeo de demo do YC, com dados simulados de uma
 
 **Lição (`features/preview/learn/`).** Abre num painel lateral no desktop e num sheet no celular, ambos montados uma vez pelo `LessonLayer` no shell. `openLesson()` fecha o painel ou sheet aberto antes de abrir a lição. São 5 passos:
 
-1. A exposição real à NVDA.
+1. A definição de Concentration e a exposição real à NVDA.
 2. Um slider "what if NVDA drops", com perda de US$ 16.463 a 30% contra US$ 11.993 no limite de 12%.
 3. O rebalanceamento.
 4. Roth contra brokerage, com a hipótese de 15% à vista.
-5. Uma checagem rápida. Acertar marca o conceito como aprendido.
+5. Uma checagem rápida sobre o conceito, com os números dela ("se a NVDA cair 30%, quanto cai a carteira inteira?"). Acertar marca o conceito como aprendido.
 
-Os números vêm de `learn/math.ts`, e os testes travam os valores.
+Os números vêm de `learn/math.ts`, e os testes travam os valores. A lição ensina o conceito e não fala da Rocca: o usuário já está no app, então o texto explica o investimento, não o produto.
 
 **Autopilot por regra.** A regra dos 12% passa por quatro estados (`ruleAutopilot`, em `widgets/rule-autopilot.tsx`): `locked` (falta a lição), `needsApproval` (aprendeu, falta aprovar um trim), `ready` (aparece o switch) e `on`. O selo "Later" e "Available after launch at brokers that allow it" ficam sempre à vista. O recibo diz "You approved this knowing why" quando a aprovação veio depois da lição. Se não veio, aponta para a lição.
 
