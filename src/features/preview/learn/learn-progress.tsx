@@ -1,6 +1,6 @@
 "use client"
 
-import { CheckIcon } from "lucide-react"
+import { CheckIcon, FlameIcon } from "lucide-react"
 import Link from "next/link"
 
 import { ProgressRing } from "@/components/product/progress-ring"
@@ -9,9 +9,9 @@ import { cn } from "@/lib/utils"
 import { LEARN_PATH } from "../constants"
 import { learn } from "../data"
 import { useDemo } from "../demo-state"
-import { LESSON_ID, concepts } from "./data"
+import { LESSON_ID, concepts, learnPage } from "./data"
 import { LessonButton } from "./open-lesson"
-import { learnSummary } from "./progress"
+import { learnSummary, streakDays } from "./progress"
 
 /**
  * Small client islands for the Learn widgets (desktop strip, phone card),
@@ -47,6 +47,29 @@ export function LearnRing({
         </p>
       </div>
     </div>
+  )
+}
+
+/** The learning streak, for the Learn widget's header. */
+export function StreakPill() {
+  const { variant, learned } = useDemo()
+  const streak = streakDays(variant, learned)
+  return (
+    <span
+      key={streak}
+      className={cn(
+        "inline-flex animate-pop items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold",
+        streak > 0
+          ? "bg-attention/10 text-attention"
+          : "bg-secondary text-muted-foreground",
+      )}
+    >
+      <FlameIcon
+        className={cn("size-3.5", streak > 0 && "fill-attention/25")}
+        aria-hidden
+      />
+      {learnPage.streak(streak)}
+    </span>
   )
 }
 

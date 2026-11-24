@@ -113,6 +113,9 @@ describe("first run (arriving from /demo)", () => {
     expect(
       within(panel).getByText(lesson.steps.check.learned),
     ).toBeInTheDocument()
+    // The reward: XP and the first day of a streak.
+    expect(within(panel).getByText("+20 XP")).toBeInTheDocument()
+    expect(within(panel).getByText("1-day streak")).toBeInTheDocument()
     await user.click(within(panel).getByRole("button", { name: lesson.close }))
 
     await waitFor(() =>

@@ -1,7 +1,7 @@
 "use client"
 
 import { Drawer } from "@base-ui/react/drawer"
-import { CircleCheckIcon, LockOpenIcon } from "lucide-react"
+import { CircleCheckIcon, FlameIcon, LockOpenIcon, ZapIcon } from "lucide-react"
 import { useId, useState } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -14,7 +14,7 @@ import { suggestion } from "../data"
 import { useDemo } from "../demo-state"
 import { formatPercent, formatUsd } from "../format"
 import { portfolioTotal } from "../portfolio/data"
-import { LESSON_ID, lesson } from "./data"
+import { LESSON_ID, learnPage, lesson } from "./data"
 import { NvdaExposureBar } from "./exposure-bar"
 import {
   brokerageTaxLabel,
@@ -23,6 +23,7 @@ import {
   nvdaPositions,
   nvdaSaleGain,
 } from "./math"
+import { XP_PER_LESSON, streakDays } from "./progress"
 
 const { steps } = lesson
 const order = ["exposure", "whatIf", "rebalance", "tax", "check"] as const
@@ -30,6 +31,93 @@ type StepId = (typeof order)[number]
 
 /** Slider range for "What if NVDA drops?", in percent. */
 export const DROP = { min: 10, max: 50, step: 5, initial: 30 } as const
+
+/**
+ * Confetti for a right answer: pieces fly out on a circle, alternating
+ * distances and the four brand tones. Fixed, not random, so every take of
+ * the demo looks the same.
+ */
+const CONFETTI = Array.from({ length: 18 }, (_, i) => {
+  const angle = (i / 18) * 2 * Math.PI
+  const distance = i % 2 === 0 ? 110 : 75
+  return {
+    x: `${Math.round(Math.cos(angle) * distance)}px`,
+    y: `${Math.round(Math.sin(angle) * distance * 0.6 - 20)}px`,
+    r: `${(i * 53) % 360}deg`,
+    color: ["bg-learn", "bg-brand", "bg-attention", "bg-control"][i % 4]!,
+  }
+})
+
+function Confetti() {
+  return (
+    <span
+      aria-hidden
+      className="pointer-events-none absolute top-6 left-1/2 motion-reduce:hidden"
+    >
+      {CONFETTI.map((piece, index) => (
+        <span
+          key={index}
+          className={cn(
+            "absolute top-0 left-0 h-2.5 w-1.5 animate-burst rounded-sm",
+            piece.color,
+          )}
+          style={
+            {
+              "--x": piece.x,
+              "--y": piece.y,
+              "--r": piece.r,
+            } as React.CSSProperties
+          }
+        />
+      ))}
+    </span>
+  )
+}
+
+/** The reward for a right answer: XP and the streak, then what you learned. */
+function Celebration({ learned, unlock }: { learned: string; unlock: string }) {
+  const { variant, learned: concepts } = useDemo()
+  const streak = streakDays(variant, concepts)
+  return (
+    <div
+      className={cn(
+        "relative mt-4 space-y-3 rounded-lg p-4 ring-1",
+        toneClasses.learn.soft,
+        toneClasses.learn.ring,
+      )}
+    >
+      <Confetti />
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="inline-flex animate-pop items-center gap-1 rounded-full bg-attention px-2.5 py-1 text-xs font-bold text-white">
+          <ZapIcon className="size-3.5 fill-current" aria-hidden />
+          {learnPage.celebrate.xp(XP_PER_LESSON)}
+        </span>
+        {streak > 0 && (
+          <span className="inline-flex animate-pop items-center gap-1 rounded-full bg-attention/10 px-2.5 py-1 text-xs font-bold text-attention [animation-delay:150ms]">
+            <FlameIcon className="size-3.5 fill-attention/25" aria-hidden />
+            {learnPage.celebrate.streak(streak)}
+          </span>
+        )}
+      </div>
+      <p
+        className={cn(
+          "flex items-center gap-2 font-semibold",
+          toneClasses.learn.text,
+        )}
+      >
+        <CircleCheckIcon className="size-5 shrink-0" aria-hidden />
+        {learned}
+      </p>
+      <p className="flex items-start gap-2 text-[13px] text-pretty text-muted-foreground">
+        <LockOpenIcon
+          className="mt-0.5 size-4 shrink-0 text-control"
+          aria-hidden
+        />
+        {unlock}
+      </p>
+    </div>
+  )
+}
 
 const institutionOf = (account: string) =>
   illustrations.accounts.find((a) => a.name === account)?.institution ?? account
@@ -258,32 +346,7 @@ function Check({ onLearned }: { onLearned: () => void }) {
             {picked.feedback}
           </p>
         )}
-        {correct && (
-          <div
-            className={cn(
-              "mt-4 animate-in space-y-2 rounded-lg p-4 ring-1 duration-300 fade-in slide-in-from-bottom-1",
-              toneClasses.learn.soft,
-              toneClasses.learn.ring,
-            )}
-          >
-            <p
-              className={cn(
-                "flex items-center gap-2 font-semibold",
-                toneClasses.learn.text,
-              )}
-            >
-              <CircleCheckIcon className="size-5 shrink-0" aria-hidden />
-              {copy.learned}
-            </p>
-            <p className="flex items-start gap-2 text-[13px] text-pretty text-muted-foreground">
-              <LockOpenIcon
-                className="mt-0.5 size-4 shrink-0 text-control"
-                aria-hidden
-              />
-              {copy.unlock}
-            </p>
-          </div>
-        )}
+        {correct && <Celebration learned={copy.learned} unlock={copy.unlock} />}
       </div>
     </div>
   )

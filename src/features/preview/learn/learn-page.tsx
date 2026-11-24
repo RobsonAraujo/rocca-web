@@ -4,6 +4,7 @@ import { Popover } from "@base-ui/react/popover"
 import {
   ArrowRightIcon,
   CheckIcon,
+  CircleCheckIcon,
   ClockIcon,
   FlameIcon,
   GraduationCapIcon,
@@ -12,10 +13,14 @@ import {
   LockOpenIcon,
   ScanSearchIcon,
   SparklesIcon,
+  TargetIcon,
+  TrophyIcon,
+  ZapIcon,
 } from "lucide-react"
 import { Fragment, useState } from "react"
 
 import { Button } from "@/components/ui/button"
+import type { Tone } from "@/components/product/tone"
 import { toneClasses } from "@/components/product/tone"
 import { illustrations } from "@/features/landing/content"
 import { cn } from "@/lib/utils"
@@ -26,10 +31,21 @@ import { rules } from "../data"
 import { useDemo } from "../demo-state"
 import { holdings } from "../portfolio/data"
 import { ruleAutopilot } from "../widgets/rule-autopilot"
+import { achievements, earnedAchievements, unitTrophies } from "./achievements"
 import type { Concept, ConceptId } from "./data"
 import { LESSON_ID, concepts, learnPage, units } from "./data"
 import { openLesson } from "./open-lesson"
-import { learnSummary, minutesLeft, nextConcept, streakDays } from "./progress"
+import {
+  XP_PER_LESSON,
+  learnSummary,
+  learnedToday,
+  levelFor,
+  minutesLeft,
+  nextConcept,
+  streakDays,
+  streakWeek,
+  xpFor,
+} from "./progress"
 
 type NodeState = "learned" | "current" | "locked"
 type UnitTone = (typeof units)[number]["tone"]
@@ -39,34 +55,113 @@ const WAVE = [0, 64, 96, 64, 0, -64, -96, -64]
 
 const position = (id: ConceptId) => concepts.findIndex((c) => c.id === id)
 
-/** Solid, "pressable" nodes: a darker lip below, that sinks when pressed. */
-const nodeTone: Record<UnitTone | "locked", string> = {
+/**
+ * Chunky, pressable tiles (lesson nodes, trophies, badges): a darker "lip"
+ * below that sinks when pressed. Full class names, so Tailwind sees them.
+ */
+const solidTile: Record<Tone | "locked", string> = {
   learn:
     "bg-learn text-white shadow-[0_6px_0_0_color-mix(in_oklab,var(--color-learn)_62%,black)] active:shadow-[0_2px_0_0_color-mix(in_oklab,var(--color-learn)_62%,black)]",
   brand:
     "bg-brand text-white shadow-[0_6px_0_0_color-mix(in_oklab,var(--color-brand)_62%,black)] active:shadow-[0_2px_0_0_color-mix(in_oklab,var(--color-brand)_62%,black)]",
+  attention:
+    "bg-attention text-white shadow-[0_6px_0_0_color-mix(in_oklab,var(--color-attention)_62%,black)] active:shadow-[0_2px_0_0_color-mix(in_oklab,var(--color-attention)_62%,black)]",
+  control:
+    "bg-control text-white shadow-[0_6px_0_0_color-mix(in_oklab,var(--color-control)_62%,black)] active:shadow-[0_2px_0_0_color-mix(in_oklab,var(--color-control)_62%,black)]",
   locked:
     "bg-secondary text-muted-foreground shadow-[0_6px_0_0_var(--color-border)] active:shadow-[0_2px_0_0_var(--color-border)]",
 }
 
+/** Everything the page shows, from the demo state. */
 function useCourse() {
   const demo = useDemo()
-  const next = nextConcept(demo.learned)
+  const { variant, learned } = demo
+  const next = nextConcept(learned)
+  const streak = streakDays(variant, learned)
+  const ruleState = ruleAutopilot(demo, rules.autopilot.ruleId)
+  const badges = earnedAchievements({
+    learned,
+    approvedInformed: demo.approvedInformed,
+    ruleEarned: ruleState === "ready" || ruleState === "on",
+    streak,
+  })
   const stateOf = (id: ConceptId): NodeState =>
-    demo.learned.includes(id)
-      ? "learned"
-      : id === next?.id
-        ? "current"
-        : "locked"
-  return { ...demo, next, stateOf }
+    learned.includes(id) ? "learned" : id === next?.id ? "current" : "locked"
+  return {
+    ...demo,
+    next,
+    stateOf,
+    streak,
+    ruleState,
+    badges,
+    xp: xpFor(learned),
+  }
+}
+
+/** The level mark: a chunky tile with the number, like a game's. */
+function LevelBadge({ level }: { level: number }) {
+  return (
+    <span
+      aria-hidden
+      className="relative grid size-16 shrink-0 place-items-center rounded-2xl bg-linear-to-br from-learn to-control text-3xl font-bold text-white shadow-[0_5px_0_0_color-mix(in_oklab,var(--color-control)_60%,black)]"
+    >
+      {level}
+      <SparklesIcon className="absolute -top-1.5 -right-1.5 size-5 rounded-full bg-card p-0.5 text-attention" />
+    </span>
+  )
+}
+
+/** Level, XP and how far to the next level. */
+function LevelCard() {
+  const { xp } = useCourse()
+  const { current, next, progress, toNext } = levelFor(xp)
+  return (
+    <section
+      aria-label={learnPage.level.label(current.level)}
+      className="w-full rounded-2xl bg-card/90 p-5 shadow-soft ring-1 ring-border backdrop-blur lg:w-80"
+    >
+      <div className="flex items-center gap-4">
+        <LevelBadge key={current.level} level={current.level} />
+        <div className="min-w-0">
+          <p className="text-xs font-medium text-muted-foreground">
+            {learnPage.level.label(current.level)}
+          </p>
+          <p className="text-xl font-semibold tracking-tight">{current.name}</p>
+          <p className="mt-0.5 flex items-center gap-1 text-xs font-semibold text-attention">
+            <ZapIcon className="size-3.5 fill-current" aria-hidden />
+            {learnPage.level.xp(xp)}
+          </p>
+        </div>
+      </div>
+      <div
+        role="progressbar"
+        aria-label="XP to the next level"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(progress * 100)}
+        className="mt-4 h-3 overflow-hidden rounded-full bg-secondary"
+      >
+        <span
+          className="block h-full rounded-full bg-linear-to-r from-learn to-control transition-[width] duration-700 ease-out motion-reduce:transition-none"
+          style={{ width: `${Math.max(progress, 0.04) * 100}%` }}
+        />
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">
+        {next
+          ? learnPage.level.toNext(toNext, next.level)
+          : learnPage.level.max}
+      </p>
+    </section>
+  )
 }
 
 /**
  * The top of the page: this course was made from your money. The pipeline
- * (accounts read → holdings checked → lessons) shows how, in numbers.
+ * (accounts read → holdings checked → lessons) shows how, in numbers; the
+ * level card shows where you are.
  */
 function CourseHero() {
-  const { persona, variant, learned } = useCourse()
+  const { persona } = useCourse()
   const steps = [
     {
       icon: LayersIcon,
@@ -84,78 +179,73 @@ function CourseHero() {
       label: learnPage.pipeline.lessons,
     },
   ]
-  const streak = streakDays(variant, learned)
-  const total = concepts.reduce((sum, c) => sum + c.minutes, 0)
   return (
     <section
       aria-labelledby="course-title"
-      className="relative overflow-hidden rounded-3xl bg-linear-to-br from-learn/[0.12] via-card to-brand/[0.08] p-6 ring-1 ring-learn/15 sm:p-8"
+      className="relative overflow-hidden rounded-3xl bg-linear-to-br from-learn/[0.12] via-card to-control/[0.08] p-6 ring-1 ring-learn/15 sm:p-8"
     >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <p
-          className={cn(
-            "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold",
-            toneClasses.learn.tile,
-          )}
-        >
-          <SparklesIcon className="size-3.5" aria-hidden />
-          {learnPage.badge}
-        </p>
-        <SimulatedBadge className="w-fit xl:hidden" />
-      </div>
+      {/* Soft shapes in the corners, for depth. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -top-16 -right-10 size-56 rounded-full bg-learn/10 blur-2xl"
+      />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -bottom-20 left-1/3 size-48 rounded-full bg-attention/10 blur-2xl"
+      />
 
-      <div className="mt-4 grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+      <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
         <div className="max-w-xl">
+          <div className="flex flex-wrap items-center gap-2">
+            <p
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold",
+                toneClasses.learn.tile,
+              )}
+            >
+              <SparklesIcon className="size-3.5" aria-hidden />
+              {learnPage.badge}
+            </p>
+            <SimulatedBadge className="w-fit xl:hidden" />
+          </div>
           <h1
             id="course-title"
-            className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl"
+            className="mt-4 text-3xl font-semibold tracking-tight text-balance sm:text-4xl"
           >
             {learnPage.title(persona?.name ?? null)}
           </h1>
           <p className="mt-3 text-[15px] leading-relaxed text-pretty text-muted-foreground">
             {learnPage.intro}
           </p>
-          <ul className="mt-5 flex flex-wrap gap-2 text-xs font-medium">
-            <li className="inline-flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5 ring-1 ring-border">
-              <ClockIcon className="size-3.5 text-learn" aria-hidden />
-              {learnPage.minutes(total)}
-            </li>
-            <li className="inline-flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5 ring-1 ring-border">
-              <FlameIcon
-                className={cn(
-                  "size-3.5",
-                  streak > 0 ? "text-attention" : "text-muted-foreground",
+
+          <ol
+            aria-label={learnPage.pipeline.label}
+            className="mt-6 flex items-stretch gap-1.5 sm:gap-2"
+          >
+            {steps.map(({ icon: Icon, value, label }, index) => (
+              <Fragment key={label}>
+                {index > 0 && (
+                  <li aria-hidden className="flex items-center">
+                    <ArrowRightIcon className="size-4 text-learn/60" />
+                  </li>
                 )}
-                aria-hidden
-              />
-              {learnPage.streak(streak)}
-            </li>
-          </ul>
+                <li className="flex min-w-0 flex-1 items-center gap-2.5 rounded-2xl bg-card/80 px-3 py-2.5 ring-1 ring-border backdrop-blur sm:flex-none sm:px-3.5">
+                  <Icon className="size-4 shrink-0 text-learn" aria-hidden />
+                  <span className="min-w-0">
+                    <span className="block text-lg leading-tight font-semibold tabular-nums">
+                      {value}
+                    </span>
+                    <span className="block text-[11px] leading-tight text-muted-foreground">
+                      {label}
+                    </span>
+                  </span>
+                </li>
+              </Fragment>
+            ))}
+          </ol>
         </div>
 
-        <ol
-          aria-label={learnPage.pipeline.label}
-          className="flex items-stretch gap-1.5 sm:gap-2"
-        >
-          {steps.map(({ icon: Icon, value, label }, index) => (
-            <Fragment key={label}>
-              {index > 0 && (
-                <li aria-hidden className="flex items-center">
-                  <ArrowRightIcon className="size-4 text-learn/60" />
-                </li>
-              )}
-              <li className="flex min-w-0 flex-1 flex-col rounded-2xl bg-card/80 px-3 py-3 ring-1 ring-border backdrop-blur sm:w-28 sm:flex-none sm:px-4">
-                <Icon className="size-4 text-learn" aria-hidden />
-                <span className="mt-2 text-2xl font-semibold tracking-tight tabular-nums">
-                  {value}
-                </span>
-                <span className="text-[11px] leading-tight text-muted-foreground">
-                  {label}
-                </span>
-              </li>
-            </Fragment>
-          ))}
-        </ol>
+        <LevelCard />
       </div>
     </section>
   )
@@ -184,13 +274,19 @@ function LessonCard({
   }
   return (
     <>
-      <p className="text-xs font-medium text-muted-foreground">
-        {learnPage.lessonOf(
-          position(concept.id) + 1,
-          concepts.length,
-          concept.minutes,
-        )}
-      </p>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs font-medium text-muted-foreground">
+          {learnPage.lessonOf(
+            position(concept.id) + 1,
+            concepts.length,
+            concept.minutes,
+          )}
+        </p>
+        <span className="inline-flex items-center gap-1 rounded-full bg-attention/10 px-2 py-0.5 text-[11px] font-bold text-attention">
+          <ZapIcon className="size-3 fill-current" aria-hidden />
+          {learnPage.celebrate.xp(XP_PER_LESSON)}
+        </span>
+      </div>
       <Popover.Title className="mt-1 text-base leading-snug font-semibold tracking-tight text-balance">
         {concept.title}
       </Popover.Title>
@@ -242,6 +338,14 @@ function LessonNode({
   const Icon = concept.icon
   const offset = WAVE[position(concept.id) % WAVE.length]!
   const current = state === "current"
+  const statusLabel =
+    learnPage.status[
+      state === "current"
+        ? "next"
+        : state === "learned"
+          ? "learned"
+          : "notStarted"
+    ]
   return (
     <li id={concept.id} className="flex scroll-mt-24 justify-center">
       <div
@@ -273,10 +377,10 @@ function LessonNode({
             )}
           >
             <Popover.Trigger
-              aria-label={`${concept.label}, ${learnPage.status[state === "current" ? "next" : state === "learned" ? "learned" : "notStarted"]}`}
+              aria-label={`${concept.label}, ${statusLabel}`}
               className={cn(
                 "relative grid size-18 place-items-center rounded-full transition-[translate,box-shadow] duration-100 outline-none focus-visible:ring-4 focus-visible:ring-ring/50 active:translate-y-1 motion-reduce:transition-none",
-                nodeTone[state === "locked" ? "locked" : tone],
+                solidTile[state === "locked" ? "locked" : tone],
               )}
             >
               <Icon className="size-7" aria-hidden />
@@ -284,7 +388,7 @@ function LessonNode({
                 <span
                   aria-hidden
                   className={cn(
-                    "absolute -right-1 -bottom-1 grid size-7 place-items-center rounded-full bg-card ring-2 ring-card",
+                    "absolute -right-1 -bottom-1 grid size-7 animate-pop place-items-center rounded-full bg-card ring-2 ring-card",
                     toneClasses[tone].text,
                   )}
                 >
@@ -341,14 +445,57 @@ function LessonNode({
   )
 }
 
-/** The path: units as colored banners, lessons as stops on a wave. */
+/** The trophy closing a unit: that unit's badge, lit once it's done. */
+function UnitTrophy({
+  unit,
+  badge,
+  earned,
+}: {
+  unit: number
+  badge: string
+  earned: boolean
+}) {
+  const text = earned
+    ? learnPage.trophy.earned(badge)
+    : learnPage.trophy.hint(badge)
+  return (
+    <li className="flex justify-center">
+      <div className="flex flex-col items-center text-center">
+        <span
+          role="img"
+          aria-label={`${learnPage.trophy.label(unit)}: ${text}`}
+          className={cn(
+            "grid size-16 place-items-center rounded-2xl",
+            earned ? cn(solidTile.attention, "animate-pop") : solidTile.locked,
+          )}
+        >
+          <TrophyIcon className="size-7" aria-hidden />
+        </span>
+        <p className="mt-3 text-xs font-semibold">
+          {learnPage.trophy.label(unit)}
+        </p>
+        <p
+          className={cn(
+            "mt-0.5 text-xs",
+            earned ? "font-medium text-attention" : "text-muted-foreground",
+          )}
+        >
+          {text}
+        </p>
+      </div>
+    </li>
+  )
+}
+
+/** The path: units as colored banners, lessons as stops on a wave, a trophy per unit. */
 function CoursePath() {
-  const { stateOf, learned } = useCourse()
+  const { stateOf, learned, badges } = useCourse()
   const [openId, setOpenId] = useState<ConceptId | null>(null)
   return (
     <section aria-label={learnPage.path} className="space-y-10">
       {units.map((unit, index) => {
         const done = unit.concepts.filter((id) => learned.includes(id)).length
+        const trophy = badges.find((b) => b.id === unitTrophies[index])!
         return (
           <div key={unit.id} className="space-y-8">
             <div
@@ -383,6 +530,12 @@ function CoursePath() {
                   onOpenChange={(open) => setOpenId(open ? id : null)}
                 />
               ))}
+              <UnitTrophy
+                key={`${trophy.id}-${trophy.done}`}
+                unit={index + 1}
+                badge={trophy.label}
+                earned={trophy.done}
+              />
             </ol>
           </div>
         )
@@ -393,24 +546,108 @@ function CoursePath() {
 
 const cardClass = "rounded-2xl bg-card p-5 ring-1 ring-border"
 
+/** Duolingo's streak: the number, the week with flames, today's goal. */
+function StreakCard() {
+  const { variant, learned, streak } = useCourse()
+  const week = streakWeek(variant, learned)
+  const goalDone = learnedToday(variant, learned)
+  return (
+    <section aria-labelledby="streak-title" className={cardClass}>
+      <h2 id="streak-title" className="sr-only">
+        {learnPage.week.title}
+      </h2>
+      <div className="flex items-center gap-3">
+        <span
+          aria-hidden
+          className={cn(
+            "grid size-12 place-items-center rounded-2xl",
+            streak > 0
+              ? "bg-attention/10 text-attention"
+              : "bg-secondary text-muted-foreground",
+          )}
+        >
+          <FlameIcon
+            className={cn("size-7", streak > 0 && "fill-attention/25")}
+          />
+        </span>
+        <div>
+          <p
+            key={streak}
+            className="animate-pop text-3xl leading-none font-semibold tracking-tight tabular-nums"
+          >
+            {streak}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {learnPage.streak(streak)}
+          </p>
+        </div>
+      </div>
+      <ol className="mt-4 grid grid-cols-7 gap-1">
+        {week.map((day, index) => (
+          <li key={index} className="flex flex-col items-center gap-1">
+            <span
+              className={cn(
+                "grid size-8 place-items-center rounded-full",
+                day.done
+                  ? "bg-attention text-white"
+                  : day.today
+                    ? "text-attention ring-2 ring-attention/40"
+                    : "bg-secondary",
+              )}
+            >
+              {day.done && (
+                <FlameIcon className="size-4 fill-white/30" aria-hidden />
+              )}
+              <span className="sr-only">
+                {day.today ? learnPage.week.today : day.label}:{" "}
+                {day.done ? learnPage.week.done : learnPage.week.missed}
+              </span>
+            </span>
+            <span
+              aria-hidden
+              className={cn(
+                "text-[11px]",
+                day.today
+                  ? "font-semibold text-foreground"
+                  : "text-muted-foreground",
+              )}
+            >
+              {day.label}
+            </span>
+          </li>
+        ))}
+      </ol>
+      <p
+        className={cn(
+          "mt-4 flex items-center gap-1.5 border-t border-border pt-3 text-xs font-medium",
+          goalDone ? "text-brand" : "text-muted-foreground",
+        )}
+      >
+        {goalDone ? (
+          <CircleCheckIcon className="size-4" aria-hidden />
+        ) : (
+          <TargetIcon className="size-4" aria-hidden />
+        )}
+        {goalDone ? learnPage.week.goalDone : learnPage.week.goal}
+      </p>
+    </section>
+  )
+}
+
 function ProgressCard() {
-  const { learned, variant, next } = useCourse()
+  const { learned, next } = useCourse()
   const { done, total } = learnSummary(learned)
-  const streak = streakDays(variant, learned)
   return (
     <section aria-labelledby="progress-title" className={cardClass}>
-      <h2 id="progress-title" className="text-sm font-semibold">
-        {learnPage.progress.title}
-      </h2>
-      <p className="mt-3 text-3xl font-semibold tracking-tight tabular-nums">
-        {done}
-        <span className="text-base font-normal text-muted-foreground">
-          /{total}
-        </span>
-      </p>
-      <p className="text-xs text-muted-foreground">
-        {learnPage.progress.lessons(done, total)}
-      </p>
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 id="progress-title" className="text-sm font-semibold">
+          {learnPage.progress.title}
+        </h2>
+        <p className="text-sm font-semibold tabular-nums">
+          {done}
+          <span className="font-normal text-muted-foreground">/{total}</span>
+        </p>
+      </div>
       <div
         role="progressbar"
         aria-label="Lessons completed"
@@ -430,24 +667,11 @@ function ProgressCard() {
           />
         ))}
       </div>
-      <dl className="mt-4 space-y-2 border-t border-border pt-4 text-[13px]">
-        <div className="flex items-center justify-between gap-3">
-          <dt className="flex items-center gap-1.5 text-muted-foreground">
-            <ClockIcon className="size-3.5" aria-hidden />
-            {learnPage.progress.left(minutesLeft(learned))}
-          </dt>
-        </div>
-        <div className="flex items-center justify-between gap-3">
-          <dt className="flex items-center gap-1.5 text-muted-foreground">
-            <FlameIcon
-              className={cn(
-                "size-3.5",
-                streak > 0 ? "text-attention" : "text-muted-foreground",
-              )}
-              aria-hidden
-            />
-            {learnPage.streak(streak)}
-          </dt>
+      <dl className="mt-3 space-y-1.5 text-[13px]">
+        <div className="flex items-center gap-1.5 text-muted-foreground">
+          <ClockIcon className="size-3.5" aria-hidden />
+          <dt className="sr-only">Time</dt>
+          <dd>{learnPage.progress.left(minutesLeft(learned))}</dd>
         </div>
         {next && (
           <div className="flex items-center justify-between gap-3">
@@ -460,17 +684,69 @@ function ProgressCard() {
   )
 }
 
+/** The badges, earned in color with a little pop, the rest waiting in grey. */
+function AchievementsCard() {
+  const { badges } = useCourse()
+  const earned = badges.filter((b) => b.done).length
+  return (
+    <section aria-labelledby="achievements-title" className={cardClass}>
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 id="achievements-title" className="text-sm font-semibold">
+          {learnPage.achievements.title}
+        </h2>
+        <p className="text-xs font-medium text-muted-foreground tabular-nums">
+          {learnPage.achievements.count(earned, achievements.length)}
+        </p>
+      </div>
+      <ul className="mt-4 grid grid-cols-4 gap-x-2 gap-y-4">
+        {badges.map(({ id, label, description, icon: Icon, tone, done }) => (
+          <li
+            key={`${id}-${done}`}
+            title={description}
+            className="flex flex-col items-center text-center"
+          >
+            <span
+              aria-hidden
+              className={cn(
+                "grid size-12 place-items-center rounded-2xl",
+                done
+                  ? cn(solidTile[tone], "animate-pop")
+                  : "bg-secondary text-muted-foreground/50",
+              )}
+            >
+              <Icon className="size-5" />
+            </span>
+            <span
+              className={cn(
+                "mt-2 text-[11px] leading-tight font-medium",
+                !done && "text-muted-foreground",
+              )}
+            >
+              {label}
+            </span>
+            <span className="sr-only">
+              {done
+                ? learnPage.achievements.earned
+                : learnPage.achievements.locked}
+              : {description}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
 /** What each lesson lets Rocca take on: the rewards are real. */
 function RewardsCard() {
-  const demo = useCourse()
+  const { learned, ruleState } = useCourse()
   const statusOf = (concept: Concept) => {
     if (concept.id === LESSON_ID) {
-      const state = ruleAutopilot(demo, rules.autopilot.ruleId)
-      if (state === "locked")
+      if (ruleState === "locked")
         return { open: false, text: learnPage.rewards.locked(concept.label) }
-      return { open: true, text: learnPage.rewards[state] }
+      return { open: true, text: learnPage.rewards[ruleState] }
     }
-    return demo.learned.includes(concept.id)
+    return learned.includes(concept.id)
       ? { open: true, text: learnPage.rewards.unlocked }
       : { open: false, text: learnPage.rewards.locked(concept.label) }
   }
@@ -522,9 +798,10 @@ function RewardsCard() {
 
 /**
  * /preview/learn: the course Rocca builds from what you own, laid out as a
- * path (Duolingo-style). Each stop says which holding it comes from; tap
- * it for the lesson, where it comes from and what it unlocks. Only
- * Concentration plays; the rest show the coming-soon notice.
+ * path (Duolingo-style), with a level, a streak and badges. Each stop says
+ * which holding it comes from; tap it for the lesson, where it comes from
+ * and what it unlocks. Only Concentration plays; the rest show the
+ * coming-soon notice. The game is about learning, never trading.
  */
 export function LearnPage() {
   return (
@@ -534,7 +811,9 @@ export function LearnPage() {
         <div className="mx-auto w-full max-w-xl py-2">
           <CoursePath />
         </div>
-        <aside className="space-y-4 lg:sticky lg:top-24">
+        <aside className="space-y-4">
+          <StreakCard />
+          <AchievementsCard />
           <ProgressCard />
           <RewardsCard />
         </aside>

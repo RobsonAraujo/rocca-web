@@ -172,9 +172,17 @@ Os números vêm de `learn/math.ts`, e os testes travam os valores. A lição en
 - **Hero "Built from your portfolio":** o título usa o nome da pessoa ("Maya's course"). Ao lado, o caminho em números (4 contas lidas → 12 posições → 5 lições), mais o tempo total e o streak.
 - **Caminho:** duas unidades com banner colorido ("What you really own" e "What it costs you"). As lições ficam numa onda, como botões redondos com "relevo". Cada uma mostra de onde veio na carteira, num chip como "NVDA · 22% of your money". A próxima lição tem o balão "Start" flutuando, as aprendidas têm check e as outras, cadeado.
 - **Cartão da lição:** clicar numa lição abre um popover com o título, a origem na carteira, o que ela destrava e "Start lesson". Só Concentration abre a lição; as outras mostram "em breve".
-- **Lateral:** o progresso (barra em 5 segmentos, minutos que faltam, streak) e "What learning unlocks". As recompensas são o que o agente passa a poder fazer, não pontos. A regra dos 12% segue o estado real do Autopilot (falta aprender, falta aprovar, pronto, ligado).
-- **Dados:** unidades, ícones e origem de cada lição ficam em `learn/data.ts`. Progresso, minutos e streak (simulado) ficam em `learn/progress.ts`. O card de Learn da landing também diz 3 de 5.
-- **Gamificação só no aprendizado:** streak e progresso servem para aprender. Nada disso aparece nas ordens, que continuam sóbrias. Reguladores olham com desconfiança para gamificação em operações.
+- **Nível e XP (no hero):** 20 XP por lição e quatro níveis com nomes sobre entender o próprio dinheiro: Curious (0), Informed (40), Confident (80), In control (100, o curso inteiro). Uma barra mostra quanto falta para o próximo.
+- **Streak:**
+  - A semana, de segunda a domingo, com chamas e a meta do dia ("Today's goal: 1 lesson"). Hoje é o domingo.
+  - O preview normal chega com 6 dias e vai para 7 com uma lição.
+  - O first run começa em 0 e vai para 1.
+  - O card de Learn da visão geral também mostra o streak.
+- **Conquistas (8, em `learn/achievements.ts`):** Full picture, First lesson, Knows why (aprovou depois da lição), Rule earned (destravou o Autopilot), Owns it e Costs in check (os troféus de cada unidade, que também aparecem no fim de cada unidade do caminho), On a roll (7 dias) e In control (o curso inteiro). No fim da demo, 4 de 8 ficam acesas.
+- **Comemoração na lição:** ao acertar a checagem, confete (posições fixas, então toda tomada sai igual), "+20 XP" e o streak. Com `prefers-reduced-motion`, sem confete. As animações (`float`, `burst`, `pop`) estão no `@theme` do `globals.css`.
+- **Lateral:** streak, conquistas, progresso (barra em 5 segmentos, minutos que faltam) e "What learning unlocks". Nas recompensas, o prêmio é o que o agente passa a poder fazer, não pontos. A regra dos 12% segue o estado real do Autopilot (falta aprender, falta aprovar, pronto, ligado).
+- **Dados:** unidades, ícones e origem de cada lição ficam em `learn/data.ts`. Progresso, minutos, streak, XP e níveis (simulados) ficam em `learn/progress.ts`. O card de Learn da landing também diz 3 de 5.
+- **Gamificação só no aprendizado:** XP, streak e conquistas premiam entender e decidir com informação, nunca operar. Nada disso aparece nas ordens, que continuam sóbrias. Reguladores olham com desconfiança para gamificação em operações.
 
 **Para gravar:**
 

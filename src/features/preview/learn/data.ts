@@ -271,6 +271,36 @@ export const learnPage = {
   unlocks: "Unlocks",
   start: "Start lesson",
   review: "Review lesson",
+  level: {
+    label: (level: number) => `Level ${level}`,
+    xp: (xp: number) => `${xp} XP`,
+    toNext: (xp: number, level: number) => `${xp} XP to Level ${level}`,
+    max: "Top level: you're in control",
+  },
+  week: {
+    title: "Your streak",
+    goal: "Today's goal: 1 lesson",
+    goalDone: "Today's goal: done",
+    today: "Today",
+    done: "lesson done",
+    missed: "no lesson",
+  },
+  achievements: {
+    title: "Achievements",
+    count: (done: number, total: number) => `${done} of ${total}`,
+    earned: "Earned",
+    locked: "Not yet",
+  },
+  trophy: {
+    label: (unit: number) => `Unit ${unit} trophy`,
+    hint: (badge: string) => `Finish the unit to earn "${badge}"`,
+    earned: (badge: string) => `Earned "${badge}"`,
+  },
+  /** On the lesson's last step, when the quick check is right. */
+  celebrate: {
+    xp: (xp: number) => `+${xp} XP`,
+    streak: (days: number) => `${days}-day streak`,
+  },
   progress: {
     title: "Your progress",
     lessons: (done: number, total: number) => `${done} of ${total} lessons`,

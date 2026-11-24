@@ -66,6 +66,23 @@ describe("LearnPage", () => {
     }
   })
 
+  it("shows the game: level, XP, streak and badges", () => {
+    renderCourse()
+
+    const level = screen.getByRole("region", { name: "Level 1" })
+    expect(within(level).getByText("Curious")).toBeInTheDocument()
+    expect(within(level).getByText("0 XP")).toBeInTheDocument()
+    expect(screen.getByText(learnPage.week.goal)).toBeInTheDocument()
+    expect(
+      screen.getByText(learnPage.achievements.count(1, 8)),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("img", {
+        name: `${learnPage.trophy.label(1)}: ${learnPage.trophy.hint("Owns it")}`,
+      }),
+    ).toBeInTheDocument()
+  })
+
   it("starts a new account at Concentration, with the rest ahead", () => {
     renderCourse()
 

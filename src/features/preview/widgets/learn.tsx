@@ -6,6 +6,7 @@ import {
   ConceptChips,
   LearnRing,
   StartLessonButton,
+  StreakPill,
 } from "../learn/learn-progress"
 
 /**
@@ -23,6 +24,7 @@ export function LearnWidget({ className }: { className?: string }) {
       description={learn.description}
       icon={GraduationCapIcon}
       tone="learn"
+      action={<StreakPill />}
       className={className}
     >
       <div className="grid gap-5 sm:grid-cols-[auto_1fr] sm:items-center lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)] lg:gap-8">
