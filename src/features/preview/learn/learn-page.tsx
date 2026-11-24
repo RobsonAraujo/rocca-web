@@ -12,7 +12,7 @@ import {
   LockIcon,
   LockOpenIcon,
   ScanSearchIcon,
-  SparklesIcon,
+  LinkIcon,
   TargetIcon,
   TrophyIcon,
   ZapIcon,
@@ -41,6 +41,7 @@ import {
   learnSummary,
   learnedToday,
   levelFor,
+  levels,
   minutesLeft,
   nextConcept,
   streakDays,
@@ -102,27 +103,32 @@ function useCourse() {
   }
 }
 
-/** The level mark: a chunky tile with the number, like a game's. */
+/** The level mark: a solid, chunky tile with the number, like the path's stops. */
 function LevelBadge({ level }: { level: number }) {
   return (
     <span
       aria-hidden
-      className="relative grid size-16 shrink-0 place-items-center rounded-2xl bg-linear-to-br from-learn to-control text-3xl font-bold text-white shadow-[0_5px_0_0_color-mix(in_oklab,var(--color-control)_60%,black)]"
+      className={cn(
+        "grid size-14 shrink-0 animate-pop place-items-center rounded-2xl text-2xl font-bold tabular-nums",
+        solidTile.learn,
+      )}
     >
       {level}
-      <SparklesIcon className="absolute -top-1.5 -right-1.5 size-5 rounded-full bg-card p-0.5 text-attention" />
     </span>
   )
 }
 
-/** Level, XP and how far to the next level. */
-function LevelCard() {
+/**
+ * Level and XP, with the ladder of all four levels: the ones passed are
+ * full, the current one fills with XP.
+ */
+function LevelPanel({ className }: { className?: string }) {
   const { xp } = useCourse()
   const { current, next, progress, toNext } = levelFor(xp)
   return (
     <section
       aria-label={learnPage.level.label(current.level)}
-      className="w-full rounded-2xl bg-card/90 p-5 shadow-soft ring-1 ring-border backdrop-blur lg:w-80"
+      className={cn("flex flex-col justify-center", className)}
     >
       <div className="flex items-center gap-4">
         <LevelBadge key={current.level} level={current.level} />
@@ -137,20 +143,44 @@ function LevelCard() {
           </p>
         </div>
       </div>
-      <div
+      <ol
         role="progressbar"
         aria-label="XP to the next level"
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={Math.round(progress * 100)}
-        className="mt-4 h-3 overflow-hidden rounded-full bg-secondary"
+        className="mt-5 grid grid-cols-4 gap-1.5"
       >
-        <span
-          className="block h-full rounded-full bg-linear-to-r from-learn to-control transition-[width] duration-700 ease-out motion-reduce:transition-none"
-          style={{ width: `${Math.max(progress, 0.04) * 100}%` }}
-        />
-      </div>
-      <p className="mt-2 text-xs text-muted-foreground">
+        {levels.map((level) => {
+          const fill =
+            level.level < current.level
+              ? 1
+              : level.level === current.level
+                ? Math.max(progress, 0.06)
+                : 0
+          return (
+            <li key={level.level} className="min-w-0">
+              <span className="block h-2 overflow-hidden rounded-full bg-secondary">
+                <span
+                  className="block h-full rounded-full bg-learn transition-[width] duration-700 ease-out motion-reduce:transition-none"
+                  style={{ width: `${fill * 100}%` }}
+                />
+              </span>
+              <span
+                className={cn(
+                  "mt-1.5 block truncate text-[11px]",
+                  level.level === current.level
+                    ? "font-semibold text-foreground"
+                    : "text-muted-foreground",
+                )}
+              >
+                {level.name}
+              </span>
+            </li>
+          )
+        })}
+      </ol>
+      <p className="mt-3 text-xs text-muted-foreground">
         {next
           ? learnPage.level.toNext(toNext, next.level)
           : learnPage.level.max}
@@ -162,7 +192,8 @@ function LevelCard() {
 /**
  * The top of the page: this course was made from your money. The pipeline
  * (accounts read → holdings checked → lessons) shows how, in numbers; the
- * level card shows where you are.
+ * panel on the right shows your level. Flat, like the rest of the
+ * dashboard: a card, a hairline, no gradients.
  */
 function CourseHero() {
   const { persona } = useCourse()
@@ -186,71 +217,59 @@ function CourseHero() {
   return (
     <section
       aria-labelledby="course-title"
-      className="relative overflow-hidden rounded-3xl bg-linear-to-br from-learn/[0.12] via-card to-control/[0.08] p-6 ring-1 ring-learn/15 sm:p-8"
+      className="grid overflow-hidden rounded-2xl border border-border bg-card lg:grid-cols-[minmax(0,1fr)_22rem]"
     >
-      {/* Soft shapes in the corners, for depth. */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -top-16 -right-10 size-56 rounded-full bg-learn/10 blur-2xl"
-      />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -bottom-20 left-1/3 size-48 rounded-full bg-attention/10 blur-2xl"
-      />
-
-      <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-        <div className="max-w-xl">
-          <div className="flex flex-wrap items-center gap-2">
-            <p
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold",
-                toneClasses.learn.tile,
-              )}
-            >
-              <SparklesIcon className="size-3.5" aria-hidden />
-              {learnPage.badge}
-            </p>
-            <SimulatedBadge className="w-fit xl:hidden" />
-          </div>
-          <h1
-            id="course-title"
-            className="mt-4 text-3xl font-semibold tracking-tight text-balance sm:text-4xl"
+      <div className="p-6 sm:p-8">
+        <div className="flex flex-wrap items-center gap-2">
+          <p
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold",
+              toneClasses.learn.tile,
+            )}
           >
-            {learnPage.title(persona?.name ?? null)}
-          </h1>
-          <p className="mt-3 text-[15px] leading-relaxed text-pretty text-muted-foreground">
-            {learnPage.intro}
+            <LinkIcon className="size-3.5" aria-hidden />
+            {learnPage.badge}
           </p>
-
-          <ol
-            aria-label={learnPage.pipeline.label}
-            className="mt-6 flex items-stretch gap-1.5 sm:gap-2"
-          >
-            {steps.map(({ icon: Icon, value, label }, index) => (
-              <Fragment key={label}>
-                {index > 0 && (
-                  <li aria-hidden className="flex items-center">
-                    <ArrowRightIcon className="size-4 text-learn/60" />
-                  </li>
-                )}
-                <li className="flex min-w-0 flex-1 items-center gap-2.5 rounded-2xl bg-card/80 px-3 py-2.5 ring-1 ring-border backdrop-blur sm:flex-none sm:px-3.5">
-                  <Icon className="size-4 shrink-0 text-learn" aria-hidden />
-                  <span className="min-w-0">
-                    <span className="block text-lg leading-tight font-semibold tabular-nums">
-                      {value}
-                    </span>
-                    <span className="block text-[11px] leading-tight text-muted-foreground">
-                      {label}
-                    </span>
-                  </span>
-                </li>
-              </Fragment>
-            ))}
-          </ol>
+          <SimulatedBadge className="w-fit xl:hidden" />
         </div>
+        <h1
+          id="course-title"
+          className="mt-4 text-3xl font-semibold tracking-tight text-balance sm:text-4xl"
+        >
+          {learnPage.title(persona?.name ?? null)}
+        </h1>
+        <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-pretty text-muted-foreground">
+          {learnPage.intro}
+        </p>
 
-        <LevelCard />
+        <ol
+          aria-label={learnPage.pipeline.label}
+          className="mt-6 grid grid-cols-3 gap-2 sm:flex sm:items-stretch"
+        >
+          {steps.map(({ icon: Icon, value, label }, index) => (
+            <Fragment key={label}>
+              {index > 0 && (
+                <li aria-hidden className="flex items-center max-sm:hidden">
+                  <ArrowRightIcon className="size-4 text-muted-foreground/60" />
+                </li>
+              )}
+              <li className="flex min-w-0 flex-col gap-1.5 rounded-xl border border-border px-3 py-2.5 sm:flex-row sm:items-center sm:gap-2.5 sm:px-3.5">
+                <Icon className="size-4 shrink-0 text-learn" aria-hidden />
+                <span className="min-w-0">
+                  <span className="block text-lg leading-tight font-semibold tabular-nums">
+                    {value}
+                  </span>
+                  <span className="block text-[11px] leading-tight text-muted-foreground">
+                    {label}
+                  </span>
+                </span>
+              </li>
+            </Fragment>
+          ))}
+        </ol>
       </div>
+
+      <LevelPanel className="border-t border-border bg-secondary/40 p-6 sm:p-8 lg:border-t-0 lg:border-l" />
     </section>
   )
 }
@@ -298,7 +317,7 @@ function LessonCard({
         <div>
           <dt className="text-xs text-muted-foreground">{learnPage.tie}</dt>
           <dd className="mt-0.5 flex items-start gap-1.5 text-pretty">
-            <SparklesIcon
+            <LinkIcon
               className="mt-0.5 size-3.5 shrink-0 text-learn"
               aria-hidden
             />

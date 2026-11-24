@@ -111,7 +111,14 @@ describe("LearnPage", () => {
     renderCourse()
 
     const level = screen.getByRole("region", { name: "Level 1" })
-    expect(within(level).getByText("Curious")).toBeInTheDocument()
+    // The current level's name, and the same rung on the ladder of all four.
+    expect(within(level).getAllByText("Curious")).toHaveLength(2)
+    for (const name of ["Informed", "Confident", "In control"]) {
+      expect(within(level).getByText(name)).toBeInTheDocument()
+    }
+    expect(
+      within(level).getByRole("progressbar", { name: "XP to the next level" }),
+    ).toHaveAttribute("aria-valuenow", "0")
     expect(within(level).getByText("0 XP")).toBeInTheDocument()
     expect(screen.getByText(learnPage.week.goal)).toBeInTheDocument()
     expect(
