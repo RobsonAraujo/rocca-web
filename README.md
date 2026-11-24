@@ -165,7 +165,16 @@ Os números vêm de `learn/math.ts`, e os testes travam os valores. A lição en
 
 **Autopilot por regra.** A regra dos 12% passa por quatro estados (`ruleAutopilot`, em `widgets/rule-autopilot.tsx`): `locked` (falta a lição), `needsApproval` (aprendeu, falta aprovar um trim), `ready` (aparece o switch) e `on`. O selo "Later" e "Available after launch at brokers that allow it" ficam sempre à vista. O recibo diz "You approved this knowing why" quando a aprovação veio depois da lição. Se não veio, aponta para a lição.
 
-**No `/preview` normal** (sem sessão) nada disso muda: o placar continua com 14 sugestões e as falhas, e o Learn em 3/12. A diferença é que as entradas de lição abrem a lição de verdade e o Learn virou página.
+**No `/preview` normal** (sem sessão) nada disso muda: o placar continua com 14 sugestões e as falhas, e o Learn em 3/5. A diferença é que as entradas de lição abrem a lição de verdade e o Learn virou página.
+
+**Página Learn (`/preview/learn`).** É o destaque do produto: um curso montado a partir da carteira, no formato de caminho do Duolingo.
+
+- **Hero "Built from your portfolio":** o título usa o nome da pessoa ("Maya's course"). Ao lado, o caminho em números (4 contas lidas → 12 posições → 5 lições), mais o tempo total e o streak.
+- **Caminho:** duas unidades com banner colorido ("What you really own" e "What it costs you"). As lições ficam numa onda, como botões redondos com "relevo". Cada uma mostra de onde veio na carteira, num chip como "NVDA · 22% of your money". A próxima lição tem o balão "Start" flutuando, as aprendidas têm check e as outras, cadeado.
+- **Cartão da lição:** clicar numa lição abre um popover com o título, a origem na carteira, o que ela destrava e "Start lesson". Só Concentration abre a lição; as outras mostram "em breve".
+- **Lateral:** o progresso (barra em 5 segmentos, minutos que faltam, streak) e "What learning unlocks". As recompensas são o que o agente passa a poder fazer, não pontos. A regra dos 12% segue o estado real do Autopilot (falta aprender, falta aprovar, pronto, ligado).
+- **Dados:** unidades, ícones e origem de cada lição ficam em `learn/data.ts`. Progresso, minutos e streak (simulado) ficam em `learn/progress.ts`. O card de Learn da landing também diz 3 de 5.
+- **Gamificação só no aprendizado:** streak e progresso servem para aprender. Nada disso aparece nas ordens, que continuam sóbrias. Reguladores olham com desconfiança para gamificação em operações.
 
 **Para gravar:**
 

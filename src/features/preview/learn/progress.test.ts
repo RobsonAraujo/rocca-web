@@ -1,26 +1,29 @@
 import { describe, expect, it } from "vitest"
 
 import { learn } from "../data"
-import { DEFAULT_LEARNED, concepts } from "./data"
-import { learnSummary, nextConcept } from "./progress"
+import { DEFAULT_LEARNED, concepts, units } from "./data"
+import { learnSummary, minutesLeft, nextConcept, streakDays } from "./progress"
 
 describe("learnSummary", () => {
-  it("keeps the landing's 3 of 12 for the regular preview", () => {
-    expect(learnSummary("default", DEFAULT_LEARNED)).toEqual(learn.progress)
-    expect(
-      learnSummary("default", [...DEFAULT_LEARNED, "concentration"]),
-    ).toEqual({ done: 4, total: 12 })
+  it("counts one lesson per concept, as the landing's card does", () => {
+    expect(learnSummary(DEFAULT_LEARNED)).toEqual(learn.progress)
+    expect(learnSummary([])).toEqual({ done: 0, total: concepts.length })
+    expect(learnSummary(["concentration"])).toEqual({ done: 1, total: 5 })
   })
 
-  it("counts the course's own concepts on a first run", () => {
-    expect(learnSummary("firstRun", [])).toEqual({
-      done: 0,
-      total: concepts.length,
-    })
-    expect(learnSummary("firstRun", ["concentration"])).toEqual({
-      done: 1,
-      total: 5,
-    })
+  it("counts the minutes left and the streak", () => {
+    expect(minutesLeft([])).toBe(10)
+    expect(minutesLeft(["concentration"])).toBe(8)
+    expect(streakDays("firstRun", [])).toBe(0)
+    expect(streakDays("firstRun", ["concentration"])).toBe(1)
+  })
+})
+
+describe("units", () => {
+  it("lay out every concept once, in the course's order", () => {
+    expect(units.flatMap((unit) => unit.concepts)).toEqual(
+      concepts.map((concept) => concept.id),
+    )
   })
 })
 

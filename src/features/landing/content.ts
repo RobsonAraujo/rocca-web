@@ -190,7 +190,8 @@ export const illustrations = {
   },
   /** Also feeds the dashboard preview's Learn widget, so both show the same lesson. */
   learn: {
-    progress: { done: 3, total: 12 },
+    /** The preview's course has 5 lessons (one per concept in the portfolio). */
+    progress: { done: 3, total: 5 },
     next: {
       meta: "Next lesson · 2 min",
       title: "Why one stock shouldn't run your portfolio",

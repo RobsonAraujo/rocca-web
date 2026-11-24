@@ -20,8 +20,8 @@ import { learnSummary } from "./progress"
  */
 
 export function useLearnSummary() {
-  const { variant, learned } = useDemo()
-  return learnSummary(variant, learned)
+  const { learned } = useDemo()
+  return learnSummary(learned)
 }
 
 /** Ring with "done/total", and optionally the percent beside it. */

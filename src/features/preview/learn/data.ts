@@ -1,3 +1,12 @@
+import type { LucideIcon } from "lucide-react"
+import {
+  ChartPieIcon,
+  PercentIcon,
+  PiggyBankIcon,
+  ScaleIcon,
+  TrendingDownIcon,
+} from "lucide-react"
+
 import { illustrations } from "@/features/landing/content"
 
 import { savings } from "../data"
@@ -24,16 +33,21 @@ export type Concept = {
   label: string
   /** The lesson's title. */
   title: string
-  /** Why it's in your course: the holding or account it comes from. */
+  icon: LucideIcon
+  /** Where it comes from in the portfolio, short: shown on the course path. */
+  source: { label: string; detail: string }
+  /** The same, as a sentence. */
   tie: string
   /** What learning it lets Rocca take on. */
   unlocks: string
+  minutes: number
   /** Only Concentration is built; the others show the coming-soon notice. */
   playable: boolean
 }
 
 const usStocks = allocation.find((row) => row.assetClass === "US stocks")!
 const thematic = holdings.find((h) => h.name === "Thematic Tech ETF")!
+const thematicDrop = formatPercent(Math.abs(thematic.gain!))
 const roth = illustrations.accounts.find((a) => a.name === "Roth IRA")!
 const savingFor = (label: string) =>
   savings.items.find((item) => item.label === label)!.amount
@@ -48,49 +62,94 @@ const checkLoss = lossIfDrop(checkDrop)
 /** "6.6%". */
 export const checkLossShare = formatPercent(checkLoss / portfolioTotal)
 
-/** In the order the course suggests them; the first is "up next". */
+/**
+ * The course, in the order it's taught: what you really own first, then
+ * what it costs you. The first one not learned is "up next".
+ */
 export const concepts = [
   {
     id: "concentration",
     label: "Concentration",
     title: illustrations.learn.next.title,
+    icon: ChartPieIcon,
+    source: { label: "NVDA", detail: `${nvdaTotalLabel} of your money` },
     tie: `NVDA is ${nvdaTotalLabel} of your money`,
     unlocks: "Autopilot for your 12% rule",
+    minutes: 2,
     playable: true,
   },
   {
     id: "rebalancing",
     label: "Rebalancing",
     title: "Getting back to the mix you chose",
+    icon: ScaleIcon,
+    source: {
+      label: "US stocks",
+      detail: `${percent(usStocks.share)} vs. ${percent(usStocks.target)} target`,
+    },
     tie: `US stocks are ${percent(usStocks.share)} of your money; your target is ${percent(usStocks.target)}`,
     unlocks: "Autopilot for your target mix",
-    playable: false,
-  },
-  {
-    id: "tax-loss-harvesting",
-    label: "Tax-loss harvesting",
-    title: "Turning a loss into a tax break",
-    tie: `Thematic Tech ETF is down ${formatPercent(Math.abs(thematic.gain!))}: about ${savingFor("Tax-loss harvesting")} off this year's taxes`,
-    unlocks: "Autopilot for tax-loss harvesting",
+    minutes: 2,
     playable: false,
   },
   {
     id: "expense-ratio",
     label: "Expense ratio",
     title: "What a 0.85% fee costs you",
+    icon: PercentIcon,
+    source: { label: "2 funds", detail: "0.85% a year in fees" },
     tie: `Two of your funds charge 0.85%: ${savingFor("High-fee funds")} a year`,
     unlocks: "Rocca swaps to cheaper funds, with your OK",
+    minutes: 2,
+    playable: false,
+  },
+  {
+    id: "tax-loss-harvesting",
+    label: "Tax-loss harvesting",
+    title: "Turning a loss into a tax break",
+    icon: TrendingDownIcon,
+    source: { label: "Thematic Tech ETF", detail: `down ${thematicDrop}` },
+    tie: `Thematic Tech ETF is down ${thematicDrop}: about ${savingFor("Tax-loss harvesting")} off this year's taxes`,
+    unlocks: "Autopilot for tax-loss harvesting",
+    minutes: 2,
     playable: false,
   },
   {
     id: "roth-ira",
     label: "Roth IRA",
     title: "What your Roth IRA is for",
+    icon: PiggyBankIcon,
+    source: { label: roth.institution, detail: `Roth IRA · ${roth.value}` },
     tie: `Your ${roth.institution} Roth IRA, ${roth.value}`,
     unlocks: "Rocca picks the cheapest account for each trade",
+    minutes: 2,
     playable: false,
   },
 ] as const satisfies readonly Concept[]
+
+/** The course path, Duolingo-style: two units, each a stretch of lessons. */
+export const units = [
+  {
+    id: "what-you-own",
+    title: "What you really own",
+    description: "Where your money sits, starting with NVDA.",
+    tone: "learn",
+    concepts: ["concentration", "rebalancing"],
+  },
+  {
+    id: "what-it-costs",
+    title: "What it costs you",
+    description: "Fees and taxes hiding across your accounts.",
+    tone: "brand",
+    concepts: ["expense-ratio", "tax-loss-harvesting", "roth-ira"],
+  },
+] as const satisfies readonly {
+  id: string
+  title: string
+  description: string
+  tone: "learn" | "brand"
+  concepts: readonly ConceptId[]
+}[]
 
 /** The lesson the dashboard opens from the decision and the Learn pages. */
 export const LESSON_ID = "concentration" satisfies ConceptId
@@ -187,20 +246,47 @@ export const lesson = {
   },
 } as const
 
-/** The /preview/learn page. */
+/** The /preview/learn page: the course path. */
 export const learnPage = {
-  title: "Learn",
-  subtitle: "Your course, built from your portfolio.",
-  upNext: "Up next",
-  allDone: "You've learned everything in your portfolio so far.",
-  why: "Why this one",
-  how: {
-    title: "How unlocking works",
-    body: "Each concept you learn lets Rocca handle a little more, one rule at a time. You can always turn it back off.",
+  badge: "Built from your portfolio",
+  title: (name: string | null) => (name ? `${name}'s course` : "Your course"),
+  intro:
+    "Rocca read your accounts and turned what it found into short lessons. Each one starts from something you own, with your own numbers.",
+  pipeline: {
+    label: "How your course was built",
+    accounts: "accounts read",
+    holdings: "holdings checked",
+    lessons: "lessons for you",
   },
+  minutes: (minutes: number) => `About ${minutes} min`,
+  streak: (days: number) =>
+    days > 0 ? `${days}-day streak` : "Start your streak today",
+  path: "Course path",
+  unit: (n: number) => `Unit ${n}`,
+  lessonOf: (n: number, total: number, minutes: number) =>
+    `Lesson ${n} of ${total} · ${minutes} min`,
+  bubble: { start: "Start", next: "Up next" },
   status: { learned: "Learned", next: "Up next", notStarted: "Not started" },
   tie: "From your portfolio",
   unlocks: "Unlocks",
   start: "Start lesson",
   review: "Review lesson",
+  progress: {
+    title: "Your progress",
+    lessons: (done: number, total: number) => `${done} of ${total} lessons`,
+    left: (minutes: number) =>
+      minutes > 0 ? `About ${minutes} min to go` : "Course complete",
+    next: "Up next",
+  },
+  rewards: {
+    title: "What learning unlocks",
+    description:
+      "Your rewards are real: each lesson lets Rocca take on one more thing for you. You can turn any of it off.",
+    locked: (label: string) => `Learn ${label} to unlock`,
+    unlocked: "Unlocked",
+    /** The 12% rule also needs one approved trim (see the Autopilot rule). */
+    needsApproval: "Approve one trim to finish",
+    ready: "Ready to turn on",
+    on: "On",
+  },
 } as const
